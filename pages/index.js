@@ -47,6 +47,7 @@ export default function Home() {
   const [showDiagonals, setShowDiagonals] = useState(false)
   const [gridColor, setGridColor] = useState('#ffffff')
   const [showMunsellChart, setShowMunsellChart] = useState(false)
+  const [gridOpacity, setGridOpacity] = useState(90)
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
 
@@ -406,13 +407,23 @@ export default function Home() {
                 title="Grid color"
                 disabled={!gridMode}
               />
+              <input
+                type="range"
+                min="10"
+                max="100"
+                value={gridOpacity}
+                onChange={e => setGridOpacity(Number(e.target.value))}
+                className={styles.gridOpacitySlider}
+                title={`Opacity ${gridOpacity}%`}
+                disabled={!gridMode}
+              />
             </div>
             <div className={styles.canvasWrap}
               style={showMunsellChart ? { flex: '0 0 55%', minHeight: 0 } : {}}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
               <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} />
+              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
               {cursor.visible && (
                 <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
               )}

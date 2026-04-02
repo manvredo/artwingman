@@ -440,6 +440,17 @@
   cursor: not-allowed;
 }
 
+.gridOpacitySlider {
+  width: 70px;
+  cursor: pointer;
+  accent-color: #c8a96e;
+}
+
+.gridOpacitySlider:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .canvasWrap {
   position: relative;
   max-width: 100%;
