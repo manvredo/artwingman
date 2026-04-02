@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from '../lib/munsell'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
@@ -27,10 +27,12 @@ function AccordionDrawer({ title, isOpen, onToggle, children }) {
 
 export default function Home() {
   const canvasRef = useRef(null)
+  const canvasWrapRef = useRef(null)
   const fileInputRef = useRef(null)
   const originalImageDataRef = useRef(null)
   const workerRef = useRef(null)
   const filterDebounceRef = useRef(null)
+  const dragRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -50,6 +52,7 @@ export default function Home() {
   const [gridOpacity, setGridOpacity] = useState(90)
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
+  const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
 
   const toggleDrawer = (name) => setOpenDrawer(prev =>
     prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
@@ -67,6 +70,7 @@ export default function Home() {
         setShowGray(false)
         setValueRating(null)
         setActiveFilter(null)
+        setViewport({ zoom: 1, panX: 0, panY: 0 })
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -89,7 +93,7 @@ export default function Home() {
     loadFile(e.dataTransfer.files[0])
   }, [loadFile])
 
-  const handleCanvasClick = useCallback((e) => {
+  const sampleColor = useCallback((e) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
@@ -103,12 +107,63 @@ export default function Home() {
     setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
   }, [imgDims, sampleRadius])
 
+  const handleCanvasMouseDown = useCallback((e) => {
+    if (e.button !== 0) return
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPanX: viewport.panX,
+      startPanY: viewport.panY,
+      moved: false,
+    }
+  }, [viewport.panX, viewport.panY])
+
+  const handleCanvasMouseUp = useCallback((e) => {
+    const drag = dragRef.current
+    dragRef.current = null
+    if (!drag || e.button !== 0) return
+    if (!drag.moved) sampleColor(e)
+  }, [sampleColor])
+
   const handleMouseMove = useCallback((e) => {
+    const drag = dragRef.current
+    if (drag) {
+      const dx = e.clientX - drag.startX
+      const dy = e.clientY - drag.startY
+      if (!drag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) drag.moved = true
+      if (drag.moved) {
+        setViewport(v => ({ ...v, panX: drag.startPanX + dx, panY: drag.startPanY + dy }))
+      }
+      return
+    }
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top, visible: true })
-  }, [])
+    setCursor({
+      x: (e.clientX - rect.left) / viewport.zoom,
+      y: (e.clientY - rect.top) / viewport.zoom,
+      visible: true,
+    })
+  }, [viewport.zoom])
+
+  useEffect(() => {
+    const el = canvasWrapRef.current
+    if (!el) return
+    const onWheel = (e) => {
+      e.preventDefault()
+      const rect = el.getBoundingClientRect()
+      const cx = e.clientX - rect.left - rect.width / 2
+      const cy = e.clientY - rect.top - rect.height / 2
+      const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+      setViewport(v => {
+        const newZoom = Math.min(Math.max(v.zoom * factor, 0.25), 12)
+        const r = newZoom / v.zoom
+        return { zoom: newZoom, panX: cx * (1 - r) + v.panX * r, panY: cy * (1 - r) + v.panY * r }
+      })
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [image])
 
   const applyValueGroups = useCallback(() => {
     const canvas = canvasRef.current
@@ -284,6 +339,7 @@ export default function Home() {
             setShowGray(false)
             setValueRating(null)
             setActiveFilter(null)
+            setViewport({ zoom: 1, panX: 0, panY: 0 })
             originalImageDataRef.current = null
           }}>
             Load new image
@@ -354,15 +410,34 @@ export default function Home() {
                 title={`Opacity ${gridOpacity}%`}
                 disabled={!gridMode}
               />
+              {viewport.zoom !== 1 && (
+                <button
+                  className={styles.toolBtn}
+                  onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}
+                  title="Reset zoom"
+                >
+                  {Math.round(viewport.zoom * 100)}%
+                </button>
+              )}
             </div>
-            <div className={styles.canvasWrap}
+            <div
+              ref={canvasWrapRef}
+              className={styles.canvasWrap}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); dragRef.current = null }}
+              onMouseDown={handleCanvasMouseDown}
+              onMouseUp={handleCanvasMouseUp}
+            >
               <div
                 className={styles.canvasInner}
-                style={imgDims.w && imgDims.h ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : undefined}
+                style={{
+                  ...(imgDims.w && imgDims.h ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : {}),
+                  transform: `translate(${viewport.panX}px, ${viewport.panY}px) scale(${viewport.zoom})`,
+                  transformOrigin: 'center',
+                  cursor: dragRef.current?.moved ? 'grabbing' : viewport.zoom > 1 ? 'grab' : 'crosshair',
+                }}
               >
-                <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
+                <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {cursor.visible && (
                   <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
