@@ -3,6 +3,7 @@ import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from 
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
+import GridOverlay from '../components/GridOverlay'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -38,6 +39,9 @@ export default function Home() {
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
   const [selectedSwatch, setSelectedSwatch] = useState(null)
+  const [gridMode, setGridMode] = useState(null)
+  const [squareGridSize, setSquareGridSize] = useState(4)
+  const [showDiagonals, setShowDiagonals] = useState(false)
 
   const toggleDrawer = (name) => setOpenDrawer(prev =>
     prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
@@ -300,13 +304,44 @@ export default function Home() {
               onChange={e => loadFile(e.target.files[0])} />
           </div>
         ) : (
-          <div className={styles.canvasWrap}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-            <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-            {cursor.visible && (
-              <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-            )}
+          <div className={styles.canvasArea}>
+            <div className={styles.toolbar}>
+              <button
+                className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
+              >3×3</button>
+              <button
+                className={`${styles.toolBtn} ${gridMode === '4x4' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === '4x4' ? null : '4x4')}
+              >4×4</button>
+              <button
+                className={`${styles.toolBtn} ${gridMode === 'square' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === 'square' ? null : 'square')}
+              >Grid</button>
+              <select
+                className={styles.gridSizeSelect}
+                value={squareGridSize}
+                onChange={e => { setSquareGridSize(Number(e.target.value)); setGridMode('square') }}
+              >
+                {Array.from({ length: 11 }, (_, i) => i + 2).map(n => (
+                  <option key={n} value={n}>{n}×{n}</option>
+                ))}
+              </select>
+              <button
+                className={`${styles.toolBtn} ${showDiagonals ? styles.toolBtnActive : ''}`}
+                onClick={() => setShowDiagonals(d => !d)}
+                disabled={!gridMode}
+              >Diag</button>
+            </div>
+            <div className={styles.canvasWrap}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
+              <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
+              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} />
+              {cursor.visible && (
+                <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
+              )}
+            </div>
           </div>
         )}
       </main>
