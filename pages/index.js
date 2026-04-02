@@ -28,6 +28,7 @@ export default function Home() {
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
   const originalImageDataRef = useRef(null)
+  const workerRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -152,56 +153,16 @@ export default function Home() {
       return
     }
     const src = originalImageDataRef.current
-    const imageData = new ImageData(new Uint8ClampedArray(src.data), src.width, src.height)
-    const d = imageData.data
-    const w = src.width
-    const h = src.height
-    if (filter === 'grayscale') {
-      for (let i = 0; i < d.length; i += 4) {
-        const lum = Math.round(0.2126 * d[i] + 0.7152 * d[i+1] + 0.0722 * d[i+2])
-        d[i] = d[i+1] = d[i+2] = lum
-      }
-    } else if (filter === 'highcontrast') {
-      const factor = 1.5 + (strength / 20) * 1.5
-      for (let i = 0; i < d.length; i += 4) {
-        d[i]   = Math.min(255, Math.max(0, Math.round((d[i]   - 128) * factor + 128)))
-        d[i+1] = Math.min(255, Math.max(0, Math.round((d[i+1] - 128) * factor + 128)))
-        d[i+2] = Math.min(255, Math.max(0, Math.round((d[i+2] - 128) * factor + 128)))
-      }
-    } else if (filter === 'soften') {
-      const r = Math.max(1, strength)
-      const srcData = new Uint8ClampedArray(src.data)
-      const tmp = new Uint8ClampedArray(d.length)
-      // horizontal pass
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          let rS = 0, gS = 0, bS = 0, cnt = 0
-          for (let dx = -r; dx <= r; dx++) {
-            const nx = x + dx
-            if (nx < 0 || nx >= w) continue
-            const i = (y * w + nx) * 4
-            rS += srcData[i]; gS += srcData[i+1]; bS += srcData[i+2]; cnt++
-          }
-          const i = (y * w + x) * 4
-          tmp[i] = rS / cnt; tmp[i+1] = gS / cnt; tmp[i+2] = bS / cnt; tmp[i+3] = srcData[i+3]
-        }
-      }
-      // vertical pass
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          let rS = 0, gS = 0, bS = 0, cnt = 0
-          for (let dy = -r; dy <= r; dy++) {
-            const ny = y + dy
-            if (ny < 0 || ny >= h) continue
-            const i = (ny * w + x) * 4
-            rS += tmp[i]; gS += tmp[i+1]; bS += tmp[i+2]; cnt++
-          }
-          const i = (y * w + x) * 4
-          d[i] = Math.round(rS / cnt); d[i+1] = Math.round(gS / cnt); d[i+2] = Math.round(bS / cnt)
-        }
-      }
+    const buffer = new Uint8ClampedArray(src.data).buffer
+    if (workerRef.current) workerRef.current.terminate()
+    workerRef.current = new Worker('/filterWorker.js')
+    workerRef.current.onmessage = (e) => {
+      const out = new Uint8ClampedArray(e.data.out)
+      const imageData = new ImageData(out, src.width, src.height)
+      ctx.putImageData(imageData, 0, 0)
+      workerRef.current = null
     }
-    ctx.putImageData(imageData, 0, 0)
+    workerRef.current.postMessage({ filter, strength, buffer, width: src.width, height: src.height }, [buffer])
   }, [])
 
   const handleFilterChange = useCallback((filter) => {
