@@ -30,6 +30,7 @@ export default function Home() {
   const fileInputRef = useRef(null)
   const originalImageDataRef = useRef(null)
   const workerRef = useRef(null)
+  const filterDebounceRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -46,7 +47,6 @@ export default function Home() {
   const [squareGridSize, setSquareGridSize] = useState(4)
   const [showDiagonals, setShowDiagonals] = useState(false)
   const [gridColor, setGridColor] = useState('#ffffff')
-  const [showMunsellChart, setShowMunsellChart] = useState(false)
   const [gridOpacity, setGridOpacity] = useState(90)
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
@@ -66,6 +66,7 @@ export default function Home() {
         setColor(DEFAULT_COLOR)
         setShowGray(false)
         setValueRating(null)
+        setActiveFilter(null)
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -92,17 +93,14 @@ export default function Home() {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    const sx = e.clientX - rect.left
-    const sy = e.clientY - rect.top
     const scaleX = imgDims.w / rect.width
     const scaleY = imgDims.h / rect.height
-    const px = Math.floor(sx * scaleX)
-    const py = Math.floor(sy * scaleY)
+    const px = Math.floor((e.clientX - rect.left) * scaleX)
+    const py = Math.floor((e.clientY - rect.top) * scaleY)
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
     const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
-    const munsell = rgbToMunsell(r, g, b)
-    setColor({ r, g, b, ...munsell })
+    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
   }, [imgDims, sampleRadius])
 
   const handleMouseMove = useCallback((e) => {
@@ -123,8 +121,7 @@ export default function Home() {
     )
     const data = imageData.data
     for (let i = 0; i < data.length; i += 4) {
-      const r = data[i], g = data[i+1], b = data[i+2]
-      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+      const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2]
       const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
       const grayVal = Math.round((group / (valueSteps - 1)) * 255)
       data[i] = data[i+1] = data[i+2] = grayVal
@@ -145,8 +142,6 @@ export default function Home() {
     setValueRating(null)
   }, [])
 
-  const filterDebounceRef = useRef(null)
-
   const applyFilter = useCallback((filter, strength) => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -161,8 +156,7 @@ export default function Home() {
     workerRef.current = new Worker('/filterWorker.js')
     workerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      const imageData = new ImageData(out, src.width, src.height)
-      ctx.putImageData(imageData, 0, 0)
+      ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
       workerRef.current = null
     }
     workerRef.current.postMessage({ filter, strength, buffer, width: src.width, height: src.height }, [buffer])
@@ -204,7 +198,7 @@ export default function Home() {
           <span className={styles.logoMark}>AW</span>
           <div>
             <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.4</div>
+            <div className={styles.logoSub}>v0.6</div>
           </div>
         </div>
 
@@ -226,40 +220,6 @@ export default function Home() {
                   </button>
                 </div>
               )}
-            </div>
-            <div className={styles.drawerResult}>
-              <div className={styles.swatch} style={{ background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a' }} />
-              <div className={styles.rgbLabel}>{hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}</div>
-              <div className={styles.metrics}>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Hue</div>
-                  <div className={styles.metricValue}>{color.hue}</div>
-                  <div className={styles.metricDesc}>{color.hueName}</div>
-                </div>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Value</div>
-                  <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10 scale'}</div>
-                </div>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Chroma</div>
-                  <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
-                </div>
-              </div>
-              <div className={styles.munsellNotation}>
-                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
-              </div>
-            </div>
-          </AccordionDrawer>
-
-          <AccordionDrawer title="Munsell Chart" isOpen={openDrawer.includes('munsell')} onToggle={() => {
-            const next = !openDrawer.includes('munsell')
-            toggleDrawer('munsell')
-            setShowMunsellChart(next)
-          }}>
-            <div className={styles.comingSoon}>
-              {showMunsellChart ? 'Chart is displayed below the image' : ''}
             </div>
           </AccordionDrawer>
 
@@ -300,29 +260,6 @@ export default function Home() {
             )}
           </AccordionDrawer>
 
-          <AccordionDrawer title="Hue Wheel" isOpen={openDrawer.includes('hue')} onToggle={() => toggleDrawer('hue')}>
-            <div className={styles.drawerResult}>
-              <HueWheel
-                hueAngle={color.hueAngle}
-                hueName={color.hueName}
-                color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-                active={hasColor}
-              />
-            </div>
-          </AccordionDrawer>
-
-          <AccordionDrawer title={`Palette ${palette.length > 0 ? `(${palette.length})` : ''}`} isOpen={openDrawer.includes('palette')} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.drawerResult}>
-              <Palette
-                palette={palette}
-                selected={selectedSwatch}
-                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                onRemove={removeFromPalette}
-                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-              />
-            </div>
-          </AccordionDrawer>
-
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
               <Filters
@@ -354,7 +291,7 @@ export default function Home() {
         )}
       </aside>
 
-      <main className={styles.main}>
+      <div className={styles.rightArea}>
         {!image ? (
           <div
             className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}
@@ -371,77 +308,145 @@ export default function Home() {
               onChange={e => loadFile(e.target.files[0])} />
           </div>
         ) : (
-          <div className={styles.canvasArea} style={showMunsellChart ? { display: 'flex', flexDirection: 'column', height: '100%' } : {}}>
-            <div className={styles.toolbar}>
-              <button
-                className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
-                onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
-              >3×3</button>
-              <button
-                className={`${styles.toolBtn} ${gridMode === '4x4' ? styles.toolBtnActive : ''}`}
-                onClick={() => setGridMode(m => m === '4x4' ? null : '4x4')}
-              >4×4</button>
-              <button
-                className={`${styles.toolBtn} ${gridMode === 'square' ? styles.toolBtnActive : ''}`}
-                onClick={() => setGridMode(m => m === 'square' ? null : 'square')}
-              >Grid</button>
-              <select
-                className={styles.gridSizeSelect}
-                value={squareGridSize}
-                onChange={e => { setSquareGridSize(Number(e.target.value)); setGridMode('square') }}
-              >
-                {Array.from({ length: 11 }, (_, i) => i + 2).map(n => (
-                  <option key={n} value={n}>{n}×{n}</option>
-                ))}
-              </select>
-              <button
-                className={`${styles.toolBtn} ${showDiagonals ? styles.toolBtnActive : ''}`}
-                onClick={() => setShowDiagonals(d => !d)}
-                disabled={!gridMode}
-              >Diag</button>
-              <input
-                type="color"
-                value={gridColor}
-                onChange={e => setGridColor(e.target.value)}
-                className={styles.gridColorPicker}
-                title="Grid color"
-                disabled={!gridMode}
-              />
-              <input
-                type="range"
-                min="10"
-                max="100"
-                value={gridOpacity}
-                onChange={e => setGridOpacity(Number(e.target.value))}
-                className={styles.gridOpacitySlider}
-                title={`Opacity ${gridOpacity}%`}
-                disabled={!gridMode}
-              />
+          <>
+            <div className={styles.canvasSection}>
+              <div className={styles.toolbar}>
+                <button
+                  className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
+                  onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
+                >3×3</button>
+                <button
+                  className={`${styles.toolBtn} ${gridMode === '4x4' ? styles.toolBtnActive : ''}`}
+                  onClick={() => setGridMode(m => m === '4x4' ? null : '4x4')}
+                >4×4</button>
+                <button
+                  className={`${styles.toolBtn} ${gridMode === 'square' ? styles.toolBtnActive : ''}`}
+                  onClick={() => setGridMode(m => m === 'square' ? null : 'square')}
+                >Grid</button>
+                <select
+                  className={styles.gridSizeSelect}
+                  value={squareGridSize}
+                  onChange={e => { setSquareGridSize(Number(e.target.value)); setGridMode('square') }}
+                >
+                  {Array.from({ length: 11 }, (_, i) => i + 2).map(n => (
+                    <option key={n} value={n}>{n}×{n}</option>
+                  ))}
+                </select>
+                <button
+                  className={`${styles.toolBtn} ${showDiagonals ? styles.toolBtnActive : ''}`}
+                  onClick={() => setShowDiagonals(d => !d)}
+                  disabled={!gridMode}
+                >Diag</button>
+                <input
+                  type="color"
+                  value={gridColor}
+                  onChange={e => setGridColor(e.target.value)}
+                  className={styles.gridColorPicker}
+                  title="Grid color"
+                  disabled={!gridMode}
+                />
+                <input
+                  type="range" min="10" max="100"
+                  value={gridOpacity}
+                  onChange={e => setGridOpacity(Number(e.target.value))}
+                  className={styles.gridOpacitySlider}
+                  title={`Opacity ${gridOpacity}%`}
+                  disabled={!gridMode}
+                />
+              </div>
+              <div className={styles.canvasWrap}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
+                <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
+                <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
+                {cursor.visible && (
+                  <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
+                )}
+              </div>
             </div>
-            <div className={styles.canvasWrap}
-              style={showMunsellChart ? { flex: '0 0 55%', minHeight: 0 } : {}}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-              <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-              {cursor.visible && (
-                <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-              )}
+
+            <div className={styles.infoBar}>
+              {/* Panel 1: Swatch + RGB */}
+              <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
+                <div className={styles.infoLabel}>Color</div>
+                <div style={{
+                  flex: 1,
+                  borderRadius: 6,
+                  background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  minHeight: 0,
+                }} />
+                <div className={styles.rgbLabel}>
+                  {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
+                </div>
+              </div>
+
+              {/* Panel 2: HVC + Munsell */}
+              <div className={`${styles.infoPanel} ${styles.infoPanelHVC}`}>
+                <div className={styles.infoLabel}>Munsell</div>
+                <div className={styles.metrics}>
+                  <div className={styles.metric}>
+                    <div className={styles.metricLabel}>Hue</div>
+                    <div className={styles.metricValue}>{color.hue}</div>
+                    <div className={styles.metricDesc}>{color.hueName}</div>
+                  </div>
+                  <div className={styles.metric}>
+                    <div className={styles.metricLabel}>Value</div>
+                    <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
+                    <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10'}</div>
+                  </div>
+                  <div className={styles.metric}>
+                    <div className={styles.metricLabel}>Chroma</div>
+                    <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
+                    <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'sat.'}</div>
+                  </div>
+                </div>
+                <div className={styles.munsellNotation}>
+                  {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
+                </div>
+              </div>
+
+              {/* Panel 3: Hue Wheel */}
+              <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
+                <HueWheel
+                  hueAngle={color.hueAngle}
+                  hueName={color.hueName}
+                  color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+                  active={hasColor}
+                />
+              </div>
+
+              {/* Panel 4: Munsell Chart */}
+              <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
+                <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
+                <MunsellChart
+                  compact
+                  hueAngle={color.hueAngle}
+                  hueName={color.hueName}
+                  hue={color.hue}
+                  value={hasColor ? color.value : null}
+                  chroma={hasColor ? color.chroma : null}
+                  color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+                />
+              </div>
+
+              {/* Panel 5: Palette */}
+              <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
+                <div className={styles.infoLabel}>Palette {palette.length > 0 ? `(${palette.length})` : ''}</div>
+                <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                  <Palette
+                    palette={palette}
+                    selected={selectedSwatch}
+                    onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                    onRemove={removeFromPalette}
+                    onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+                  />
+                </div>
+              </div>
             </div>
-            <div style={showMunsellChart ? { flex: '0 0 45%', minHeight: 0, overflowY: 'auto' } : {}}>
-              <MunsellChart
-                active={showMunsellChart}
-                hueAngle={color.hueAngle}
-                hueName={color.hueName}
-                hue={color.hue}
-                value={hasColor ? color.value : null}
-                chroma={hasColor ? color.chroma : null}
-                color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-              />
-            </div>
-          </div>
+          </>
         )}
-      </main>
+      </div>
     </div>
   )
 }
