@@ -25,7 +25,7 @@ export default function Palette({ palette, onRemove, onClear, onSelect, selected
 
       {palette.length === 0 ? (
         <div style={{ fontSize: 11, color: '#555250', fontStyle: 'italic', textAlign: 'center', padding: '1rem 0' }}>
-          No colors yet — click image then add to palette
+          No colors yet
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>

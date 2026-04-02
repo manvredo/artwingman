@@ -271,8 +271,21 @@
   flex-direction: column;
   overflow: hidden;
   background: #111;
+}
+
+/* ── Dropzone Area (fills canvas region when no image) ──── */
+.dropzoneArea {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.dropzoneAreaActive .dropzone {
+  border-color: #c8a96e;
+  background: rgba(200,169,110,0.06);
 }
 
 /* ── Dropzone ───────────────────────────────────────────── */

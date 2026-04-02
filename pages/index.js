@@ -294,160 +294,160 @@ export default function Home() {
       <div className={styles.rightArea}>
         {!image ? (
           <div
-            className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}
+            className={`${styles.dropzoneArea} ${dragging ? styles.dropzoneAreaActive : ''}`}
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
           >
-            <div className={styles.dropIcon}>+</div>
-            <div className={styles.dropTitle}>Load reference image</div>
-            <div className={styles.dropSub}>Click or drag & drop</div>
+            <div className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}>
+              <div className={styles.dropIcon}>+</div>
+              <div className={styles.dropTitle}>Load reference image</div>
+              <div className={styles.dropSub}>Click or drag & drop</div>
+            </div>
             <input ref={fileInputRef} type="file" accept="image/*"
               style={{ display: 'none' }}
               onChange={e => loadFile(e.target.files[0])} />
           </div>
         ) : (
-          <>
-            <div className={styles.canvasSection}>
-              <div className={styles.toolbar}>
-                <button
-                  className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
-                  onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
-                >3×3</button>
-                <button
-                  className={`${styles.toolBtn} ${gridMode === '4x4' ? styles.toolBtnActive : ''}`}
-                  onClick={() => setGridMode(m => m === '4x4' ? null : '4x4')}
-                >4×4</button>
-                <button
-                  className={`${styles.toolBtn} ${gridMode === 'square' ? styles.toolBtnActive : ''}`}
-                  onClick={() => setGridMode(m => m === 'square' ? null : 'square')}
-                >Grid</button>
-                <select
-                  className={styles.gridSizeSelect}
-                  value={squareGridSize}
-                  onChange={e => { setSquareGridSize(Number(e.target.value)); setGridMode('square') }}
-                >
-                  {Array.from({ length: 11 }, (_, i) => i + 2).map(n => (
-                    <option key={n} value={n}>{n}×{n}</option>
-                  ))}
-                </select>
-                <button
-                  className={`${styles.toolBtn} ${showDiagonals ? styles.toolBtnActive : ''}`}
-                  onClick={() => setShowDiagonals(d => !d)}
-                  disabled={!gridMode}
-                >Diag</button>
-                <input
-                  type="color"
-                  value={gridColor}
-                  onChange={e => setGridColor(e.target.value)}
-                  className={styles.gridColorPicker}
-                  title="Grid color"
-                  disabled={!gridMode}
-                />
-                <input
-                  type="range" min="10" max="100"
-                  value={gridOpacity}
-                  onChange={e => setGridOpacity(Number(e.target.value))}
-                  className={styles.gridOpacitySlider}
-                  title={`Opacity ${gridOpacity}%`}
-                  disabled={!gridMode}
-                />
-              </div>
-              <div className={styles.canvasWrap}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-                <div className={styles.canvasInner}>
-                  <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-                  <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                  {cursor.visible && (
-                    <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-                  )}
-                </div>
+          <div className={styles.canvasSection}>
+            <div className={styles.toolbar}>
+              <button
+                className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
+              >3×3</button>
+              <button
+                className={`${styles.toolBtn} ${gridMode === '4x4' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === '4x4' ? null : '4x4')}
+              >4×4</button>
+              <button
+                className={`${styles.toolBtn} ${gridMode === 'square' ? styles.toolBtnActive : ''}`}
+                onClick={() => setGridMode(m => m === 'square' ? null : 'square')}
+              >Grid</button>
+              <select
+                className={styles.gridSizeSelect}
+                value={squareGridSize}
+                onChange={e => { setSquareGridSize(Number(e.target.value)); setGridMode('square') }}
+              >
+                {Array.from({ length: 11 }, (_, i) => i + 2).map(n => (
+                  <option key={n} value={n}>{n}×{n}</option>
+                ))}
+              </select>
+              <button
+                className={`${styles.toolBtn} ${showDiagonals ? styles.toolBtnActive : ''}`}
+                onClick={() => setShowDiagonals(d => !d)}
+                disabled={!gridMode}
+              >Diag</button>
+              <input
+                type="color"
+                value={gridColor}
+                onChange={e => setGridColor(e.target.value)}
+                className={styles.gridColorPicker}
+                title="Grid color"
+                disabled={!gridMode}
+              />
+              <input
+                type="range" min="10" max="100"
+                value={gridOpacity}
+                onChange={e => setGridOpacity(Number(e.target.value))}
+                className={styles.gridOpacitySlider}
+                title={`Opacity ${gridOpacity}%`}
+                disabled={!gridMode}
+              />
+            </div>
+            <div className={styles.canvasWrap}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
+              <div className={styles.canvasInner}>
+                <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
+                <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
+                {cursor.visible && (
+                  <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
+                )}
               </div>
             </div>
-
-            <div className={styles.infoBar}>
-              {/* Panel 1: Swatch + RGB */}
-              <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
-                <div className={styles.infoLabel}>Color</div>
-                <div style={{
-                  flex: 1,
-                  borderRadius: 6,
-                  background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  minHeight: 0,
-                }} />
-                <div className={styles.rgbLabel}>
-                  {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
-                </div>
-              </div>
-
-              {/* Panel 2: HVC + Munsell */}
-              <div className={`${styles.infoPanel} ${styles.infoPanelHVC}`}>
-                <div className={styles.infoLabel}>Munsell</div>
-                <div className={styles.metrics}>
-                  <div className={styles.metric}>
-                    <div className={styles.metricLabel}>Hue</div>
-                    <div className={styles.metricValue}>{color.hue}</div>
-                    <div className={styles.metricDesc}>{color.hueName}</div>
-                  </div>
-                  <div className={styles.metric}>
-                    <div className={styles.metricLabel}>Value</div>
-                    <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
-                    <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10'}</div>
-                  </div>
-                  <div className={styles.metric}>
-                    <div className={styles.metricLabel}>Chroma</div>
-                    <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
-                    <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'sat.'}</div>
-                  </div>
-                </div>
-                <div className={styles.munsellNotation}>
-                  {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
-                </div>
-              </div>
-
-              {/* Panel 3: Hue Wheel */}
-              <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
-                <HueWheel
-                  hueAngle={color.hueAngle}
-                  hueName={color.hueName}
-                  color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-                  active={hasColor}
-                />
-              </div>
-
-              {/* Panel 4: Munsell Chart */}
-              <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
-                <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
-                <MunsellChart
-                  compact
-                  hueAngle={color.hueAngle}
-                  hueName={color.hueName}
-                  hue={color.hue}
-                  value={hasColor ? color.value : null}
-                  chroma={hasColor ? color.chroma : null}
-                  color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-                />
-              </div>
-
-              {/* Panel 5: Palette */}
-              <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
-                <div className={styles.infoLabel}>Palette {palette.length > 0 ? `(${palette.length})` : ''}</div>
-                <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-                  <Palette
-                    palette={palette}
-                    selected={selectedSwatch}
-                    onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                    onRemove={removeFromPalette}
-                    onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-                  />
-                </div>
-              </div>
-            </div>
-          </>
+          </div>
         )}
+
+        <div className={styles.infoBar}>
+          {/* Panel 1: Swatch + RGB */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
+            <div className={styles.infoLabel}>Color</div>
+            <div style={{
+              flex: 1,
+              borderRadius: 6,
+              background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
+              border: '1px solid rgba(255,255,255,0.08)',
+              minHeight: 0,
+            }} />
+            <div className={styles.rgbLabel}>
+              {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
+            </div>
+          </div>
+
+          {/* Panel 2: HVC + Munsell */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelHVC}`}>
+            <div className={styles.infoLabel}>Munsell</div>
+            <div className={styles.metrics}>
+              <div className={styles.metric}>
+                <div className={styles.metricLabel}>Hue</div>
+                <div className={styles.metricValue}>{color.hue}</div>
+                <div className={styles.metricDesc}>{color.hueName}</div>
+              </div>
+              <div className={styles.metric}>
+                <div className={styles.metricLabel}>Value</div>
+                <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
+                <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10 scale'}</div>
+              </div>
+              <div className={styles.metric}>
+                <div className={styles.metricLabel}>Chroma</div>
+                <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
+                <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
+              </div>
+            </div>
+            <div className={styles.munsellNotation}>
+              {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+            </div>
+          </div>
+
+          {/* Panel 3: Hue Wheel */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
+            <HueWheel
+              hueAngle={color.hueAngle}
+              hueName={color.hueName}
+              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+              active={hasColor}
+            />
+          </div>
+
+          {/* Panel 4: Munsell Chart */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
+            <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
+            <MunsellChart
+              compact
+              hueAngle={color.hueAngle}
+              hueName={color.hueName}
+              hue={color.hue}
+              value={hasColor ? color.value : null}
+              chroma={hasColor ? color.chroma : null}
+              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+            />
+          </div>
+
+          {/* Panel 5: Palette */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
+            <div className={styles.infoLabel}>Palette</div>
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              <Palette
+                palette={palette}
+                selected={selectedSwatch}
+                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                onRemove={removeFromPalette}
+                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
