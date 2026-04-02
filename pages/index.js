@@ -4,6 +4,7 @@ import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
+import Filters from '../components/Filters'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -43,6 +44,8 @@ export default function Home() {
   const [squareGridSize, setSquareGridSize] = useState(4)
   const [showDiagonals, setShowDiagonals] = useState(false)
   const [gridColor, setGridColor] = useState('#ffffff')
+  const [activeFilter, setActiveFilter] = useState(null)
+  const [filterStrength, setFilterStrength] = useState(5)
 
   const toggleDrawer = (name) => setOpenDrawer(prev =>
     prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
@@ -137,6 +140,66 @@ export default function Home() {
     setShowGray(false)
     setValueRating(null)
   }, [])
+
+  const applyFilter = useCallback((filter, strength) => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!filter) {
+      ctx.putImageData(originalImageDataRef.current, 0, 0)
+      return
+    }
+    const src = originalImageDataRef.current
+    const imageData = new ImageData(new Uint8ClampedArray(src.data), src.width, src.height)
+    const d = imageData.data
+    const w = src.width
+    const h = src.height
+    if (filter === 'grayscale') {
+      for (let i = 0; i < d.length; i += 4) {
+        const lum = Math.round(0.2126 * d[i] + 0.7152 * d[i+1] + 0.0722 * d[i+2])
+        d[i] = d[i+1] = d[i+2] = lum
+      }
+    } else if (filter === 'highcontrast') {
+      const factor = 1.5 + (strength / 20) * 1.5
+      for (let i = 0; i < d.length; i += 4) {
+        d[i]   = Math.min(255, Math.max(0, Math.round((d[i]   - 128) * factor + 128)))
+        d[i+1] = Math.min(255, Math.max(0, Math.round((d[i+1] - 128) * factor + 128)))
+        d[i+2] = Math.min(255, Math.max(0, Math.round((d[i+2] - 128) * factor + 128)))
+      }
+    } else if (filter === 'soften') {
+      const r = Math.max(1, strength)
+      const srcData = new Uint8ClampedArray(src.data)
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let rSum = 0, gSum = 0, bSum = 0, count = 0
+          for (let dy = -r; dy <= r; dy++) {
+            for (let dx = -r; dx <= r; dx++) {
+              const nx = x + dx, ny = y + dy
+              if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue
+              const idx = (ny * w + nx) * 4
+              rSum += srcData[idx]; gSum += srcData[idx+1]; bSum += srcData[idx+2]
+              count++
+            }
+          }
+          const idx = (y * w + x) * 4
+          d[idx]   = Math.round(rSum / count)
+          d[idx+1] = Math.round(gSum / count)
+          d[idx+2] = Math.round(bSum / count)
+        }
+      }
+    }
+    ctx.putImageData(imageData, 0, 0)
+  }, [])
+
+  const handleFilterChange = useCallback((filter) => {
+    setActiveFilter(filter)
+    applyFilter(filter, filterStrength)
+  }, [applyFilter, filterStrength])
+
+  const handleStrengthChange = useCallback((strength) => {
+    setFilterStrength(strength)
+    if (activeFilter === 'soften') applyFilter('soften', strength)
+  }, [applyFilter, activeFilter])
 
   const addToPalette = useCallback(() => {
     if (!color || color.r === null) return
@@ -269,6 +332,17 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
+          <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
+            <div className={styles.drawerControls}>
+              <Filters
+                activeFilter={activeFilter}
+                onFilterChange={handleFilterChange}
+                filterStrength={filterStrength}
+                onStrengthChange={handleStrengthChange}
+              />
+            </div>
+          </AccordionDrawer>
+
           <AccordionDrawer title="Paint Match" isOpen={openDrawer.includes('paint')} onToggle={() => toggleDrawer('paint')}>
             <div className={styles.comingSoon}>Pro feature — coming soon</div>
           </AccordionDrawer>
@@ -281,6 +355,7 @@ export default function Home() {
             setColor(DEFAULT_COLOR)
             setShowGray(false)
             setValueRating(null)
+            setActiveFilter(null)
             originalImageDataRef.current = null
           }}>
             Load new image
