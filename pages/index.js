@@ -42,6 +42,7 @@ export default function Home() {
   const [gridMode, setGridMode] = useState(null)
   const [squareGridSize, setSquareGridSize] = useState(4)
   const [showDiagonals, setShowDiagonals] = useState(false)
+  const [gridColor, setGridColor] = useState('#ffffff')
 
   const toggleDrawer = (name) => setOpenDrawer(prev =>
     prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
@@ -332,12 +333,20 @@ export default function Home() {
                 onClick={() => setShowDiagonals(d => !d)}
                 disabled={!gridMode}
               >Diag</button>
+              <input
+                type="color"
+                value={gridColor}
+                onChange={e => setGridColor(e.target.value)}
+                className={styles.gridColorPicker}
+                title="Grid color"
+                disabled={!gridMode}
+              />
             </div>
             <div className={styles.canvasWrap}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
               <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} />
+              <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} />
               {cursor.visible && (
                 <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
               )}
