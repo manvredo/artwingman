@@ -46,6 +46,7 @@ export default function Home() {
   const [squareGridSize, setSquareGridSize] = useState(4)
   const [showDiagonals, setShowDiagonals] = useState(false)
   const [gridColor, setGridColor] = useState('#ffffff')
+  const [showMunsellChart, setShowMunsellChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
 
@@ -251,15 +252,14 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Munsell Chart" isOpen={openDrawer.includes('munsell')} onToggle={() => toggleDrawer('munsell')}>
-            <MunsellChart
-              hueAngle={color.hueAngle}
-              hueName={color.hueName}
-              hue={color.hue}
-              value={hasColor ? color.value : null}
-              chroma={hasColor ? color.chroma : null}
-              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-            />
+          <AccordionDrawer title="Munsell Chart" isOpen={openDrawer.includes('munsell')} onToggle={() => {
+            const next = !openDrawer.includes('munsell')
+            toggleDrawer('munsell')
+            setShowMunsellChart(next)
+          }}>
+            <div className={styles.comingSoon}>
+              {showMunsellChart ? 'Chart is displayed below the image' : ''}
+            </div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
@@ -370,7 +370,7 @@ export default function Home() {
               onChange={e => loadFile(e.target.files[0])} />
           </div>
         ) : (
-          <div className={styles.canvasArea}>
+          <div className={styles.canvasArea} style={showMunsellChart ? { display: 'flex', flexDirection: 'column', height: '100%' } : {}}>
             <div className={styles.toolbar}>
               <button
                 className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
@@ -408,6 +408,7 @@ export default function Home() {
               />
             </div>
             <div className={styles.canvasWrap}
+              style={showMunsellChart ? { flex: '0 0 55%', minHeight: 0 } : {}}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
               <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
@@ -415,6 +416,17 @@ export default function Home() {
               {cursor.visible && (
                 <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
               )}
+            </div>
+            <div style={showMunsellChart ? { flex: '0 0 45%', minHeight: 0, overflowY: 'auto' } : {}}>
+              <MunsellChart
+                active={showMunsellChart}
+                hueAngle={color.hueAngle}
+                hueName={color.hueName}
+                hue={color.hue}
+                value={hasColor ? color.value : null}
+                chroma={hasColor ? color.chroma : null}
+                color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+              />
             </div>
           </div>
         )}
