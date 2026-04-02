@@ -5,6 +5,7 @@ import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
 import Filters from '../components/Filters'
+import MunsellChart from '../components/MunsellChart'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -216,6 +217,13 @@ export default function Home() {
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{sampleRadius}px</span>
               </div>
+              {hasColor && palette.length < 24 && (
+                <div className={styles.btnRow}>
+                  <button className={styles.btnPrimary} onClick={addToPalette}>
+                    + Add to Palette
+                  </button>
+                </div>
+              )}
             </div>
             <div className={styles.drawerResult}>
               <div className={styles.swatch} style={{ background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a' }} />
@@ -240,12 +248,18 @@ export default function Home() {
               <div className={styles.munsellNotation}>
                 {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
               </div>
-              {hasColor && palette.length < 24 && (
-                <button className={styles.btnPrimary} onClick={addToPalette}>
-                  + Add to Palette
-                </button>
-              )}
             </div>
+          </AccordionDrawer>
+
+          <AccordionDrawer title="Munsell Chart" isOpen={openDrawer.includes('munsell')} onToggle={() => toggleDrawer('munsell')}>
+            <MunsellChart
+              hueAngle={color.hueAngle}
+              hueName={color.hueName}
+              hue={color.hue}
+              value={hasColor ? color.value : null}
+              chroma={hasColor ? color.chroma : null}
+              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+            />
           </AccordionDrawer>
 
           <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
