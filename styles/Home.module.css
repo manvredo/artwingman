@@ -326,6 +326,7 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -400,11 +401,17 @@
 .canvasWrap {
   flex: 1;
   min-height: 0;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+.canvasInner {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .canvas {

@@ -357,11 +357,13 @@ export default function Home() {
               <div className={styles.canvasWrap}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-                <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-                <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {cursor.visible && (
-                  <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-                )}
+                <div className={styles.canvasInner}>
+                  <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
+                  <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
+                  {cursor.visible && (
+                    <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
+                  )}
+                </div>
               </div>
             </div>
 
