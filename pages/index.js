@@ -32,14 +32,16 @@ export default function Home() {
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false })
   const [sampleRadius, setSampleRadius] = useState(3)
   const [dragging, setDragging] = useState(false)
-  const [openDrawer, setOpenDrawer] = useState('color')
+  const [openDrawer, setOpenDrawer] = useState(['color'])
   const [valueSteps, setValueSteps] = useState(5)
   const [showGray, setShowGray] = useState(false)
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
   const [selectedSwatch, setSelectedSwatch] = useState(null)
 
-  const toggleDrawer = (name) => setOpenDrawer(prev => prev === name ? null : name)
+  const toggleDrawer = (name) => setOpenDrawer(prev =>
+    prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
+  )
 
   const loadFile = useCallback((file) => {
     if (!file || !file.type.startsWith('image/')) return
@@ -134,8 +136,11 @@ export default function Home() {
   const addToPalette = useCallback(() => {
     if (!color || color.r === null) return
     if (palette.length >= 24) return
-    setPalette(prev => [...prev, { ...color }])
-    setSelectedSwatch(palette.length)
+    setPalette(prev => {
+      const newPalette = [...prev, { ...color }]
+      setSelectedSwatch(newPalette.length - 1)
+      return newPalette
+    })
   }, [color, palette])
 
   const removeFromPalette = useCallback((index) => {
@@ -158,7 +163,7 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
-          <AccordionDrawer title="Color Finder" isOpen={openDrawer === 'color'} onToggle={() => toggleDrawer('color')}>
+          <AccordionDrawer title="Color Finder" isOpen={openDrawer.includes('color')} onToggle={() => toggleDrawer('color')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Sample Radius</div>
               <div className={styles.sliderRow}>
@@ -199,7 +204,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Value Groups" isOpen={openDrawer === 'value'} onToggle={() => toggleDrawer('value')}>
+          <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
@@ -236,7 +241,7 @@ export default function Home() {
             )}
           </AccordionDrawer>
 
-          <AccordionDrawer title="Hue Wheel" isOpen={openDrawer === 'hue'} onToggle={() => toggleDrawer('hue')}>
+          <AccordionDrawer title="Hue Wheel" isOpen={openDrawer.includes('hue')} onToggle={() => toggleDrawer('hue')}>
             <div className={styles.drawerResult}>
               <HueWheel
                 hueAngle={color.hueAngle}
@@ -247,7 +252,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title={`Palette ${palette.length > 0 ? `(${palette.length})` : ''}`} isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
+          <AccordionDrawer title={`Palette ${palette.length > 0 ? `(${palette.length})` : ''}`} isOpen={openDrawer.includes('palette')} onToggle={() => toggleDrawer('palette')}>
             <div className={styles.drawerResult}>
               <Palette
                 palette={palette}
@@ -259,7 +264,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Paint Match" isOpen={openDrawer === 'paint'} onToggle={() => toggleDrawer('paint')}>
+          <AccordionDrawer title="Paint Match" isOpen={openDrawer.includes('paint')} onToggle={() => toggleDrawer('paint')}>
             <div className={styles.comingSoon}>Pro feature — coming soon</div>
           </AccordionDrawer>
 
