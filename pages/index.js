@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from '../lib/munsell'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
+import Palette from '../components/Palette'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -35,6 +36,8 @@ export default function Home() {
   const [valueSteps, setValueSteps] = useState(5)
   const [showGray, setShowGray] = useState(false)
   const [valueRating, setValueRating] = useState(null)
+  const [palette, setPalette] = useState([])
+  const [selectedSwatch, setSelectedSwatch] = useState(null)
 
   const toggleDrawer = (name) => setOpenDrawer(prev => prev === name ? null : name)
 
@@ -128,6 +131,18 @@ export default function Home() {
     setValueRating(null)
   }, [])
 
+  const addToPalette = useCallback(() => {
+    if (!color || color.r === null) return
+    if (palette.length >= 24) return
+    setPalette(prev => [...prev, { ...color }])
+    setSelectedSwatch(palette.length)
+  }, [color, palette])
+
+  const removeFromPalette = useCallback((index) => {
+    setPalette(prev => prev.filter((_, i) => i !== index))
+    setSelectedSwatch(null)
+  }, [])
+
   const hasColor = color.r !== null
 
   return (
@@ -137,7 +152,7 @@ export default function Home() {
           <span className={styles.logoMark}>AW</span>
           <div>
             <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.3</div>
+            <div className={styles.logoSub}>v0.4</div>
           </div>
         </div>
 
@@ -176,6 +191,11 @@ export default function Home() {
               <div className={styles.munsellNotation}>
                 {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
               </div>
+              {hasColor && palette.length < 24 && (
+                <button className={styles.btnPrimary} onClick={addToPalette}>
+                  + Add to Palette
+                </button>
+              )}
             </div>
           </AccordionDrawer>
 
@@ -227,8 +247,16 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Palette" isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.comingSoon}>Coming in v0.4</div>
+          <AccordionDrawer title={`Palette ${palette.length > 0 ? `(${palette.length})` : ''}`} isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
+            <div className={styles.drawerResult}>
+              <Palette
+                palette={palette}
+                selected={selectedSwatch}
+                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                onRemove={removeFromPalette}
+                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+              />
+            </div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Paint Match" isOpen={openDrawer === 'paint'} onToggle={() => toggleDrawer('paint')}>

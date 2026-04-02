@@ -1,310 +1,108 @@
-import { useRef, useState, useCallback } from 'react'
-import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from '../lib/munsell'
-import styles from '../styles/Home.module.css'
-import HueWheel from '../components/HueWheel'
-import Palette from '../components/Palette'
+import { useState } from 'react'
 
-const DEFAULT_COLOR = {
-  r: null, g: null, b: null,
-  hue: '—', hueName: '—', hueAngle: 0,
-  value: null, chroma: null
-}
-
-function AccordionDrawer({ title, isOpen, onToggle, children }) {
+export default function Palette({ palette, onRemove, onClear, onSelect, selected }) {
   return (
-    <div className={styles.drawer}>
-      <button className={`${styles.drawerHeader} ${isOpen ? styles.drawerHeaderActive : ''}`} onClick={onToggle}>
-        <span className={styles.drawerTitle}>{title}</span>
-        <span className={styles.drawerArrow}>{isOpen ? '▼' : '▶'}</span>
-      </button>
-      {isOpen && <div className={styles.drawerBody}>{children}</div>}
-    </div>
-  )
-}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-export default function Home() {
-  const canvasRef = useRef(null)
-  const fileInputRef = useRef(null)
-  const originalImageDataRef = useRef(null)
-  const [image, setImage] = useState(null)
-  const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
-  const [color, setColor] = useState(DEFAULT_COLOR)
-  const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false })
-  const [sampleRadius, setSampleRadius] = useState(3)
-  const [dragging, setDragging] = useState(false)
-  const [openDrawer, setOpenDrawer] = useState('color')
-  const [valueSteps, setValueSteps] = useState(5)
-  const [showGray, setShowGray] = useState(false)
-  const [valueRating, setValueRating] = useState(null)
-  const [palette, setPalette] = useState([])
-  const [selectedSwatch, setSelectedSwatch] = useState(null)
-
-  const toggleDrawer = (name) => setOpenDrawer(prev => prev === name ? null : name)
-
-  const loadFile = useCallback((file) => {
-    if (!file || !file.type.startsWith('image/')) return
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const img = new Image()
-      img.onload = () => {
-        setImage(img)
-        setImgDims({ w: img.width, h: img.height })
-        setColor(DEFAULT_COLOR)
-        setShowGray(false)
-        setValueRating(null)
-        setTimeout(() => {
-          const canvas = canvasRef.current
-          if (canvas) {
-            canvas.width = img.width
-            canvas.height = img.height
-            const ctx = canvas.getContext('2d', { willReadFrequently: true })
-            ctx.drawImage(img, 0, 0)
-            originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
-          }
-        }, 50)
-      }
-      img.src = e.target.result
-    }
-    reader.readAsDataURL(file)
-  }, [])
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault()
-    setDragging(false)
-    loadFile(e.dataTransfer.files[0])
-  }, [loadFile])
-
-  const handleCanvasClick = useCallback((e) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const rect = canvas.getBoundingClientRect()
-    const sx = e.clientX - rect.left
-    const sy = e.clientY - rect.top
-    const scaleX = imgDims.w / rect.width
-    const scaleY = imgDims.h / rect.height
-    const px = Math.floor(sx * scaleX)
-    const py = Math.floor(sy * scaleY)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
-    const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
-    const munsell = rgbToMunsell(r, g, b)
-    setColor({ r, g, b, ...munsell })
-  }, [imgDims, sampleRadius])
-
-  const handleMouseMove = useCallback((e) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const rect = canvas.getBoundingClientRect()
-    setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top, visible: true })
-  }, [])
-
-  const applyValueGroups = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = new ImageData(
-      new Uint8ClampedArray(originalImageDataRef.current.data),
-      originalImageDataRef.current.width,
-      originalImageDataRef.current.height
-    )
-    const data = imageData.data
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i], g = data[i+1], b = data[i+2]
-      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-      const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
-      const grayVal = Math.round((group / (valueSteps - 1)) * 255)
-      data[i] = data[i+1] = data[i+2] = grayVal
-    }
-    ctx.putImageData(imageData, 0, 0)
-    setShowGray(true)
-    if (valueSteps <= 4) setValueRating('green')
-    else if (valueSteps <= 7) setValueRating('yellow')
-    else setValueRating('red')
-  }, [valueSteps])
-
-  const resetCanvas = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.putImageData(originalImageDataRef.current, 0, 0)
-    setShowGray(false)
-    setValueRating(null)
-  }, [])
-
-  const addToPalette = useCallback(() => {
-    if (!color || color.r === null) return
-    if (palette.length >= 24) return
-    setPalette(prev => [...prev, { ...color }])
-    setSelectedSwatch(palette.length)
-  }, [color, palette])
-
-  const removeFromPalette = useCallback((index) => {
-    setPalette(prev => prev.filter((_, i) => i !== index))
-    setSelectedSwatch(null)
-  }, [])
-
-  const hasColor = color.r !== null
-
-  return (
-    <div className={styles.layout}>
-      <aside className={styles.sidebar}>
-        <div className={styles.logo}>
-          <span className={styles.logoMark}>AW</span>
-          <div>
-            <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.4</div>
-          </div>
-        </div>
-
-        <div className={styles.accordion}>
-
-          <AccordionDrawer title="Color Finder" isOpen={openDrawer === 'color'} onToggle={() => toggleDrawer('color')}>
-            <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Sample Radius</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="1" max="20" value={sampleRadius}
-                  onChange={e => setSampleRadius(Number(e.target.value))}
-                  className={styles.slider} />
-                <span className={styles.sliderVal}>{sampleRadius}px</span>
-              </div>
-            </div>
-            <div className={styles.drawerResult}>
-              <div className={styles.swatch} style={{ background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a' }} />
-              <div className={styles.rgbLabel}>{hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}</div>
-              <div className={styles.metrics}>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Hue</div>
-                  <div className={styles.metricValue}>{color.hue}</div>
-                  <div className={styles.metricDesc}>{color.hueName}</div>
-                </div>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Value</div>
-                  <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10 scale'}</div>
-                </div>
-                <div className={styles.metric}>
-                  <div className={styles.metricLabel}>Chroma</div>
-                  <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
-                </div>
-              </div>
-              <div className={styles.munsellNotation}>
-                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : 'Munsell — / —'}
-              </div>
-              {hasColor && palette.length < 24 && (
-                <button className={styles.btnPrimary} onClick={addToPalette}>
-                  + Add to Palette
-                </button>
-              )}
-            </div>
-          </AccordionDrawer>
-
-          <AccordionDrawer title="Value Groups" isOpen={openDrawer === 'value'} onToggle={() => toggleDrawer('value')}>
-            <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Number of steps</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="3" max="10" step="1" value={valueSteps}
-                  onChange={e => setValueSteps(Number(e.target.value))}
-                  className={styles.slider} />
-                <span className={styles.sliderVal}>{valueSteps}</span>
-              </div>
-              <div className={styles.btnRow}>
-                <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
-                  Analyze
-                </button>
-                {showGray && (
-                  <button className={styles.btnSecondary} onClick={resetCanvas}>
-                    Reset
-                  </button>
-                )}
-              </div>
-            </div>
-            {valueRating && (
-              <div className={styles.drawerResult}>
-                <div className={`${styles.ampel} ${styles['ampel' + valueRating]}`}>
-                  {valueRating === 'green' && `${valueSteps} values — ideal for painting`}
-                  {valueRating === 'yellow' && `${valueSteps} values — acceptable`}
-                  {valueRating === 'red' && `${valueSteps} values — too complex, simplify`}
-                </div>
-                <div className={styles.valueSteps}>
-                  {Array.from({ length: valueSteps }).map((_, i) => (
-                    <div key={i} className={styles.valueStep}
-                      style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps - 1)) * 100)}%)` }} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </AccordionDrawer>
-
-          <AccordionDrawer title="Hue Wheel" isOpen={openDrawer === 'hue'} onToggle={() => toggleDrawer('hue')}>
-            <div className={styles.drawerResult}>
-              <HueWheel
-                hueAngle={color.hueAngle}
-                hueName={color.hueName}
-                color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-                active={hasColor}
-              />
-            </div>
-          </AccordionDrawer>
-
-          <AccordionDrawer title={`Palette ${palette.length > 0 ? `(${palette.length})` : ''}`} isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.drawerResult}>
-              <Palette
-                palette={palette}
-                selected={selectedSwatch}
-                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                onRemove={removeFromPalette}
-                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-              />
-            </div>
-          </AccordionDrawer>
-
-          <AccordionDrawer title="Paint Match" isOpen={openDrawer === 'paint'} onToggle={() => toggleDrawer('paint')}>
-            <div className={styles.comingSoon}>Pro feature — coming soon</div>
-          </AccordionDrawer>
-
-        </div>
-
-        {image && (
-          <button className={styles.changeBtnSidebar} onClick={() => {
-            setImage(null)
-            setColor(DEFAULT_COLOR)
-            setShowGray(false)
-            setValueRating(null)
-            originalImageDataRef.current = null
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: '#555250', fontFamily: 'monospace' }}>
+          {palette.length}/24 colors
+        </span>
+        {palette.length > 0 && (
+          <button onClick={onClear} style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#555250',
+            borderRadius: 4,
+            padding: '3px 10px',
+            fontSize: 11,
+            cursor: 'pointer',
           }}>
-            Load new image
+            Clear all
           </button>
         )}
-      </aside>
+      </div>
 
-      <main className={styles.main}>
-        {!image ? (
-          <div
-            className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}
-            onDragOver={e => { e.preventDefault(); setDragging(true) }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <div className={styles.dropIcon}>+</div>
-            <div className={styles.dropTitle}>Load reference image</div>
-            <div className={styles.dropSub}>Click or drag & drop</div>
-            <input ref={fileInputRef} type="file" accept="image/*"
-              style={{ display: 'none' }}
-              onChange={e => loadFile(e.target.files[0])} />
+      {palette.length === 0 ? (
+        <div style={{ fontSize: 11, color: '#555250', fontStyle: 'italic', textAlign: 'center', padding: '1rem 0' }}>
+          No colors yet — click image then add to palette
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>
+          {palette.map((c, i) => (
+            <div
+              key={i}
+              onClick={() => onSelect(i)}
+              title={`${c.hue} ${c.value.toFixed(1)}/${c.chroma.toFixed(1)}`}
+              style={{
+                width: '100%',
+                aspectRatio: '1',
+                background: `rgb(${c.r},${c.g},${c.b})`,
+                borderRadius: 4,
+                cursor: 'pointer',
+                border: selected === i
+                  ? '2px solid #c8a96e'
+                  : '1px solid rgba(255,255,255,0.1)',
+                transition: 'border 0.1s',
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {selected !== null && palette[selected] && (
+        <div style={{
+          background: '#222',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 6,
+          padding: '10px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+        }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 4,
+              background: `rgb(${palette[selected].r},${palette[selected].g},${palette[selected].b})`,
+              border: '1px solid rgba(255,255,255,0.1)',
+              flexShrink: 0,
+            }} />
+            <div>
+              <div style={{ fontSize: 13, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500 }}>
+                {palette[selected].hue} {palette[selected].value.toFixed(1)}/{palette[selected].chroma.toFixed(1)}
+              </div>
+              <div style={{ fontSize: 11, color: '#555250', fontFamily: 'monospace' }}>
+                RGB {palette[selected].r}, {palette[selected].g}, {palette[selected].b}
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className={styles.canvasWrap}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-            <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-            {cursor.visible && (
-              <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-            )}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ flex: 1, background: '#1a1a1a', borderRadius: 4, padding: '5px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Value</div>
+              <div style={{ fontSize: 14, color: '#c8a96e', fontWeight: 500 }}>{palette[selected].value.toFixed(1)}</div>
+            </div>
+            <div style={{ flex: 1, background: '#1a1a1a', borderRadius: 4, padding: '5px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Chroma</div>
+              <div style={{ fontSize: 14, color: '#c8a96e', fontWeight: 500 }}>{palette[selected].chroma.toFixed(1)}</div>
+            </div>
+            <div style={{ flex: 1, background: '#1a1a1a', borderRadius: 4, padding: '5px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hue</div>
+              <div style={{ fontSize: 14, color: '#c8a96e', fontWeight: 500 }}>{palette[selected].hue}</div>
+            </div>
           </div>
-        )}
-      </main>
+          <button onClick={() => onRemove(selected)} style={{
+            background: 'transparent',
+            border: '1px solid rgba(239,68,68,0.3)',
+            color: 'rgba(239,68,68,0.7)',
+            borderRadius: 4,
+            padding: '4px',
+            fontSize: 11,
+            cursor: 'pointer',
+          }}>
+            Remove
+          </button>
+        </div>
+      )}
     </div>
   )
 }
