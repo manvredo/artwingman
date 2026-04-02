@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from '../lib/munsell'
 import styles from '../styles/Home.module.css'
+import HueWheel from '../components/HueWheel'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -136,7 +137,7 @@ export default function Home() {
           <span className={styles.logoMark}>AW</span>
           <div>
             <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.2</div>
+            <div className={styles.logoSub}>v0.3</div>
           </div>
         </div>
 
@@ -216,11 +217,18 @@ export default function Home() {
           </AccordionDrawer>
 
           <AccordionDrawer title="Hue Wheel" isOpen={openDrawer === 'hue'} onToggle={() => toggleDrawer('hue')}>
-            <div className={styles.comingSoon}>Coming in v0.3</div>
+            <div className={styles.drawerResult}>
+              <HueWheel
+                hueAngle={color.hueAngle}
+                hueName={color.hueName}
+                color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+                active={hasColor}
+              />
+            </div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Palette" isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.comingSoon}>Coming in v0.3</div>
+            <div className={styles.comingSoon}>Coming in v0.4</div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Paint Match" isOpen={openDrawer === 'paint'} onToggle={() => toggleDrawer('paint')}>
