@@ -114,7 +114,7 @@ export default function Home() {
     ctx.putImageData(imageData, 0, 0)
     setShowGray(true)
     if (valueSteps <= 4) setValueRating('green')
-    else if (valueSteps <= 6) setValueRating('yellow')
+    else if (valueSteps <= 7) setValueRating('yellow')
     else setValueRating('red')
   }, [valueSteps])
 
@@ -182,7 +182,7 @@ export default function Home() {
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="3" max="9" step="1" value={valueSteps}
+                <input type="range" min="3" max="10" step="1" value={valueSteps}
                   onChange={e => setValueSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{valueSteps}</span>
