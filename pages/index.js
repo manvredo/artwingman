@@ -23,6 +23,7 @@ function AccordionDrawer({ title, isOpen, onToggle, children }) {
 export default function Home() {
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
+  const originalImageDataRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -54,6 +55,7 @@ export default function Home() {
             canvas.height = img.height
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
+            originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
           }
         }, 50)
       }
@@ -94,9 +96,13 @@ export default function Home() {
 
   const applyValueGroups = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || !originalImageDataRef.current) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
+    const imageData = new ImageData(
+      new Uint8ClampedArray(originalImageDataRef.current.data),
+      originalImageDataRef.current.width,
+      originalImageDataRef.current.height
+    )
     const data = imageData.data
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i], g = data[i+1], b = data[i+2]
@@ -110,18 +116,16 @@ export default function Home() {
     if (valueSteps <= 4) setValueRating('green')
     else if (valueSteps <= 6) setValueRating('yellow')
     else setValueRating('red')
-  }, [imgDims, valueSteps])
+  }, [valueSteps])
 
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas || !image) return
-    canvas.width = image.width
-    canvas.height = image.height
+    if (!canvas || !originalImageDataRef.current) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.drawImage(image, 0, 0)
+    ctx.putImageData(originalImageDataRef.current, 0, 0)
     setShowGray(false)
     setValueRating(null)
-  }, [image])
+  }, [])
 
   const hasColor = color.r !== null
 
@@ -231,6 +235,7 @@ export default function Home() {
             setColor(DEFAULT_COLOR)
             setShowGray(false)
             setValueRating(null)
+            originalImageDataRef.current = null
           }}>
             Load new image
           </button>
@@ -258,7 +263,9 @@ export default function Home() {
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
             <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
-            {cursor.visible && <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />}
+            {cursor.visible && (
+              <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
+            )}
           </div>
         )}
       </main>
