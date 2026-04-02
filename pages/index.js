@@ -22,7 +22,6 @@ function AccordionDrawer({ title, isOpen, onToggle, children }) {
 
 export default function Home() {
   const canvasRef = useRef(null)
-  const canvasGrayRef = useRef(null)
   const fileInputRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
@@ -99,23 +98,15 @@ export default function Home() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
     const data = imageData.data
-
-    // Count unique value groups
-    const groupCounts = new Array(valueSteps).fill(0)
-
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i], g = data[i+1], b = data[i+2]
       const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
       const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
       const grayVal = Math.round((group / (valueSteps - 1)) * 255)
       data[i] = data[i+1] = data[i+2] = grayVal
-      groupCounts[group]++
     }
-
     ctx.putImageData(imageData, 0, 0)
     setShowGray(true)
-
-    // Ampel rating
     if (valueSteps <= 4) setValueRating('green')
     else if (valueSteps <= 6) setValueRating('yellow')
     else setValueRating('red')
@@ -147,7 +138,6 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
-          {/* COLOR FINDER */}
           <AccordionDrawer title="Color Finder" isOpen={openDrawer === 'color'} onToggle={() => toggleDrawer('color')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Sample Radius</div>
@@ -170,12 +160,12 @@ export default function Home() {
                 <div className={styles.metric}>
                   <div className={styles.metricLabel}>Value</div>
                   <div className={styles.metricValue}>{hasColor ? color.value.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10 Skala'}</div>
+                  <div className={styles.metricDesc}>{hasColor ? valueDescription(color.value) : '0-10 scale'}</div>
                 </div>
                 <div className={styles.metric}>
                   <div className={styles.metricLabel}>Chroma</div>
                   <div className={styles.metricValue}>{hasColor ? color.chroma.toFixed(1) : '—'}</div>
-                  <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'Sättigung'}</div>
+                  <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
                 </div>
               </div>
               <div className={styles.munsellNotation}>
@@ -184,10 +174,9 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          {/* VALUE GROUPS */}
           <AccordionDrawer title="Value Groups" isOpen={openDrawer === 'value'} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Anzahl Stufen</div>
+              <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
                 <input type="range" min="3" max="9" step="1" value={valueSteps}
                   onChange={e => setValueSteps(Number(e.target.value))}
@@ -196,11 +185,11 @@ export default function Home() {
               </div>
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
-                  Analysieren
+                  Analyze
                 </button>
                 {showGray && (
                   <button className={styles.btnSecondary} onClick={resetCanvas}>
-                    Zurücksetzen
+                    Reset
                   </button>
                 )}
               </div>
@@ -208,38 +197,42 @@ export default function Home() {
             {valueRating && (
               <div className={styles.drawerResult}>
                 <div className={`${styles.ampel} ${styles['ampel' + valueRating]}`}>
-                  {valueRating === 'green' && `${valueSteps} Werte — ideal zum Malen`}
-                  {valueRating === 'yellow' && `${valueSteps} Werte — noch akzeptabel`}
-                  {valueRating === 'red' && `${valueSteps} Werte — zu komplex, vereinfachen`}
+                  {valueRating === 'green' && `${valueSteps} values — ideal for painting`}
+                  {valueRating === 'yellow' && `${valueSteps} values — acceptable`}
+                  {valueRating === 'red' && `${valueSteps} values — too complex, simplify`}
                 </div>
                 <div className={styles.valueSteps}>
                   {Array.from({ length: valueSteps }).map((_, i) => (
                     <div key={i} className={styles.valueStep}
-                      style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps-1)) * 100)}%)` }} />
+                      style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps - 1)) * 100)}%)` }} />
                   ))}
                 </div>
               </div>
             )}
           </AccordionDrawer>
 
-          {/* COMING SOON */}
           <AccordionDrawer title="Hue Wheel" isOpen={openDrawer === 'hue'} onToggle={() => toggleDrawer('hue')}>
-            <div className={styles.comingSoon}>Kommt in v0.3</div>
+            <div className={styles.comingSoon}>Coming in v0.3</div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Palette" isOpen={openDrawer === 'palette'} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.comingSoon}>Kommt in v0.3</div>
+            <div className={styles.comingSoon}>Coming in v0.3</div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Paint Match" isOpen={openDrawer === 'paint'} onToggle={() => toggleDrawer('paint')}>
-            <div className={styles.comingSoon}>Pro Feature — kommt bald</div>
+            <div className={styles.comingSoon}>Pro feature — coming soon</div>
           </AccordionDrawer>
 
         </div>
 
         {image && (
-          <button className={styles.changeBtnSidebar} onClick={() => { setImage(null); setColor(DEFAULT_COLOR); setShowGray(false); setValueRating(null) }}>
-            Anderes Bild laden
+          <button className={styles.changeBtnSidebar} onClick={() => {
+            setImage(null)
+            setColor(DEFAULT_COLOR)
+            setShowGray(false)
+            setValueRating(null)
+          }}>
+            Load new image
           </button>
         )}
       </aside>
@@ -254,9 +247,10 @@ export default function Home() {
             onClick={() => fileInputRef.current?.click()}
           >
             <div className={styles.dropIcon}>+</div>
-            <div className={styles.dropTitle}>Referenzbild laden</div>
-            <div className={styles.dropSub}>Klicken oder hierher ziehen</div>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+            <div className={styles.dropTitle}>Load reference image</div>
+            <div className={styles.dropSub}>Click or drag & drop</div>
+            <input ref={fileInputRef} type="file" accept="image/*"
+              style={{ display: 'none' }}
               onChange={e => loadFile(e.target.files[0])} />
           </div>
         ) : (
