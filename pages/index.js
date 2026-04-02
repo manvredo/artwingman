@@ -358,7 +358,10 @@ export default function Home() {
             <div className={styles.canvasWrap}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setCursor(c => ({ ...c, visible: false }))}>
-              <div className={styles.canvasInner}>
+              <div
+                className={styles.canvasInner}
+                style={imgDims.w && imgDims.h ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : undefined}
+              >
                 <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {cursor.visible && (
