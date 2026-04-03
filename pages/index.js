@@ -53,7 +53,7 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
-  const [canvasBg, setCanvasBg] = useState('#222222')
+  const [canvasBg, setCanvasBg] = useState('#444444')
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -354,6 +354,7 @@ export default function Home() {
         {!image ? (
           <div
             className={`${styles.dropzoneArea} ${dragging ? styles.dropzoneAreaActive : ''}`}
+            style={{ background: canvasBg }}
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
