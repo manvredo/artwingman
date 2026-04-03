@@ -60,13 +60,13 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
             {/* "Chroma" axis label */}
             <text
               x={PAD_L + (CHROMAS.length * cellW) / 2} y={11}
-              textAnchor="middle" fontSize={10} fontFamily="monospace" fill="#555250"
+              textAnchor="middle" fontSize={13} fontFamily="monospace" fill="#a8a4a0"
             >Chroma</text>
 
             {/* "Value" axis label — rotated */}
             <text
               x={9} y={PAD_T + (VALUES.length * cellH) / 2}
-              textAnchor="middle" fontSize={10} fontFamily="monospace" fill="#555250"
+              textAnchor="middle" fontSize={13} fontFamily="monospace" fill="#a8a4a0"
               transform={`rotate(-90, 9, ${PAD_T + (VALUES.length * cellH) / 2})`}
             >Value</text>
 
