@@ -57,6 +57,7 @@ export default function Home() {
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
+  const [showColorOverlay, setShowColorOverlay] = useState(false)
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -533,6 +534,34 @@ export default function Home() {
                   )
                 })()}
               </div>
+              {showColorOverlay && hasColor && (
+                <div
+                  onClick={() => setShowColorOverlay(false)}
+                  style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <div
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      position: 'relative',
+                      width: '60%', height: '60%',
+                      background: `rgb(${color.r},${color.g},${color.b})`,
+                      borderRadius: 16,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
+                    }}
+                  >
+                    <button
+                      onClick={() => setShowColorOverlay(false)}
+                      style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
+                    >×</button>
+                    <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
+                      {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+                    </div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Hue: {color.hue} — {color.hueName}</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Value: {color.value.toFixed(1)}</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Chroma: {color.chroma.toFixed(1)}</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -541,13 +570,18 @@ export default function Home() {
           {/* Panel 1: Swatch + RGB */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
             <div className={styles.infoLabel}>Color</div>
-            <div style={{
-              flex: 1,
-              borderRadius: 6,
-              background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
-              border: '1px solid rgba(255,255,255,0.08)',
-              minHeight: 0,
-            }} />
+            <div
+              onClick={() => hasColor && setShowColorOverlay(true)}
+              title="Click to compare color"
+              style={{
+                flex: 1,
+                borderRadius: 6,
+                background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
+                border: '1px solid rgba(255,255,255,0.08)',
+                minHeight: 0,
+                cursor: hasColor ? 'pointer' : 'default',
+              }}
+            />
             <div className={styles.rgbLabel}>
               {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
             </div>
