@@ -517,7 +517,7 @@ export default function Home() {
                           top: clickPos.y - half,
                           width: sq,
                           height: sq,
-                          border: '1px solid #c8a96e',
+                          border: '1px solid rgba(255,255,255,0.9)',
                           boxSizing: 'border-box',
                           pointerEvents: 'none',
                         }} />
