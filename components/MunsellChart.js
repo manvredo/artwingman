@@ -138,15 +138,15 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
       }}>
         {hovered ? (
           <>
-            <div style={{ fontSize: 13, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500, textAlign: 'left' }}>
+            <div style={{ fontSize: 15, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500, textAlign: 'left' }}>
               {hueLabel} {hovered.v}/{hovered.c}
             </div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Value: {hovered.v}</div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Chroma: {hovered.c}</div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Hue: {hueLabel}</div>
+            <div style={{ fontSize: 13, color: '#a8a4a0', fontFamily: 'monospace', textAlign: 'left' }}>Value: {hovered.v}</div>
+            <div style={{ fontSize: 13, color: '#a8a4a0', fontFamily: 'monospace', textAlign: 'left' }}>Chroma: {hovered.c}</div>
+            <div style={{ fontSize: 13, color: '#a8a4a0', fontFamily: 'monospace', textAlign: 'left' }}>Hue: {hueLabel}</div>
           </>
         ) : (
-          <div style={{ fontSize: 13, color: '#555250', fontFamily: 'monospace', textAlign: 'left' }}>—</div>
+          <div style={{ fontSize: 15, color: '#706c68', fontFamily: 'monospace', textAlign: 'left' }}>—</div>
         )}
         <div style={{
           width: 40,
