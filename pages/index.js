@@ -498,11 +498,9 @@ export default function Home() {
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {clickPos && (() => {
-                  const aspect = (imgDims.w || 1) / (imgDims.h || 1)
-                  const wrapAspect = wrapSz.w && wrapSz.h ? wrapSz.w / wrapSz.h : aspect
-                  const displayW = wrapAspect > aspect ? wrapSz.h * aspect : wrapSz.w
+                  const displayW = canvasRef.current?.offsetWidth || 1
                   const scale = displayW / (imgDims.w || 1)
-                  const half = sampleRadius * scale
+                  const half = Math.max(4, sampleRadius * scale)
                   const sq = half * 2
                   return (
                     <>
