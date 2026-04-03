@@ -413,6 +413,23 @@ export default function Home() {
                 title={`Opacity ${gridOpacity}%`}
                 disabled={!gridMode}
               />
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                {bgColors.map(c => (
+                  <div
+                    key={c}
+                    onClick={() => setCanvasBg(c)}
+                    style={{
+                      width: 24,
+                      height: 16,
+                      borderRadius: 4,
+                      background: c,
+                      cursor: 'pointer',
+                      border: canvasBg === c ? '2px solid #c8a96e' : '1px solid rgba(255,255,255,0.15)',
+                      transition: 'border 0.15s',
+                    }}
+                  />
+                ))}
+              </div>
               {viewport.zoom !== 1 && (
                 <button
                   className={styles.toolBtn}
@@ -432,23 +449,6 @@ export default function Home() {
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
             >
-              <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 4, zIndex: 10 }}>
-                {bgColors.map(c => (
-                  <div
-                    key={c}
-                    onClick={() => setCanvasBg(c)}
-                    style={{
-                      width: 24,
-                      height: 16,
-                      borderRadius: 4,
-                      background: c,
-                      cursor: 'pointer',
-                      border: canvasBg === c ? '2px solid #c8a96e' : '1px solid rgba(255,255,255,0.15)',
-                      transition: 'border 0.15s',
-                    }}
-                  />
-                ))}
-              </div>
               <div
                 className={styles.canvasInner}
                 style={{
