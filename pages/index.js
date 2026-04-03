@@ -553,21 +553,7 @@ export default function Home() {
             />
           </div>
 
-          {/* Panel 4: Munsell Chart */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
-            <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
-            <MunsellChart
-              compact
-              hueAngle={color.hueAngle}
-              hueName={color.hueName}
-              hue={color.hue}
-              value={hasColor ? color.value : null}
-              chroma={hasColor ? color.chroma : null}
-              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-            />
-          </div>
-
-          {/* Panel 5: Sample + Add to Palette */}
+          {/* Panel 4: Sample + Add to Palette */}
           <div style={{
             width: 140,
             flexShrink: 0,
@@ -603,6 +589,20 @@ export default function Home() {
                 {palette.length >= 24 ? 'Palette full' : 'Click image first'}
               </div>
             )}
+          </div>
+
+          {/* Panel 5: Munsell Chart */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
+            <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
+            <MunsellChart
+              compact
+              hueAngle={color.hueAngle}
+              hueName={color.hueName}
+              hue={color.hue}
+              value={hasColor ? color.value : null}
+              chroma={hasColor ? color.chroma : null}
+              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+            />
           </div>
 
           {/* Panel 6: Palette */}
