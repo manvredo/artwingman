@@ -134,6 +134,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
         padding: 12,
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'flex-start',
         gap: 8,
         lineHeight: 'normal',
         transition: 'all 0.15s',
@@ -149,15 +150,15 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
         }} />
         {hovered ? (
           <>
-            <div style={{ fontSize: 13, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500 }}>
+            <div style={{ fontSize: 13, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500, textAlign: 'left' }}>
               {hueLabel} {hovered.v}/{hovered.c}
             </div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace' }}>Value: {hovered.v}</div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace' }}>Chroma: {hovered.c}</div>
-            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace' }}>Hue: {hueLabel}</div>
+            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Value: {hovered.v}</div>
+            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Chroma: {hovered.c}</div>
+            <div style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'left' }}>Hue: {hueLabel}</div>
           </>
         ) : (
-          <div style={{ fontSize: 13, color: '#555250', fontFamily: 'monospace' }}>—</div>
+          <div style={{ fontSize: 13, color: '#555250', fontFamily: 'monospace', textAlign: 'left' }}>—</div>
         )}
       </div>
 
