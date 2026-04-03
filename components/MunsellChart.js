@@ -110,7 +110,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
                     {isActive && (
                       <>
                         <rect x={gx} y={gy} width={gw} height={gh}
-                          fill="none" stroke="#c8a96e" strokeWidth={2} rx={1} />
+                          fill="none" stroke="#ffffff" strokeWidth={2} rx={1} />
                         <circle cx={x + cellW / 2} cy={y + cellH / 2} r={2} fill="white" />
                       </>
                     )}
