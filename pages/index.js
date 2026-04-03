@@ -543,7 +543,7 @@ export default function Home() {
                     onClick={e => e.stopPropagation()}
                     style={{
                       position: 'relative',
-                      width: '60%', height: '60%',
+                      width: '60%', height: '80%',
                       background: `rgb(${color.r},${color.g},${color.b})`,
                       borderRadius: 16,
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
