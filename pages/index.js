@@ -100,6 +100,17 @@ export default function Home() {
     loadFile(e.dataTransfer.files[0])
   }, [loadFile])
 
+  const lastImgPosRef = useRef(null)
+
+  const sampleAt = useCallback((px, py, radius) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
+    const { r, g, b } = samplePixels(imageData, px, py, radius, imgDims.w, imgDims.h)
+    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
+  }, [imgDims])
+
   const sampleColor = useCallback((e) => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -108,12 +119,10 @@ export default function Home() {
     const scaleY = imgDims.h / rect.height
     const px = Math.floor((e.clientX - rect.left) * scaleX)
     const py = Math.floor((e.clientY - rect.top) * scaleY)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
-    const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
-    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
+    lastImgPosRef.current = { px, py }
+    sampleAt(px, py, sampleRadius)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
-  }, [imgDims, sampleRadius, viewport.zoom])
+  }, [imgDims, sampleRadius, sampleAt, viewport.zoom])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
@@ -583,7 +592,11 @@ export default function Home() {
               <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Sample Radius</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <input type="range" min="1" max="50" value={sampleRadius}
-                  onChange={e => setSampleRadius(Number(e.target.value))}
+                  onChange={e => {
+                    const r = Number(e.target.value)
+                    setSampleRadius(r)
+                    if (lastImgPosRef.current) sampleAt(lastImgPosRef.current.px, lastImgPosRef.current.py, r)
+                  }}
                   className={styles.slider} style={{ flex: 1 }} />
                 <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#8a8680', flexShrink: 0 }}>{sampleRadius}px</span>
               </div>
