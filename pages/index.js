@@ -556,11 +556,27 @@ export default function Home() {
             <div>
               <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Sample Radius</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="range" min="1" max="20" value={sampleRadius}
+                <input type="range" min="1" max="50" value={sampleRadius}
                   onChange={e => setSampleRadius(Number(e.target.value))}
                   className={styles.slider} style={{ flex: 1 }} />
                 <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#8a8680', flexShrink: 0 }}>{sampleRadius}px</span>
               </div>
+              {/* Sample radius preview */}
+              {(() => {
+                const size = (sampleRadius / 50) * 70
+                const cx = 40, cy = 40
+                const x = cx - size / 2, y = cy - size / 2
+                return (
+                  <div style={{ marginTop: 6 }}>
+                    <svg width={80} height={80} style={{ display: 'block', background: '#161616', borderRadius: 4, overflow: 'hidden' }}>
+                      <rect x={x} y={y} width={size} height={size} fill="none" stroke="#c8a96e" strokeWidth={2} />
+                      <line x1={cx} y1={y} x2={cx} y2={y + size} stroke="rgba(200,169,110,0.5)" strokeWidth={1} />
+                      <line x1={x} y1={cy} x2={x + size} y2={cy} stroke="rgba(200,169,110,0.5)" strokeWidth={1} />
+                    </svg>
+                    <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', marginTop: 4 }}>{sampleRadius} × {sampleRadius} px</div>
+                  </div>
+                )
+              })()}
             </div>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
             {hasColor && palette.length < 24 ? (
