@@ -243,34 +243,55 @@ export default function Home() {
     const pixelCount = src.width * src.height
     const k = colorSteps
 
-    // Initialize k random cluster centers from image pixels
+    // Sample ~10000 pixels for training (much faster, good enough for K-Means)
+    const sampleStep = Math.max(1, Math.floor(pixelCount / 10000))
+    const samples = []
+    for (let i = 0; i < pixelCount; i += sampleStep) {
+      const idx = i * 4
+      samples.push([data[idx], data[idx + 1], data[idx + 2]])
+    }
+    const sampleCount = samples.length
+
+    // K-Means++ initialization: spread centers across color space
     const centers = []
-    for (let c = 0; c < k; c++) {
-      const idx = Math.floor(Math.random() * pixelCount) * 4
-      centers.push([data[idx], data[idx + 1], data[idx + 2]])
+    centers.push([...samples[Math.floor(Math.random() * sampleCount)]])
+    for (let c = 1; c < k; c++) {
+      const dists = samples.map(s => {
+        let minD = Infinity
+        for (const center of centers) {
+          const dr = s[0] - center[0], dg = s[1] - center[1], db = s[2] - center[2]
+          const d = dr * dr + dg * dg + db * db
+          if (d < minD) minD = d
+        }
+        return minD
+      })
+      const total = dists.reduce((a, b) => a + b, 0)
+      let rand = Math.random() * total, chosen = 0
+      for (let i = 0; i < dists.length; i++) {
+        rand -= dists[i]
+        if (rand <= 0) { chosen = i; break }
+      }
+      centers.push([...samples[chosen]])
     }
 
-    const assignments = new Int32Array(pixelCount)
-
+    // K-Means iterations on sampled pixels only
+    const sampleAssign = new Int32Array(sampleCount)
     for (let iter = 0; iter < 10; iter++) {
-      // Assign each pixel to nearest cluster
-      for (let i = 0; i < pixelCount; i++) {
-        const idx = i * 4
-        const r = data[idx], g = data[idx + 1], b = data[idx + 2]
+      for (let i = 0; i < sampleCount; i++) {
+        const [r, g, b] = samples[i]
         let minDist = Infinity, minC = 0
         for (let c = 0; c < k; c++) {
           const dr = r - centers[c][0], dg = g - centers[c][1], db = b - centers[c][2]
           const dist = dr * dr + dg * dg + db * db
           if (dist < minDist) { minDist = dist; minC = c }
         }
-        assignments[i] = minC
+        sampleAssign[i] = minC
       }
-      // Recalculate cluster centers
       const sums = Array.from({ length: k }, () => [0, 0, 0, 0])
-      for (let i = 0; i < pixelCount; i++) {
-        const c = assignments[i], idx = i * 4
-        sums[c][0] += data[idx]; sums[c][1] += data[idx + 1]
-        sums[c][2] += data[idx + 2]; sums[c][3]++
+      for (let i = 0; i < sampleCount; i++) {
+        const c = sampleAssign[i]
+        sums[c][0] += samples[i][0]; sums[c][1] += samples[i][1]
+        sums[c][2] += samples[i][2]; sums[c][3]++
       }
       for (let c = 0; c < k; c++) {
         if (sums[c][3] > 0) {
@@ -281,16 +302,21 @@ export default function Home() {
       }
     }
 
-    // Count pixels per cluster
+    // Apply final centers to all pixels in one pass
     const clusterCounts = new Int32Array(k)
-    for (let i = 0; i < pixelCount; i++) clusterCounts[assignments[i]]++
-
-    // Replace each pixel with its cluster color
     for (let i = 0; i < pixelCount; i++) {
-      const c = assignments[i], idx = i * 4
-      data[idx] = Math.round(centers[c][0])
-      data[idx + 1] = Math.round(centers[c][1])
-      data[idx + 2] = Math.round(centers[c][2])
+      const idx = i * 4
+      const r = data[idx], g = data[idx + 1], b = data[idx + 2]
+      let minDist = Infinity, minC = 0
+      for (let c = 0; c < k; c++) {
+        const dr = r - centers[c][0], dg = g - centers[c][1], db = b - centers[c][2]
+        const dist = dr * dr + dg * dg + db * db
+        if (dist < minDist) { minDist = dist; minC = c }
+      }
+      data[idx] = Math.round(centers[minC][0])
+      data[idx + 1] = Math.round(centers[minC][1])
+      data[idx + 2] = Math.round(centers[minC][2])
+      clusterCounts[minC]++
     }
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
