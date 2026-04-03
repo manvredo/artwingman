@@ -33,6 +33,7 @@ export default function Home() {
   const workerRef = useRef(null)
   const filterDebounceRef = useRef(null)
   const dragRef = useRef(null)
+  const minimapCanvasRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -54,6 +55,7 @@ export default function Home() {
   const [filterStrength, setFilterStrength] = useState(5)
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const [canvasBg, setCanvasBg] = useState('#222222')
+  const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -166,6 +168,25 @@ export default function Home() {
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
+  }, [image])
+
+  useEffect(() => {
+    const el = canvasWrapRef.current
+    if (!el) return
+    const ro = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect
+      setWrapSz({ w: width, h: height })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const mc = minimapCanvasRef.current
+    if (!mc || !image) return
+    const ctx = mc.getContext('2d')
+    ctx.clearRect(0, 0, mc.width, mc.height)
+    ctx.drawImage(image, 0, 0, mc.width, mc.height)
   }, [image])
 
   const applyValueGroups = useCallback(() => {
@@ -411,15 +432,14 @@ export default function Home() {
                   />
                 ))}
               </div>
-              {viewport.zoom !== 1 && (
-                <button
-                  className={styles.toolBtn}
-                  onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}
-                  title="Reset zoom"
-                >
-                  {Math.round(viewport.zoom * 100)}%
-                </button>
-              )}
+              <button
+                className={styles.toolBtn}
+                onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}
+                title="Reset zoom"
+                style={{ opacity: viewport.zoom === 1 && viewport.panX === 0 && viewport.panY === 0 ? 0.35 : 1 }}
+              >
+                1:1
+              </button>
         </div>
         {!image ? (
           <div
@@ -450,6 +470,45 @@ export default function Home() {
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
             >
+              {(() => {
+                const MINI_MAX = 120
+                const iw = imgDims.w || 1, ih = imgDims.h || 1
+                const miniScale = Math.min(MINI_MAX / iw, (MINI_MAX * 0.75) / ih)
+                const miniW = Math.round(iw * miniScale)
+                const miniH = Math.round(ih * miniScale)
+                const { w: ww, h: wh } = wrapSz
+                const aspect = iw / ih
+                const natW = ww && wh ? (ww / wh > aspect ? wh * aspect : ww) : 1
+                const natH = ww && wh ? (ww / wh > aspect ? wh : ww / aspect) : 1
+                const { zoom, panX, panY } = viewport
+                const vx0 = (-ww / 2 - panX) / zoom + natW / 2
+                const vy0 = (-wh / 2 - panY) / zoom + natH / 2
+                const vx1 = (ww / 2 - panX) / zoom + natW / 2
+                const vy1 = (wh / 2 - panY) / zoom + natH / 2
+                const rx = (Math.max(0, vx0) / natW) * miniW
+                const ry = (Math.max(0, vy0) / natH) * miniH
+                const rw = ((Math.min(natW, vx1) - Math.max(0, vx0)) / natW) * miniW
+                const rh = ((Math.min(natH, vy1) - Math.max(0, vy0)) / natH) * miniH
+                return (
+                  <div style={{
+                    position: 'absolute', top: 10, left: 10, zIndex: 10,
+                    background: '#1a1a1a',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                    width: miniW, height: miniH,
+                    pointerEvents: 'none',
+                  }}>
+                    <canvas ref={minimapCanvasRef} width={miniW} height={miniH} style={{ display: 'block' }} />
+                    <div style={{
+                      position: 'absolute',
+                      left: rx, top: ry, width: Math.max(4, rw), height: Math.max(4, rh),
+                      border: '2px solid #c8a96e',
+                      boxSizing: 'border-box',
+                    }} />
+                  </div>
+                )
+              })()}
               <div
                 className={styles.canvasInner}
                 style={{
