@@ -283,25 +283,6 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
-          <AccordionDrawer title="Color Finder" isOpen={openDrawer.includes('color')} onToggle={() => toggleDrawer('color')}>
-            <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Sample Radius</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="1" max="20" value={sampleRadius}
-                  onChange={e => setSampleRadius(Number(e.target.value))}
-                  className={styles.slider} />
-                <span className={styles.sliderVal}>{sampleRadius}px</span>
-              </div>
-              {hasColor && palette.length < 24 && (
-                <div className={styles.btnRow}>
-                  <button className={styles.btnPrimary} onClick={addToPalette}>
-                    + Add to Palette
-                  </button>
-                </div>
-              )}
-            </div>
-          </AccordionDrawer>
-
           <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
@@ -586,7 +567,45 @@ export default function Home() {
             />
           </div>
 
-          {/* Panel 5: Palette */}
+          {/* Panel 5: Sample + Add to Palette */}
+          <div style={{
+            width: 140,
+            flexShrink: 0,
+            borderLeft: '1px solid rgba(255,255,255,0.08)',
+            padding: 12,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Sample Radius</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input type="range" min="1" max="20" value={sampleRadius}
+                  onChange={e => setSampleRadius(Number(e.target.value))}
+                  className={styles.slider} style={{ flex: 1 }} />
+                <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#8a8680', flexShrink: 0 }}>{sampleRadius}px</span>
+              </div>
+            </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+            {hasColor && palette.length < 24 ? (
+              <button onClick={addToPalette} style={{
+                background: 'rgba(200,169,110,0.15)',
+                border: '1px solid rgba(200,169,110,0.4)',
+                color: '#c8a96e',
+                borderRadius: 6,
+                padding: 8,
+                fontSize: 12,
+                width: '100%',
+                cursor: 'pointer',
+              }}>+ Add to Palette</button>
+            ) : (
+              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250' }}>
+                {palette.length >= 24 ? 'Palette full' : 'Click image first'}
+              </div>
+            )}
+          </div>
+
+          {/* Panel 6: Palette */}
           <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
             <div className={styles.infoLabel}>Palette</div>
             <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
