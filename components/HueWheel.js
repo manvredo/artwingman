@@ -63,7 +63,7 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
     const cx = 90, cy = 90, inner = 32, r = 78
     const dx = x - cx, dy = y - cy
     const dist = Math.sqrt(dx * dx + dy * dy)
-    if (dist < inner || dist > r) return
+    if (dist < inner) return
     let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90
     deg = ((deg % 360) + 360) % 360
     onHueClick(deg)
