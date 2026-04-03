@@ -56,6 +56,7 @@ export default function Home() {
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
+  const [clickPos, setClickPos] = useState(null)
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -76,6 +77,7 @@ export default function Home() {
         setValueRating(null)
         setActiveFilter(null)
         setViewport({ zoom: 1, panX: 0, panY: 0 })
+        setClickPos(null)
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -110,7 +112,8 @@ export default function Home() {
     const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
     const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
     setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
-  }, [imgDims, sampleRadius])
+    setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
+  }, [imgDims, sampleRadius, viewport.zoom])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
@@ -494,7 +497,7 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {cursor.visible && (() => {
+                {clickPos && (() => {
                   const aspect = (imgDims.w || 1) / (imgDims.h || 1)
                   const wrapAspect = wrapSz.w && wrapSz.h ? wrapSz.w / wrapSz.h : aspect
                   const displayW = wrapAspect > aspect ? wrapSz.h * aspect : wrapSz.w
@@ -502,19 +505,24 @@ export default function Home() {
                   const half = sampleRadius * scale
                   const sq = half * 2
                   return (
-                    <div style={{
-                      position: 'absolute',
-                      left: cursor.x - half,
-                      top: cursor.y - half,
-                      width: sq,
-                      height: sq,
-                      border: '2px solid #c8a96e',
-                      boxSizing: 'border-box',
-                      pointerEvents: 'none',
-                    }}>
-                      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(200,169,110,0.6)', transform: 'translateX(-50%)' }} />
-                      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'rgba(200,169,110,0.6)', transform: 'translateY(-50%)' }} />
-                    </div>
+                    <>
+                      {/* Crosshair */}
+                      <div style={{ position: 'absolute', left: clickPos.x - 7, top: clickPos.y, width: 14, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 7, width: 1, height: 14, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      {/* Sample radius square */}
+                      {sampleRadius >= 10 && (
+                        <div style={{
+                          position: 'absolute',
+                          left: clickPos.x - half,
+                          top: clickPos.y - half,
+                          width: sq,
+                          height: sq,
+                          border: '1px solid #c8a96e',
+                          boxSizing: 'border-box',
+                          pointerEvents: 'none',
+                        }} />
+                      )}
+                    </>
                   )
                 })()}
               </div>
