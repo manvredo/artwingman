@@ -59,6 +59,10 @@ export default function Home() {
   const [clickPos, setClickPos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(null)
+  const [colorSteps, setColorSteps] = useState(8)
+  const [showColorDecreased, setShowColorDecreased] = useState(false)
+  const [colorRating, setColorRating] = useState(null)
+  const [colorClusters, setColorClusters] = useState([])
 
   const grayTones = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -82,6 +86,9 @@ export default function Home() {
         setActiveFilter(null)
         setViewport({ zoom: 1, panX: 0, panY: 0 })
         setClickPos(null)
+        setShowColorDecreased(false)
+        setColorRating(null)
+        setColorClusters([])
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -228,6 +235,86 @@ export default function Home() {
     else setValueRating('red')
   }, [valueSteps])
 
+  const applyColorDecreaser = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const src = originalImageDataRef.current
+    const data = new Uint8ClampedArray(src.data)
+    const pixelCount = src.width * src.height
+    const k = colorSteps
+
+    // Initialize k random cluster centers from image pixels
+    const centers = []
+    for (let c = 0; c < k; c++) {
+      const idx = Math.floor(Math.random() * pixelCount) * 4
+      centers.push([data[idx], data[idx + 1], data[idx + 2]])
+    }
+
+    const assignments = new Int32Array(pixelCount)
+
+    for (let iter = 0; iter < 10; iter++) {
+      // Assign each pixel to nearest cluster
+      for (let i = 0; i < pixelCount; i++) {
+        const idx = i * 4
+        const r = data[idx], g = data[idx + 1], b = data[idx + 2]
+        let minDist = Infinity, minC = 0
+        for (let c = 0; c < k; c++) {
+          const dr = r - centers[c][0], dg = g - centers[c][1], db = b - centers[c][2]
+          const dist = dr * dr + dg * dg + db * db
+          if (dist < minDist) { minDist = dist; minC = c }
+        }
+        assignments[i] = minC
+      }
+      // Recalculate cluster centers
+      const sums = Array.from({ length: k }, () => [0, 0, 0, 0])
+      for (let i = 0; i < pixelCount; i++) {
+        const c = assignments[i], idx = i * 4
+        sums[c][0] += data[idx]; sums[c][1] += data[idx + 1]
+        sums[c][2] += data[idx + 2]; sums[c][3]++
+      }
+      for (let c = 0; c < k; c++) {
+        if (sums[c][3] > 0) {
+          centers[c][0] = sums[c][0] / sums[c][3]
+          centers[c][1] = sums[c][1] / sums[c][3]
+          centers[c][2] = sums[c][2] / sums[c][3]
+        }
+      }
+    }
+
+    // Count pixels per cluster
+    const clusterCounts = new Int32Array(k)
+    for (let i = 0; i < pixelCount; i++) clusterCounts[assignments[i]]++
+
+    // Replace each pixel with its cluster color
+    for (let i = 0; i < pixelCount; i++) {
+      const c = assignments[i], idx = i * 4
+      data[idx] = Math.round(centers[c][0])
+      data[idx + 1] = Math.round(centers[c][1])
+      data[idx + 2] = Math.round(centers[c][2])
+    }
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    ctx.putImageData(new ImageData(data, src.width, src.height), 0, 0)
+
+    setShowColorDecreased(true)
+    setColorClusters(centers.map((c, i) => ({
+      r: Math.round(c[0]), g: Math.round(c[1]), b: Math.round(c[2]), count: clusterCounts[i]
+    })))
+    if (colorSteps <= 4) setColorRating('green')
+    else if (colorSteps <= 8) setColorRating('yellow')
+    else setColorRating('red')
+  }, [colorSteps])
+
+  const resetColorDecreaser = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    ctx.putImageData(originalImageDataRef.current, 0, 0)
+    setShowColorDecreased(false)
+    setColorRating(null)
+    setColorClusters([])
+  }, [])
+
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -336,6 +423,54 @@ export default function Home() {
             )}
           </AccordionDrawer>
 
+          <AccordionDrawer title="Color Decreaser" isOpen={openDrawer.includes('colordec')} onToggle={() => toggleDrawer('colordec')}>
+            <div className={styles.drawerControls}>
+              <div className={styles.sectionLabel}>Number of colors</div>
+              <div className={styles.sliderRow}>
+                <input type="range" min="2" max="16" step="1" value={colorSteps}
+                  onChange={e => setColorSteps(Number(e.target.value))}
+                  className={styles.slider} />
+                <span className={styles.sliderVal}>{colorSteps}</span>
+              </div>
+              <div className={styles.btnRow}>
+                <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
+                  Simplify
+                </button>
+                {showColorDecreased && (
+                  <button className={styles.btnSecondary} onClick={resetColorDecreaser}>
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+            {showColorDecreased && colorRating && (
+              <div className={styles.drawerResult}>
+                <div className={`${styles.ampel} ${styles['ampel' + colorRating]}`}>
+                  {colorRating === 'green' && `${colorSteps} colors — ideal for painting`}
+                  {colorRating === 'yellow' && `${colorSteps} colors — acceptable`}
+                  {colorRating === 'red' && `${colorSteps} colors — too complex, simplify`}
+                </div>
+                {colorClusters.length > 0 && (() => {
+                  const total = colorClusters.reduce((s, c) => s + c.count, 0)
+                  return (
+                    <div style={{ display: 'flex', height: 18, marginTop: 8, borderRadius: 4, overflow: 'hidden' }}>
+                      {[...colorClusters]
+                        .sort((a, b) => b.count - a.count)
+                        .map((c, i) => (
+                          <div key={i} style={{
+                            flex: c.count / total,
+                            background: `rgb(${c.r},${c.g},${c.b})`,
+                            minWidth: 1,
+                          }} />
+                        ))
+                      }
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
+          </AccordionDrawer>
+
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
               <Filters
@@ -361,6 +496,9 @@ export default function Home() {
             setValueRating(null)
             setActiveFilter(null)
             setViewport({ zoom: 1, panX: 0, panY: 0 })
+            setShowColorDecreased(false)
+            setColorRating(null)
+            setColorClusters([])
             originalImageDataRef.current = null
           }}>
             Load new image
@@ -560,20 +698,24 @@ export default function Home() {
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
                     {/* Gray comparison circles */}
-                    <div style={{ position: 'absolute', top: 12, right: 52, display: 'flex', gap: 6, alignItems: 'center' }}>
-                      {grayTones.map(g => (
-                        <div
-                          key={g}
-                          onClick={e => { e.stopPropagation(); setCompGray(prev => prev === g ? null : g) }}
-                          style={{
-                            width: 32, height: 32, borderRadius: '50%',
-                            background: g,
-                            cursor: 'pointer',
-                            border: compGray === g ? '3px solid #c8a96e' : '2px solid rgba(255,255,255,0.3)',
-                            boxSizing: 'border-box',
-                            flexShrink: 0,
-                          }}
-                        />
+                    <div style={{ position: 'absolute', top: 12, right: 52, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                      {grayTones.map((g, i) => (
+                        <div key={g} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                          <div
+                            onClick={e => { e.stopPropagation(); setCompGray(prev => prev === g ? null : g) }}
+                            style={{
+                              width: 32, height: 32, borderRadius: 4,
+                              background: g,
+                              cursor: 'pointer',
+                              border: compGray === g ? '3px solid #c8a96e' : '2px solid rgba(255,255,255,0.3)',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                          <div style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>
+                            {g.slice(1)}
+                          </div>
+                          {i === 3 && <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>◆</div>}
+                        </div>
                       ))}
                     </div>
                     {/* Color info */}
