@@ -494,9 +494,29 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {cursor.visible && (
-                  <div className={styles.crosshair} style={{ left: cursor.x, top: cursor.y }} />
-                )}
+                {cursor.visible && (() => {
+                  const aspect = (imgDims.w || 1) / (imgDims.h || 1)
+                  const wrapAspect = wrapSz.w && wrapSz.h ? wrapSz.w / wrapSz.h : aspect
+                  const displayW = wrapAspect > aspect ? wrapSz.h * aspect : wrapSz.w
+                  const scale = displayW / (imgDims.w || 1)
+                  const half = sampleRadius * scale
+                  const sq = half * 2
+                  return (
+                    <div style={{
+                      position: 'absolute',
+                      left: cursor.x - half,
+                      top: cursor.y - half,
+                      width: sq,
+                      height: sq,
+                      border: '2px solid #c8a96e',
+                      boxSizing: 'border-box',
+                      pointerEvents: 'none',
+                    }}>
+                      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(200,169,110,0.6)', transform: 'translateX(-50%)' }} />
+                      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'rgba(200,169,110,0.6)', transform: 'translateY(-50%)' }} />
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           </div>
@@ -561,22 +581,6 @@ export default function Home() {
                   className={styles.slider} style={{ flex: 1 }} />
                 <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#8a8680', flexShrink: 0 }}>{sampleRadius}px</span>
               </div>
-              {/* Sample radius preview */}
-              {(() => {
-                const size = (sampleRadius / 50) * 70
-                const cx = 40, cy = 40
-                const x = cx - size / 2, y = cy - size / 2
-                return (
-                  <div style={{ marginTop: 6 }}>
-                    <svg width={80} height={80} style={{ display: 'block', background: '#161616', borderRadius: 4, overflow: 'hidden' }}>
-                      <rect x={x} y={y} width={size} height={size} fill="none" stroke="#c8a96e" strokeWidth={2} />
-                      <line x1={cx} y1={y} x2={cx} y2={y + size} stroke="rgba(200,169,110,0.5)" strokeWidth={1} />
-                      <line x1={x} y1={cy} x2={x + size} y2={cy} stroke="rgba(200,169,110,0.5)" strokeWidth={1} />
-                    </svg>
-                    <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', marginTop: 4 }}>{sampleRadius} × {sampleRadius} px</div>
-                  </div>
-                )
-              })()}
             </div>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
             {hasColor && palette.length < 24 ? (
