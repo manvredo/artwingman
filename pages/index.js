@@ -507,8 +507,8 @@ export default function Home() {
                   return (
                     <>
                       {/* Crosshair */}
-                      <div style={{ position: 'absolute', left: clickPos.x - 7, top: clickPos.y, width: 14, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-                      <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 7, width: 1, height: 14, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'absolute', left: clickPos.x - 4, top: clickPos.y, width: 8, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 4, width: 1, height: 8, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
                       {/* Sample radius square */}
                       {sampleRadius >= 10 && (
                         <div style={{
