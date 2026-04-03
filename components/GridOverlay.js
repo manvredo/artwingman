@@ -26,10 +26,10 @@ export default function GridOverlay({ gridMode, squareGridSize, showDiagonals, g
 
   const lines = []
   for (let x = 1; x < cols; x++) {
-    lines.push(<line key={`v${x}`} x1={x} y1={0} x2={x} y2={rows} stroke={hexToRgba(gridColor, gridOpacity)} strokeWidth="2" vectorEffect="non-scaling-stroke" />)
+    lines.push(<line key={`v${x}`} x1={x} y1={0} x2={x} y2={rows} stroke={hexToRgba(gridColor, gridOpacity)} strokeWidth="1" vectorEffect="non-scaling-stroke" />)
   }
   for (let y = 1; y < rows; y++) {
-    lines.push(<line key={`h${y}`} x1={0} y1={y} x2={cols} y2={y} stroke={hexToRgba(gridColor, gridOpacity)} strokeWidth="2" vectorEffect="non-scaling-stroke" />)
+    lines.push(<line key={`h${y}`} x1={0} y1={y} x2={cols} y2={y} stroke={hexToRgba(gridColor, gridOpacity)} strokeWidth="1" vectorEffect="non-scaling-stroke" />)
   }
 
   const diagonals = []
@@ -37,8 +37,8 @@ export default function GridOverlay({ gridMode, squareGridSize, showDiagonals, g
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         diagonals.push(
-          <line key={`d1-${row}-${col}`} x1={col} y1={row} x2={col + 1} y2={row + 1} stroke={hexToRgba(gridColor, gridOpacity * 0.65)} strokeWidth="2" vectorEffect="non-scaling-stroke" />,
-          <line key={`d2-${row}-${col}`} x1={col + 1} y1={row} x2={col} y2={row + 1} stroke={hexToRgba(gridColor, gridOpacity * 0.65)} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+          <line key={`d1-${row}-${col}`} x1={col} y1={row} x2={col + 1} y2={row + 1} stroke={hexToRgba(gridColor, gridOpacity * 0.65)} strokeWidth="1" vectorEffect="non-scaling-stroke" />,
+          <line key={`d2-${row}-${col}`} x1={col + 1} y1={row} x2={col} y2={row + 1} stroke={hexToRgba(gridColor, gridOpacity * 0.65)} strokeWidth="1" vectorEffect="non-scaling-stroke" />
         )
       }
     }
