@@ -41,7 +41,7 @@ export default function Home() {
   const [sampleRadius, setSampleRadius] = useState(3)
   const [dragging, setDragging] = useState(false)
   const [openDrawer, setOpenDrawer] = useState(['color'])
-  const [valueSteps, setValueSteps] = useState(5)
+  const [valueSteps, setValueSteps] = useState(10)
   const [showGray, setShowGray] = useState(false)
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
