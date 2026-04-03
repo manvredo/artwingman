@@ -351,27 +351,7 @@ export default function Home() {
       </aside>
 
       <div className={styles.rightArea}>
-        {!image ? (
-          <div
-            className={`${styles.dropzoneArea} ${dragging ? styles.dropzoneAreaActive : ''}`}
-            style={{ background: canvasBg }}
-            onDragOver={e => { e.preventDefault(); setDragging(true) }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <div className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}>
-              <div className={styles.dropIcon}>+</div>
-              <div className={styles.dropTitle}>Load reference image</div>
-              <div className={styles.dropSub}>Click or drag & drop</div>
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*"
-              style={{ display: 'none' }}
-              onChange={e => loadFile(e.target.files[0])} />
-          </div>
-        ) : (
-          <div className={styles.canvasSection}>
-            <div className={styles.toolbar}>
+        <div className={styles.toolbar} style={{ padding: '10px 12px 0' }}>
               <button
                 className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
                 onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
@@ -440,7 +420,27 @@ export default function Home() {
                   {Math.round(viewport.zoom * 100)}%
                 </button>
               )}
+        </div>
+        {!image ? (
+          <div
+            className={`${styles.dropzoneArea} ${dragging ? styles.dropzoneAreaActive : ''}`}
+            style={{ background: canvasBg }}
+            onDragOver={e => { e.preventDefault(); setDragging(true) }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className={`${styles.dropzone} ${dragging ? styles.dropzoneActive : ''}`}>
+              <div className={styles.dropIcon}>+</div>
+              <div className={styles.dropTitle}>Load reference image</div>
+              <div className={styles.dropSub}>Click or drag & drop</div>
             </div>
+            <input ref={fileInputRef} type="file" accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => loadFile(e.target.files[0])} />
+          </div>
+        ) : (
+          <div className={styles.canvasSection}>
             <div
               ref={canvasWrapRef}
               className={styles.canvasWrap}
