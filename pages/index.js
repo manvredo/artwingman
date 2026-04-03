@@ -25,6 +25,8 @@ function AccordionDrawer({ title, isOpen, onToggle, children }) {
   )
 }
 
+const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
+
 export default function Home() {
   const canvasRef = useRef(null)
   const canvasWrapRef = useRef(null)
@@ -672,7 +674,7 @@ export default function Home() {
                   ...(imgDims.w && imgDims.h ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : {}),
                   transform: `translate(${viewport.panX}px, ${viewport.panY}px) scale(${viewport.zoom})`,
                   transformOrigin: 'center',
-                  cursor: dragRef.current?.moved ? 'grabbing' : 'crosshair',
+                  cursor: dragRef.current?.moved ? 'grabbing' : CROSSHAIR_CURSOR,
                 }}
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
@@ -685,8 +687,8 @@ export default function Home() {
                   return (
                     <>
                       {/* Crosshair */}
-                      <div style={{ position: 'absolute', left: clickPos.x - 4, top: clickPos.y, width: 8, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-                      <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 4, width: 1, height: 8, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'absolute', left: clickPos.x - 12, top: clickPos.y, width: 24, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 12, width: 1, height: 24, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
                       {/* Sample radius square */}
                       {sampleRadius >= 10 && (
                         <div style={{
