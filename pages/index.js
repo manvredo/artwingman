@@ -471,41 +471,34 @@ export default function Home() {
               onMouseUp={handleCanvasMouseUp}
             >
               {(() => {
-                const MINI_MAX = 120
-                const iw = imgDims.w || 1, ih = imgDims.h || 1
-                const miniScale = Math.min(MINI_MAX / iw, (MINI_MAX * 0.75) / ih)
-                const miniW = Math.round(iw * miniScale)
-                const miniH = Math.round(ih * miniScale)
-                const { w: ww, h: wh } = wrapSz
-                const aspect = iw / ih
-                const natW = ww && wh ? (ww / wh > aspect ? wh * aspect : ww) : 1
-                const natH = ww && wh ? (ww / wh > aspect ? wh : ww / aspect) : 1
+                const minimapW = 150
+                const minimapH = 150
                 const { zoom, panX, panY } = viewport
-                const vx0 = (-ww / 2 - panX) / zoom + natW / 2
-                const vy0 = (-wh / 2 - panY) / zoom + natH / 2
-                const vx1 = (ww / 2 - panX) / zoom + natW / 2
-                const vy1 = (wh / 2 - panY) / zoom + natH / 2
-                const rx = (Math.max(0, vx0) / natW) * miniW
-                const ry = (Math.max(0, vy0) / natH) * miniH
-                const rw = ((Math.min(natW, vx1) - Math.max(0, vx0)) / natW) * miniW
-                const rh = ((Math.min(natH, vy1) - Math.max(0, vy0)) / natH) * miniH
+                const frameW = minimapW / zoom
+                const frameH = minimapH / zoom
+                const frameX = (-panX / zoom) * (minimapW / (imgDims.w || 1)) + minimapW / 2 - frameW / 2
+                const frameY = (-panY / zoom) * (minimapH / (imgDims.h || 1)) + minimapH / 2 - frameH / 2
                 return (
                   <div style={{
                     position: 'absolute', top: 10, left: 10, zIndex: 10,
+                    width: minimapW, height: minimapH,
                     background: '#1a1a1a',
-                    border: '1px solid rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.2)',
                     borderRadius: 6,
                     overflow: 'hidden',
-                    width: miniW, height: miniH,
                     pointerEvents: 'none',
                   }}>
-                    <canvas ref={minimapCanvasRef} width={miniW} height={miniH} style={{ display: 'block' }} />
-                    <div style={{
-                      position: 'absolute',
-                      left: rx, top: ry, width: Math.max(4, rw), height: Math.max(4, rh),
-                      border: '2px solid #c8a96e',
-                      boxSizing: 'border-box',
-                    }} />
+                    <img src={image?.src} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                    {zoom > 1 && (
+                      <div style={{
+                        position: 'absolute',
+                        left: frameX, top: frameY,
+                        width: frameW, height: frameH,
+                        border: '2px solid #ff3333',
+                        boxSizing: 'border-box',
+                        pointerEvents: 'none',
+                      }} />
+                    )}
                   </div>
                 )
               })()}
