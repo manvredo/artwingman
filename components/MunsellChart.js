@@ -33,13 +33,10 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   const activeValue  = value  !== null ? Math.round(value)         : null
   const hasColor = value !== null && chroma !== null
 
-  const chartW = sz.w - DETAIL_W
-  const cellWFromW = chartW > 0 ? (chartW - PAD_L) / CHROMAS.length : 0
-  const cellWFromH = sz.h > 0 ? ((sz.h - PAD_T) / VALUES.length) * 2 : cellWFromW
-  const cellW = Math.max(1, Math.min(cellWFromW, cellWFromH))
+  const cellW = sz.h > 0 ? Math.max(1, ((sz.h - PAD_T) / VALUES.length) * 2) : 1
   const cellH = cellW / 2
 
-  const svgW = chartW
+  const svgW = PAD_L + CHROMAS.length * cellW
   const svgH = PAD_T + VALUES.length * cellH
 
   const hueLabel = hue && hue !== '—' ? hue : '—'
