@@ -537,6 +537,8 @@ export default function Home() {
               {showColorOverlay && hasColor && (
                 <div
                   onClick={() => setShowColorOverlay(false)}
+                  onMouseDown={e => e.stopPropagation()}
+                  onMouseUp={e => e.stopPropagation()}
                   style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <div
