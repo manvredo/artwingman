@@ -53,6 +53,9 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
+  const [canvasBg, setCanvasBg] = useState('#111111')
+
+  const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
   const toggleDrawer = (name) => setOpenDrawer(prev =>
     prev.includes(name) ? prev.filter(d => d !== name) : [...prev, name]
@@ -423,11 +426,29 @@ export default function Home() {
             <div
               ref={canvasWrapRef}
               className={styles.canvasWrap}
+              style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); dragRef.current = null }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
             >
+              <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 4, zIndex: 10 }}>
+                {bgColors.map(c => (
+                  <div
+                    key={c}
+                    onClick={() => setCanvasBg(c)}
+                    style={{
+                      width: 24,
+                      height: 16,
+                      borderRadius: 4,
+                      background: c,
+                      cursor: 'pointer',
+                      border: canvasBg === c ? '2px solid #c8a96e' : '1px solid rgba(255,255,255,0.15)',
+                      transition: 'border 0.15s',
+                    }}
+                  />
+                ))}
+              </div>
               <div
                 className={styles.canvasInner}
                 style={{
