@@ -59,7 +59,7 @@ export default function Home() {
   const [clickPos, setClickPos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(null)
-  const [colorSteps, setColorSteps] = useState(8)
+  const [colorSteps, setColorSteps] = useState(256)
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
@@ -300,8 +300,8 @@ export default function Home() {
     setColorClusters(centers.map((c, i) => ({
       r: Math.round(c[0]), g: Math.round(c[1]), b: Math.round(c[2]), count: clusterCounts[i]
     })))
-    if (colorSteps <= 4) setColorRating('green')
-    else if (colorSteps <= 8) setColorRating('yellow')
+    if (colorSteps <= 6) setColorRating('green')
+    else if (colorSteps <= 32) setColorRating('yellow')
     else setColorRating('red')
   }, [colorSteps])
 
@@ -427,7 +427,7 @@ export default function Home() {
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of colors</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="2" max="16" step="1" value={colorSteps}
+                <input type="range" min="2" max="256" step="1" value={colorSteps}
                   onChange={e => setColorSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
