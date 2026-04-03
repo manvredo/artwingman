@@ -672,7 +672,7 @@ export default function Home() {
                   ...(imgDims.w && imgDims.h ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : {}),
                   transform: `translate(${viewport.panX}px, ${viewport.panY}px) scale(${viewport.zoom})`,
                   transformOrigin: 'center',
-                  cursor: dragRef.current?.moved ? 'grabbing' : viewport.zoom > 1 ? 'move' : 'crosshair',
+                  cursor: dragRef.current?.moved ? 'grabbing' : 'crosshair',
                 }}
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
