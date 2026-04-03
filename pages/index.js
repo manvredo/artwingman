@@ -543,17 +543,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Panel 3: Hue Wheel */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
-            <HueWheel
-              hueAngle={color.hueAngle}
-              hueName={color.hueName}
-              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-              active={hasColor}
-            />
-          </div>
-
-          {/* Panel 4: Sample + Add to Palette */}
+          {/* Panel 3: Sample + Add to Palette */}
           <div style={{
             width: 140,
             flexShrink: 0,
@@ -591,7 +581,31 @@ export default function Home() {
             )}
           </div>
 
-          {/* Panel 5: Munsell Chart */}
+          {/* Panel 4: Hue Wheel */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
+            <HueWheel
+              hueAngle={color.hueAngle}
+              hueName={color.hueName}
+              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+              active={hasColor}
+            />
+          </div>
+
+          {/* Panel 5: Palette */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
+            <div className={styles.infoLabel}>Palette</div>
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              <Palette
+                palette={palette}
+                selected={selectedSwatch}
+                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                onRemove={removeFromPalette}
+                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+              />
+            </div>
+          </div>
+
+          {/* Panel 6: Munsell Chart */}
           <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
             <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
             <MunsellChart
@@ -605,19 +619,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Panel 6: Palette */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
-            <div className={styles.infoLabel}>Palette</div>
-            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-              <Palette
-                palette={palette}
-                selected={selectedSwatch}
-                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                onRemove={removeFromPalette}
-                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>
