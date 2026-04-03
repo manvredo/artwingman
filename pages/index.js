@@ -25,6 +25,14 @@ function AccordionDrawer({ title, isOpen, onToggle, children }) {
   )
 }
 
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100
+  const k = n => (n + h / 30) % 12
+  const a = s * Math.min(l, 1 - l)
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))
+  return { r: Math.round(f(0) * 255), g: Math.round(f(8) * 255), b: Math.round(f(4) * 255) }
+}
+
 const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
 
 export default function Home() {
@@ -397,6 +405,12 @@ export default function Home() {
   const removeFromPalette = useCallback((index) => {
     setPalette(prev => prev.filter((_, i) => i !== index))
     setSelectedSwatch(null)
+  }, [])
+
+  const handleHueWheelClick = useCallback((deg) => {
+    const { r, g, b } = hslToRgb(deg, 65, 55)
+    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
+    setClickPos(null)
   }, [])
 
   const hasColor = color.r !== null
@@ -862,6 +876,7 @@ export default function Home() {
               hueName={color.hueName}
               color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
               active={hasColor}
+              onHueClick={handleHueWheelClick}
             />
           </div>
 

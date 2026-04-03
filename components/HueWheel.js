@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 const HUE_NAMES = ['R','YR','Y','GY','G','BG','B','PB','P','RP']
 const HUE_ANGLES = [25, 55, 85, 115, 165, 210, 245, 280, 315, 355]
 
-export default function HueWheel({ hueAngle, hueName, color, active }) {
+export default function HueWheel({ hueAngle, hueName, color, active, onHueClick }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -54,9 +54,27 @@ export default function HueWheel({ hueAngle, hueName, color, active }) {
     }
   }, [hueAngle, hueName, color, active])
 
+  const handleClick = (e) => {
+    if (!onHueClick) return
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left) * (180 / rect.width)
+    const y = (e.clientY - rect.top) * (180 / rect.height)
+    const cx = 90, cy = 90, inner = 32, r = 78
+    const dx = x - cx, dy = y - cy
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < inner || dist > r) return
+    let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90
+    deg = ((deg % 360) + 360) % 360
+    onHueClick(deg)
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-      <canvas ref={canvasRef} width={180} height={180} style={{ borderRadius: '50%' }} />
+      <canvas ref={canvasRef} width={180} height={180}
+        style={{ borderRadius: '50%', cursor: onHueClick ? 'crosshair' : 'default' }}
+        onClick={handleClick}
+      />
       <div style={{
         fontFamily: 'monospace',
         fontSize: 12,
