@@ -58,6 +58,9 @@ export default function Home() {
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
+  const [compGray, setCompGray] = useState(null)
+
+  const grayTones = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -551,16 +554,39 @@ export default function Home() {
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
                     }}
                   >
+                    {/* X Button */}
                     <button
-                      onClick={() => setShowColorOverlay(false)}
+                      onClick={() => { setShowColorOverlay(false); setCompGray(null) }}
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
+                    {/* Gray comparison circles */}
+                    <div style={{ position: 'absolute', top: 12, right: 52, display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {grayTones.map(g => (
+                        <div
+                          key={g}
+                          onClick={e => { e.stopPropagation(); setCompGray(prev => prev === g ? null : g) }}
+                          style={{
+                            width: 32, height: 32, borderRadius: '50%',
+                            background: g,
+                            cursor: 'pointer',
+                            border: compGray === g ? '3px solid #c8a96e' : '2px solid rgba(255,255,255,0.3)',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {/* Color info */}
                     <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
                       {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                     </div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Hue: {color.hue} — {color.hueName}</div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Value: {color.value.toFixed(1)}</div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Chroma: {color.chroma.toFixed(1)}</div>
+                    {/* Gray comparison strip */}
+                    {compGray && (
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '25%', background: compGray, borderRadius: '0 0 16px 16px' }} />
+                    )}
                   </div>
                 </div>
               )}
