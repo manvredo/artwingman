@@ -139,15 +139,6 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
         lineHeight: 'normal',
         transition: 'all 0.15s',
       }}>
-        <div style={{
-          width: '100%',
-          height: 60,
-          borderRadius: 5,
-          background: hoveredColor ?? '#2a2a2a',
-          border: '1px solid rgba(255,255,255,0.06)',
-          flexShrink: 0,
-          transition: 'background 0.15s',
-        }} />
         {hovered ? (
           <>
             <div style={{ fontSize: 13, color: '#c8a96e', fontFamily: 'monospace', fontWeight: 500, textAlign: 'left' }}>
@@ -160,6 +151,15 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
         ) : (
           <div style={{ fontSize: 13, color: '#555250', fontFamily: 'monospace', textAlign: 'left' }}>—</div>
         )}
+        <div style={{
+          width: 40,
+          height: 40,
+          borderRadius: 5,
+          background: hoveredColor ?? '#2a2a2a',
+          border: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
+          transition: 'background 0.15s',
+        }} />
       </div>
 
     </div>
