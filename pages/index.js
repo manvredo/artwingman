@@ -59,7 +59,7 @@ export default function Home() {
   const [clickPos, setClickPos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(null)
-  const [colorSteps, setColorSteps] = useState(256)
+  const [colorSteps, setColorSteps] = useState(10)
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
@@ -241,7 +241,7 @@ export default function Home() {
     const src = originalImageDataRef.current
     const data = new Uint8ClampedArray(src.data)
     const pixelCount = src.width * src.height
-    const k = colorSteps
+    const k = Math.max(2, Math.round(colorSteps * 256 / 10))
 
     // Sample ~10000 pixels for training (much faster, good enough for K-Means)
     const sampleStep = Math.max(1, Math.floor(pixelCount / 10000))
@@ -326,8 +326,8 @@ export default function Home() {
     setColorClusters(centers.map((c, i) => ({
       r: Math.round(c[0]), g: Math.round(c[1]), b: Math.round(c[2]), count: clusterCounts[i]
     })))
-    if (colorSteps <= 6) setColorRating('green')
-    else if (colorSteps <= 32) setColorRating('yellow')
+    if (k <= 6) setColorRating('green')
+    else if (k <= 32) setColorRating('yellow')
     else setColorRating('red')
   }, [colorSteps])
 
@@ -451,12 +451,15 @@ export default function Home() {
 
           <AccordionDrawer title="Color Decreaser" isOpen={openDrawer.includes('colordec')} onToggle={() => toggleDrawer('colordec')}>
             <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Number of colors</div>
+              <div className={styles.sectionLabel}>Reduction level</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="2" max="256" step="1" value={colorSteps}
+                <input type="range" min="1" max="10" step="1" value={colorSteps}
                   onChange={e => setColorSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
+              </div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', marginBottom: 2 }}>
+                ~{Math.max(2, Math.round(colorSteps * 256 / 10))} colors
               </div>
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
@@ -472,9 +475,9 @@ export default function Home() {
             {showColorDecreased && colorRating && (
               <div className={styles.drawerResult}>
                 <div className={`${styles.ampel} ${styles['ampel' + colorRating]}`}>
-                  {colorRating === 'green' && `${colorSteps} colors — ideal for painting`}
-                  {colorRating === 'yellow' && `${colorSteps} colors — acceptable`}
-                  {colorRating === 'red' && `${colorSteps} colors — too complex, simplify`}
+                  {colorRating === 'green' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — ideal for painting`}
+                  {colorRating === 'yellow' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — acceptable`}
+                  {colorRating === 'red' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — too complex, simplify`}
                 </div>
                 {colorClusters.length > 0 && (() => {
                   const total = colorClusters.reduce((s, c) => s + c.count, 0)
