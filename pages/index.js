@@ -351,7 +351,7 @@ export default function Home() {
       </aside>
 
       <div className={styles.rightArea}>
-        <div className={styles.toolbar} style={{ padding: '10px 12px 0' }}>
+        <div className={styles.toolbar} style={{ padding: '10px 12px 8px' }}>
               <button
                 className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
                 onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
