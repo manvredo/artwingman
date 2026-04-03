@@ -53,7 +53,7 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
-  const [canvasBg, setCanvasBg] = useState('#111111')
+  const [canvasBg, setCanvasBg] = useState('#222222')
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
