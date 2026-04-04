@@ -752,14 +752,18 @@ export default function Home() {
                       <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
                         <div style={{ display: 'flex', height: '100%' }}>
                           {grayTones.map((g, i) => (
-                            <div key={i} style={{ flex: 1, background: g, outline: compGray === i ? '2px solid #c8a96e' : 'none', outlineOffset: -2 }} />
+                            <div key={i} style={{
+                              flex: 1, background: g,
+                              outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
+                              outlineOffset: -2
+                            }} />
                           ))}
                         </div>
                         <input
                           type="range" min="0" max="6" step="1" value={compGray}
                           onChange={e => setCompGray(Number(e.target.value))}
-                          className={styles.slider}
-                          style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)', background: 'transparent' }}
+                          className={styles.sliderThin}
+                          style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)' }}
                         />
                       </div>
                       {/* Gray area */}
