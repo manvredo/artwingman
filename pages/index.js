@@ -746,17 +746,20 @@ export default function Home() {
                       onClick={() => { setShowColorOverlay(false); setCompGray(102) }}
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
-                    {/* Gray comparison slider */}
-                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', width: 190, display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 4 }}>
-                      <input
-                        type="range" min="0" max="255" value={compGray}
-                        onChange={e => setCompGray(Number(e.target.value))}
-                        className={styles.slider}
-                        style={{ width: '100%' }}
-                      />
-                      <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
-                        #{compGray.toString(16).padStart(2,'0').repeat(3)}
+                    {/* Gray comparison strip with embedded slider */}
+                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 190, borderRadius: '16px 0 0 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ background: '#1a1a1a', padding: '10px 12px 8px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <input
+                          type="range" min="0" max="255" value={compGray}
+                          onChange={e => setCompGray(Number(e.target.value))}
+                          className={styles.slider}
+                          style={{ width: '100%' }}
+                        />
+                        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#8a8680', textAlign: 'center' }}>
+                          #{compGray.toString(16).padStart(2,'0').repeat(3)}
+                        </div>
                       </div>
+                      <div style={{ flex: 1, background: `rgb(${compGray},${compGray},${compGray})` }} />
                     </div>
                     {/* Color info */}
                     <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
@@ -765,8 +768,6 @@ export default function Home() {
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Hue: {color.hue} — {color.hueName}</div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Value: {color.value.toFixed(1)}</div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Chroma: {color.chroma.toFixed(1)}</div>
-                    {/* Gray comparison strip */}
-                    <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 190, background: `rgb(${compGray},${compGray},${compGray})`, borderRadius: '16px 0 0 16px' }} />
                   </div>
                 </div>
               )}
