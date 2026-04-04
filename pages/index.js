@@ -817,7 +817,7 @@ export default function Home() {
           </div>
         )}
         <div className={styles.viewBtnStrip}>
-          <button className={styles.viewBtn} onClick={centerImage} title="Bild zentrieren" disabled={!image}>
+          <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickCenterPos}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
               <line x1="8" y1="1" x2="8" y2="4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -844,12 +844,13 @@ export default function Home() {
               <polyline points="5,11 8,15 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
             </svg>
           </button>
-          <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickCenterPos}>
+          <button className={styles.viewBtn} onClick={centerImage} title="Bild zentrieren" disabled={!image}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5"/>
-              <line x1="6.5" y1="4" x2="6.5" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="4" y1="6.5" x2="9" y2="6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <polyline points="1,5 1,1 5,1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="11,1 15,1 15,5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="1,11 1,15 5,15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="15,11 15,15 11,15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
             </svg>
           </button>
         </div>
