@@ -111,13 +111,14 @@ export default function Home() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
             originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
+            applyValueGroups()
           }
         }, 50)
       }
       img.src = e.target.result
     }
     reader.readAsDataURL(file)
-  }, [])
+  }, [applyValueGroups])
 
   const handleDrop = useCallback((e) => {
     e.preventDefault()
@@ -224,6 +225,11 @@ export default function Home() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [image])
+
+  useEffect(() => {
+    if (!image || !originalImageDataRef.current) return
+    applyValueGroups()
+  }, [applyValueGroups])
 
   useEffect(() => {
     const mc = minimapCanvasRef.current
@@ -482,18 +488,8 @@ export default function Home() {
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{valueSteps}</span>
               </div>
-              <div className={styles.btnRow}>
-                <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
-                  Analyze
-                </button>
-                {showGray && (
-                  <button className={styles.btnSecondary} onClick={resetCanvas}>
-                    Reset
-                  </button>
-                )}
-              </div>
             </div>
-            {valueRating && (
+            {image && (
               <div className={styles.drawerResult}>
                 <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
                   {valueSteps} values
