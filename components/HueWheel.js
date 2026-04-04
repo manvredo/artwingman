@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { labToRgb } from '../lib/munsell'
 
 const HUE_NAMES = ['R','YR','Y','GY','G','BG','B','PB','P','RP']
@@ -7,6 +7,7 @@ const HUE_ANGLES = [25, 55, 85, 115, 165, 210, 245, 280, 315, 355]
 export default function HueWheel({ hueAngle, hueName, color, active, onHueClick }) {
   const canvasRef = useRef(null)
   const dragging = useRef(false)
+  const [markerR, setMarkerR] = useState(55) // default midpoint of ring
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -46,8 +47,8 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
 
     if (active && hueAngle !== null) {
       const angle = (hueAngle - 90) * Math.PI / 180
-      const ix = cx + ((inner + r) / 2) * Math.cos(angle)
-      const iy = cy + ((inner + r) / 2) * Math.sin(angle)
+      const ix = cx + markerR * Math.cos(angle)
+      const iy = cy + markerR * Math.sin(angle)
       ctx.beginPath()
       ctx.arc(ix, iy, 7, 0, Math.PI * 2)
       ctx.fillStyle = color || '#ffffff'
@@ -56,31 +57,33 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
       ctx.lineWidth = 2
       ctx.stroke()
     }
-  }, [hueAngle, hueName, color, active])
+  }, [hueAngle, hueName, color, active, markerR])
 
-  const getAngle = (e) => {
+  const getHitInfo = (e) => {
     const canvas = canvasRef.current
     const rect = canvas.getBoundingClientRect()
-    const cx = 90, cy = 90, inner = 32
+    const cx = 90, cy = 90, inner = 32, r = 78
     const x = (e.clientX - rect.left) * (180 / rect.width)
     const y = (e.clientY - rect.top) * (180 / rect.height)
     const dx = x - cx, dy = y - cy
     const dist = Math.sqrt(dx * dx + dy * dy)
     if (dist < inner) return null
     let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90
-    return ((deg % 360) + 360) % 360
+    deg = ((deg % 360) + 360) % 360
+    const clampedR = Math.min(r, Math.max(inner, dist))
+    return { deg, r: clampedR }
   }
 
   const handleMouseDown = (e) => {
     if (!onHueClick) return
     dragging.current = true
-    const deg = getAngle(e)
-    if (deg !== null) onHueClick(deg)
+    const hit = getHitInfo(e)
+    if (hit) { onHueClick(hit.deg); setMarkerR(hit.r) }
 
     const onMove = (ev) => {
       if (!dragging.current) return
-      const deg = getAngle(ev)
-      if (deg !== null) onHueClick(deg)
+      const hit = getHitInfo(ev)
+      if (hit) { onHueClick(hit.deg); setMarkerR(hit.r) }
     }
     const onUp = () => {
       dragging.current = false
