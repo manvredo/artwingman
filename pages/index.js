@@ -739,7 +739,8 @@ export default function Home() {
                       width: '60%', height: '80%',
                       background: `rgb(${color.r},${color.g},${color.b})`,
                       borderRadius: 16,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 8,
+                      paddingTop: 24,
                     }}
                   >
                     {/* X Button */}
@@ -752,20 +753,13 @@ export default function Home() {
                       {/* 7 gray fields with slider overlaid */}
                       <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
                         <div style={{ display: 'flex', height: '100%' }}>
-                          {grayTones.map((g, i) => {
-                            const n = 8 - i
-                            const light = n >= 5
-                            return (
-                              <div key={i} style={{
-                                flex: 1, background: g, position: 'relative',
-                                outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
-                                outlineOffset: -2,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }}>
-                                <span style={{ fontSize: 9, fontFamily: 'monospace', color: light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', lineHeight: 1, userSelect: 'none' }}>N{n}</span>
-                              </div>
-                            )
-                          })}
+                          {grayTones.map((g, i) => (
+                            <div key={i} style={{
+                              flex: 1, background: g,
+                              outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
+                              outlineOffset: -2,
+                            }} />
+                          ))}
                         </div>
                         <input
                           type="range" min="0" max="6" step="1" value={compGray}
@@ -774,8 +768,12 @@ export default function Home() {
                           style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)' }}
                         />
                       </div>
-                      {/* Gray area */}
-                      <div style={{ flex: 1, background: grayTones[compGray] }} />
+                      {/* Gray area with N label */}
+                      <div style={{ flex: 1, background: grayTones[compGray], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: (8 - compGray) >= 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)', userSelect: 'none' }}>
+                          N{8 - compGray}/
+                        </span>
+                      </div>
                     </div>
                     {/* Color info */}
                     <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
