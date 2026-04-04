@@ -725,7 +725,7 @@ export default function Home() {
                   )
                 })()}
               </div>
-              {showColorOverlay && hasColor && (
+              {showColorOverlay && color.r !== null && (
                 <div
                   onClick={() => setShowColorOverlay(false)}
                   onMouseDown={e => e.stopPropagation()}
