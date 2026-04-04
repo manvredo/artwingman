@@ -6,6 +6,7 @@ const HUE_ANGLES = [25, 55, 85, 115, 165, 210, 245, 280, 315, 355]
 
 export default function HueWheel({ hueAngle, hueName, color, active, onHueClick }) {
   const canvasRef = useRef(null)
+  const dragging = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -57,26 +58,42 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
     }
   }, [hueAngle, hueName, color, active])
 
-  const handleClick = (e) => {
-    if (!onHueClick) return
+  const getAngle = (e) => {
     const canvas = canvasRef.current
     const rect = canvas.getBoundingClientRect()
+    const cx = 90, cy = 90, inner = 32
     const x = (e.clientX - rect.left) * (180 / rect.width)
     const y = (e.clientY - rect.top) * (180 / rect.height)
-    const cx = 90, cy = 90, inner = 32, r = 78
     const dx = x - cx, dy = y - cy
     const dist = Math.sqrt(dx * dx + dy * dy)
-    if (dist < inner || dist > r) return
+    if (dist < inner) return null
     let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90
-    deg = ((deg % 360) + 360) % 360
-    onHueClick(deg)
+    return ((deg % 360) + 360) % 360
   }
+
+  const handleMouseDown = (e) => {
+    if (!onHueClick) return
+    dragging.current = true
+    const deg = getAngle(e)
+    if (deg !== null) onHueClick(deg)
+  }
+
+  const handleMouseMove = (e) => {
+    if (!dragging.current || !onHueClick) return
+    const deg = getAngle(e)
+    if (deg !== null) onHueClick(deg)
+  }
+
+  const handleMouseUp = () => { dragging.current = false }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
       <canvas ref={canvasRef} width={180} height={180}
         style={{ borderRadius: '50%', cursor: onHueClick ? 'crosshair' : 'default' }}
-        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       />
       <div style={{
         fontFamily: 'monospace',
