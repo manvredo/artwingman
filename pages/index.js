@@ -820,6 +820,19 @@ export default function Home() {
           </div>
         )}
         <div className={styles.viewBtnStrip}>
+          <button className={styles.viewBtn} onClick={fitVertical} title="Standardansicht" disabled={!image}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="5" y="5" width="6" height="6" stroke="currentColor" strokeWidth="1.5" fill="none" rx="1"/>
+              <line x1="8" y1="1" x2="8" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <polyline points="6,3 8,1 10,3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="8" y1="12" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <polyline points="6,13 8,15 10,13" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="1" y1="8" x2="4" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <polyline points="3,6 1,8 3,10" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="12" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <polyline points="13,6 15,8 13,10" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
           <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickImagePos}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
@@ -836,24 +849,6 @@ export default function Home() {
               <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5"/>
               <polyline points="5,5 1,8 5,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
               <polyline points="11,5 15,8 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <button className={styles.viewBtn} onClick={fitVertical} title="Höhe anpassen" disabled={!image}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <line x1="2" y1="1" x2="14" y2="1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="2" y1="15" x2="14" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5"/>
-              <polyline points="5,5 8,1 11,5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
-              <polyline points="5,11 8,15 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <button className={styles.viewBtn} onClick={centerImage} title="Bild zentrieren" disabled={!image}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <polyline points="1,5 1,1 5,1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="11,1 15,1 15,5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="1,11 1,15 5,15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="15,11 15,15 11,15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
             </svg>
           </button>
         </div>
