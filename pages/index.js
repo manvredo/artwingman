@@ -509,21 +509,18 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Color Decreaser" isOpen={openDrawer.includes('colordec')} onToggle={() => toggleDrawer('colordec')}>
+          <AccordionDrawer title="Color Groups" isOpen={true} onToggle={() => {}} noToggle>
             <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Reduction level</div>
+              <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
                 <input type="range" min="1" max="10" step="1" value={colorSteps}
                   onChange={e => setColorSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', marginBottom: 2 }}>
-                ~{Math.max(2, Math.round(colorSteps * 256 / 10))} colors
-              </div>
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
-                  Simplify
+                  Analyze
                 </button>
                 {showColorDecreased && (
                   <button className={styles.btnSecondary} onClick={resetColorDecreaser}>
@@ -532,32 +529,28 @@ export default function Home() {
                 )}
               </div>
             </div>
-            {showColorDecreased && colorRating && (
-              <div className={styles.drawerResult}>
-                <div className={`${styles.ampel} ${styles['ampel' + colorRating]}`}>
-                  {colorRating === 'green' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — ideal for painting`}
-                  {colorRating === 'yellow' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — acceptable`}
-                  {colorRating === 'red' && `~${Math.max(2, Math.round(colorSteps * 256 / 10))} colors — too complex, simplify`}
-                </div>
-                {colorClusters.length > 0 && (() => {
-                  const total = colorClusters.reduce((s, c) => s + c.count, 0)
-                  return (
-                    <div style={{ display: 'flex', height: 18, marginTop: 8, borderRadius: 4, overflow: 'hidden' }}>
-                      {[...colorClusters]
-                        .sort((a, b) => b.count - a.count)
-                        .map((c, i) => (
-                          <div key={i} style={{
-                            flex: c.count / total,
-                            background: `rgb(${c.r},${c.g},${c.b})`,
-                            minWidth: 1,
-                          }} />
-                        ))
-                      }
-                    </div>
-                  )
-                })()}
+            <div className={styles.drawerResult}>
+              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
+                {colorSteps} colors
               </div>
-            )}
+              {colorClusters.length > 0 && (() => {
+                const total = colorClusters.reduce((s, c) => s + c.count, 0)
+                return (
+                  <div style={{ display: 'flex', height: 18, marginTop: 4, borderRadius: 4, overflow: 'hidden' }}>
+                    {[...colorClusters]
+                      .sort((a, b) => b.count - a.count)
+                      .map((c, i) => (
+                        <div key={i} style={{
+                          flex: c.count / total,
+                          background: `rgb(${c.r},${c.g},${c.b})`,
+                          minWidth: 1,
+                        }} />
+                      ))
+                    }
+                  </div>
+                )
+              })()}
+            </div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
