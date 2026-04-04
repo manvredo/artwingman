@@ -449,6 +449,8 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
+          <div className={styles.accordionSection}>Analyze</div>
+
           <AccordionDrawer title="Value Groups" isOpen={true} onToggle={() => {}} noToggle>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
@@ -550,6 +552,8 @@ export default function Home() {
               </div>
             </div>
           </AccordionDrawer>
+
+          <div className={styles.accordionSection}>Develop</div>
 
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
