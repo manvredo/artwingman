@@ -113,7 +113,6 @@ export default function Home() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
             originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
-            applyValueGroupsRef.current?.()
           }
         }, 50)
       }
@@ -259,11 +258,6 @@ export default function Home() {
     else setValueRating('red')
   }, [valueSteps])
   applyValueGroupsRef.current = applyValueGroups
-
-  useEffect(() => {
-    if (!image || !originalImageDataRef.current) return
-    applyValueGroups()
-  }, [applyValueGroups])
 
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
@@ -491,20 +485,28 @@ export default function Home() {
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{valueSteps}</span>
               </div>
-            </div>
-            {image && (
-              <div className={styles.drawerResult}>
-                <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
-                  {valueSteps} values
-                </div>
-                <div className={styles.valueSteps}>
-                  {Array.from({ length: valueSteps }).map((_, i) => (
-                    <div key={i} className={styles.valueStep}
-                      style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps - 1)) * 100)}%)` }} />
-                  ))}
-                </div>
+              <div className={styles.btnRow}>
+                <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
+                  Analyze
+                </button>
+                {showGray && (
+                  <button className={styles.btnSecondary} onClick={resetCanvas}>
+                    Reset
+                  </button>
+                )}
               </div>
-            )}
+            </div>
+            <div className={styles.drawerResult}>
+              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
+                {valueSteps} values
+              </div>
+              <div className={styles.valueSteps}>
+                {Array.from({ length: valueSteps }).map((_, i) => (
+                  <div key={i} className={styles.valueStep}
+                    style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps - 1)) * 100)}%)` }} />
+                ))}
+              </div>
+            </div>
           </AccordionDrawer>
 
           <AccordionDrawer title="Color Decreaser" isOpen={openDrawer.includes('colordec')} onToggle={() => toggleDrawer('colordec')}>
