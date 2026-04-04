@@ -346,7 +346,9 @@ export default function Home() {
         canvas.getContext('2d', { willReadFrequently: true }).putImageData(originalImageDataRef.current, 0, 0)
       return
     }
-    const t = setTimeout(() => applyDevelop(develop), 150)
+    const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
+    const delay = hasExpensive ? 450 : 180
+    const t = setTimeout(() => applyDevelop(develop), delay)
     return () => clearTimeout(t)
   }, [develop, applyDevelop])
 
