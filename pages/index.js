@@ -77,9 +77,12 @@ export default function Home() {
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
   const [paletteClusters, setPaletteClusters] = useState([])
+  const DEVELOP_DEFAULTS = { exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
+  const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
 
   const applyValueGroupsRef = useRef(null)
   const paletteWorkerRef = useRef(null)
+  const developWorkerRef = useRef(null)
 
   // Munsell neutrals N8/ → N2/ (perceptually uniform), N5/ in centre (index 3)
   const grayTones = ['#c6c6c6', '#aaaaaa', '#8f8f8f', '#737373', '#565656', '#3b3b3b', '#252525']
@@ -109,6 +112,7 @@ export default function Home() {
         setColorRating(null)
         setColorClusters([])
         setPaletteClusters([])
+        setDevelop(DEVELOP_DEFAULTS)
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -314,6 +318,37 @@ export default function Home() {
     setShowGray(false)
     setValueRating(null)
   }, [])
+
+  const applyDevelop = useCallback((dev) => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const src = originalImageDataRef.current
+    const buffer = new Uint8ClampedArray(src.data).buffer
+    if (developWorkerRef.current) developWorkerRef.current.terminate()
+    developWorkerRef.current = new Worker('/filterWorker.js')
+    developWorkerRef.current.onmessage = (e) => {
+      const out = new Uint8ClampedArray(e.data.out)
+      canvas.getContext('2d', { willReadFrequently: true })
+        .putImageData(new ImageData(out, src.width, src.height), 0, 0)
+      developWorkerRef.current = null
+    }
+    developWorkerRef.current.postMessage(
+      { filter: 'develop', ...dev, buffer, width: src.width, height: src.height },
+      [buffer]
+    )
+  }, [])
+
+  useEffect(() => {
+    const allZero = Object.values(develop).every(v => v === 0)
+    if (allZero) {
+      const canvas = canvasRef.current
+      if (canvas && originalImageDataRef.current)
+        canvas.getContext('2d', { willReadFrequently: true }).putImageData(originalImageDataRef.current, 0, 0)
+      return
+    }
+    const t = setTimeout(() => applyDevelop(develop), 150)
+    return () => clearTimeout(t)
+  }, [develop, applyDevelop])
 
   const applyFilter = useCallback((filter, strength) => {
     const canvas = canvasRef.current
@@ -554,6 +589,65 @@ export default function Home() {
           </AccordionDrawer>
 
           <div className={styles.accordionSection}>Develop</div>
+
+          <AccordionDrawer title="Basic" isOpen={openDrawer.includes('basic')} onToggle={() => toggleDrawer('basic')}>
+            <div className={styles.drawerControls}>
+              {[
+                { key: 'exposure',   label: 'Exposure',   min: -100, max: 100, fmt: v => `${v > 0 ? '+' : ''}${(v*3/100).toFixed(1)} EV` },
+                { key: 'contrast',   label: 'Contrast',   min: -100, max: 100 },
+                { key: 'highlights', label: 'Highlights', min: -100, max: 100 },
+                { key: 'shadows',    label: 'Shadows',    min: -100, max: 100 },
+                { key: 'whites',     label: 'Whites',     min: -100, max: 100 },
+                { key: 'blacks',     label: 'Blacks',     min: -100, max: 100 },
+              ].map(({ key, label, min, max, fmt }) => (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 62, flexShrink: 0 }}>{label}</span>
+                  <input type="range" min={min} max={max} step="1" value={develop[key]}
+                    onChange={e => setDevelop(d => ({ ...d, [key]: Number(e.target.value) }))}
+                    className={styles.slider} style={{ flex: 1 }} />
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 48, textAlign: 'right', color: develop[key] !== 0 ? '#c8a96e' : '#555250' }}>
+                    {fmt ? fmt(develop[key]) : `${develop[key] > 0 ? '+' : ''}${develop[key]}`}
+                  </span>
+                </div>
+              ))}
+              <div className={styles.btnRow} style={{ marginTop: 4 }}>
+                <button className={styles.btnSecondary}
+                  onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0 }))}
+                  disabled={['exposure','contrast','highlights','shadows','whites','blacks'].every(k => develop[k] === 0)}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </AccordionDrawer>
+
+          <AccordionDrawer title="Presence" isOpen={openDrawer.includes('presence')} onToggle={() => toggleDrawer('presence')}>
+            <div className={styles.drawerControls}>
+              {[
+                { key: 'texture',    label: 'Texture'    },
+                { key: 'clarity',    label: 'Clarity'    },
+                { key: 'dehaze',     label: 'Dehaze'     },
+                { key: 'vibrance',   label: 'Vibrance'   },
+                { key: 'saturation', label: 'Saturation' },
+              ].map(({ key, label }) => (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 62, flexShrink: 0 }}>{label}</span>
+                  <input type="range" min="-100" max="100" step="1" value={develop[key]}
+                    onChange={e => setDevelop(d => ({ ...d, [key]: Number(e.target.value) }))}
+                    className={styles.slider} style={{ flex: 1 }} />
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 36, textAlign: 'right', color: develop[key] !== 0 ? '#c8a96e' : '#555250' }}>
+                    {`${develop[key] > 0 ? '+' : ''}${develop[key]}`}
+                  </span>
+                </div>
+              ))}
+              <div className={styles.btnRow} style={{ marginTop: 4 }}>
+                <button className={styles.btnSecondary}
+                  onClick={() => setDevelop(d => ({ ...d, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }))}
+                  disabled={['texture','clarity','dehaze','vibrance','saturation'].every(k => develop[k] === 0)}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </AccordionDrawer>
 
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>

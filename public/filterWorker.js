@@ -1,4 +1,5 @@
-self.onmessage = function (e) {
+self.addEventListener('message', function (e) {
+  if (e.data.filter === 'develop') return
   const { filter, strength, buffer, width, height } = e.data
   const src = new Uint8ClampedArray(buffer)
   const out = new Uint8ClampedArray(src.length)
@@ -182,4 +183,152 @@ self.onmessage = function (e) {
   }
 
   self.postMessage({ out: out.buffer }, [out.buffer])
-}
+})
+
+self.addEventListener('message', function(e) {
+  if (e.data.filter !== 'develop') return
+  const {
+    exposure=0, contrast=0,
+    highlights=0, shadows=0, whites=0, blacks=0,
+    texture=0, clarity=0, dehaze=0,
+    vibrance=0, saturation=0,
+    buffer, width: w, height: h
+  } = e.data
+
+  const src = new Uint8ClampedArray(buffer)
+  const out = new Uint8ClampedArray(src.length)
+  const cl = v => Math.max(0, Math.min(255, v))
+  const lum = (r,g,b) => 0.2126*r + 0.7152*g + 0.0722*b
+
+  // Pass 1 — pixel-wise adjustments
+  for (let i = 0; i < src.length; i += 4) {
+    let r = src[i], g = src[i+1], b = src[i+2]
+
+    // Exposure (-100→-3EV … +100→+3EV)
+    if (exposure !== 0) {
+      const ef = Math.pow(2, exposure * 3 / 100)
+      r = cl(r * ef); g = cl(g * ef); b = cl(b * ef)
+    }
+
+    // Contrast
+    if (contrast !== 0) {
+      const cf = contrast > 0 ? 1 + contrast / 100 * 2 : 1 + contrast / 100
+      r = cl(128 + (r-128)*cf); g = cl(128 + (g-128)*cf); b = cl(128 + (b-128)*cf)
+    }
+
+    // Highlights (lum > 128)
+    if (highlights !== 0) {
+      const L = lum(r,g,b), mask = Math.max(0,(L-128)/127)
+      const adj = highlights/100 * 60 * mask
+      r = cl(r+adj); g = cl(g+adj); b = cl(b+adj)
+    }
+
+    // Shadows (lum < 128)
+    if (shadows !== 0) {
+      const L = lum(r,g,b), mask = Math.max(0,(128-L)/128)
+      const adj = shadows/100 * 60 * mask
+      r = cl(r+adj); g = cl(g+adj); b = cl(b+adj)
+    }
+
+    // Whites (lum > 192)
+    if (whites !== 0) {
+      const L = lum(r,g,b), mask = Math.max(0,(L-192)/63)
+      const adj = whites/100 * 40 * mask
+      r = cl(r+adj); g = cl(g+adj); b = cl(b+adj)
+    }
+
+    // Blacks (lum < 64)
+    if (blacks !== 0) {
+      const L = lum(r,g,b), mask = Math.max(0,(64-L)/64)
+      const adj = blacks/100 * 40 * mask
+      r = cl(r+adj); g = cl(g+adj); b = cl(b+adj)
+    }
+
+    // Dehaze (simplified: contrast + saturation boost)
+    if (dehaze !== 0) {
+      const dh = dehaze/100
+      r = cl(128+(r-128)*(1+dh*0.5)); g = cl(128+(g-128)*(1+dh*0.5)); b = cl(128+(b-128)*(1+dh*0.5))
+      const gray = lum(r,g,b)
+      r = cl(gray+(r-gray)*(1+dh*0.4)); g = cl(gray+(g-gray)*(1+dh*0.4)); b = cl(gray+(b-gray)*(1+dh*0.4))
+    }
+
+    // Vibrance (saturation boost, protects already-saturated colors)
+    if (vibrance !== 0) {
+      const gray = lum(r,g,b)
+      const maxC = Math.max(r,g,b), minC = Math.min(r,g,b)
+      const sat = maxC > 0 ? (maxC-minC)/maxC : 0
+      const vf = 1 + (vibrance/100) * (1-sat)
+      r = cl(gray+(r-gray)*vf); g = cl(gray+(g-gray)*vf); b = cl(gray+(b-gray)*vf)
+    }
+
+    // Saturation
+    if (saturation !== 0) {
+      const gray = lum(r,g,b), sf = 1 + saturation/100
+      r = cl(gray+(r-gray)*sf); g = cl(gray+(g-gray)*sf); b = cl(gray+(b-gray)*sf)
+    }
+
+    out[i]=r; out[i+1]=g; out[i+2]=b; out[i+3]=src[i+3]
+  }
+
+  // Pass 2 — Clarity (box blur r=10, unsharp with midtone mask)
+  if (clarity !== 0) {
+    const r2 = 10
+    const tmp = new Uint8ClampedArray(out.length)
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        let rS=0,gS=0,bS=0,cnt=0
+        for (let dx=-r2; dx<=r2; dx++) {
+          const nx=Math.max(0,Math.min(w-1,x+dx)), idx=(y*w+nx)*4
+          rS+=out[idx]; gS+=out[idx+1]; bS+=out[idx+2]; cnt++
+        }
+        const i=(y*w+x)*4
+        tmp[i]=rS/cnt; tmp[i+1]=gS/cnt; tmp[i+2]=bS/cnt; tmp[i+3]=out[i+3]
+      }
+    }
+    const blur=new Uint8ClampedArray(out.length)
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        let rS=0,gS=0,bS=0,cnt=0
+        for (let dy=-r2; dy<=r2; dy++) {
+          const ny=Math.max(0,Math.min(h-1,y+dy)), idx=(ny*w+x)*4
+          rS+=tmp[idx]; gS+=tmp[idx+1]; bS+=tmp[idx+2]; cnt++
+        }
+        const i=(y*w+x)*4
+        blur[i]=rS/cnt; blur[i+1]=gS/cnt; blur[i+2]=bS/cnt; blur[i+3]=out[i+3]
+      }
+    }
+    const cf=clarity/100
+    for (let i=0; i<out.length; i+=4) {
+      const r=out[i],g=out[i+1],b=out[i+2]
+      const L=lum(r,g,b), mid=1-Math.abs(L-128)/128
+      out[i]  =cl(r+(r-blur[i]  )*cf*mid)
+      out[i+1]=cl(g+(g-blur[i+1])*cf*mid)
+      out[i+2]=cl(b+(b-blur[i+2])*cf*mid)
+    }
+  }
+
+  // Pass 3 — Texture (3×3 unsharp mask, fine detail)
+  if (texture !== 0) {
+    const tf=texture/100
+    const tex=new Uint8ClampedArray(out.length)
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        let rS=0,gS=0,bS=0
+        for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++) {
+          const nx=Math.max(0,Math.min(w-1,x+dx)), ny=Math.max(0,Math.min(h-1,y+dy))
+          const idx=(ny*w+nx)*4
+          rS+=out[idx]; gS+=out[idx+1]; bS+=out[idx+2]
+        }
+        const i=(y*w+x)*4
+        tex[i]=rS/9; tex[i+1]=gS/9; tex[i+2]=bS/9
+      }
+    }
+    for (let i=0; i<out.length; i+=4) {
+      out[i]  =cl(out[i]  +(out[i]  -tex[i]  )*tf)
+      out[i+1]=cl(out[i+1]+(out[i+1]-tex[i+1])*tf)
+      out[i+2]=cl(out[i+2]+(out[i+2]-tex[i+2])*tf)
+    }
+  }
+
+  self.postMessage({ out: out.buffer }, [out.buffer])
+})
