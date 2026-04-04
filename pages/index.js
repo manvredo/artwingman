@@ -14,12 +14,13 @@ const DEFAULT_COLOR = {
   value: null, chroma: null
 }
 
-function AccordionDrawer({ title, isOpen, onToggle, children }) {
+function AccordionDrawer({ title, isOpen, onToggle, children, noToggle }) {
   return (
     <div className={styles.drawer}>
-      <button className={`${styles.drawerHeader} ${isOpen ? styles.drawerHeaderActive : ''}`} onClick={onToggle}>
+      <button className={`${styles.drawerHeader} ${isOpen ? styles.drawerHeaderActive : ''}`} onClick={noToggle ? undefined : onToggle}
+        style={noToggle ? { cursor: 'default', pointerEvents: 'none' } : {}}>
         <span className={styles.drawerTitle}>{title}</span>
-        <span className={styles.drawerArrow}>{isOpen ? '▼' : '▶'}</span>
+        {!noToggle && <span className={styles.drawerArrow}>{isOpen ? '▼' : '▶'}</span>}
       </button>
       {isOpen && <div className={styles.drawerBody}>{children}</div>}
     </div>
@@ -51,7 +52,7 @@ export default function Home() {
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false })
   const [sampleRadius, setSampleRadius] = useState(3)
   const [dragging, setDragging] = useState(false)
-  const [openDrawer, setOpenDrawer] = useState(['color'])
+  const [openDrawer, setOpenDrawer] = useState(['color', 'value'])
   const [valueSteps, setValueSteps] = useState(10)
   const [showGray, setShowGray] = useState(false)
   const [valueRating, setValueRating] = useState(null)
@@ -472,7 +473,7 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
-          <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
+          <AccordionDrawer title="Value Groups" isOpen={true} onToggle={() => {}} noToggle>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
