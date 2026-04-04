@@ -58,6 +58,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   const hoveredColor = hovered ? cellColor(hovered.v, hovered.c) : null
 
   return (
+    <>
     <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0, alignSelf: 'stretch', overflow: 'hidden', background: '#161616' }}>
 
       {/* Chart */}
@@ -216,5 +217,6 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
         </div>
       )
     })()}
+    </>
   )
 }
