@@ -76,24 +76,26 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
     dragging.current = true
     const deg = getAngle(e)
     if (deg !== null) onHueClick(deg)
-  }
 
-  const handleMouseMove = (e) => {
-    if (!dragging.current || !onHueClick) return
-    const deg = getAngle(e)
-    if (deg !== null) onHueClick(deg)
+    const onMove = (ev) => {
+      if (!dragging.current) return
+      const deg = getAngle(ev)
+      if (deg !== null) onHueClick(deg)
+    }
+    const onUp = () => {
+      dragging.current = false
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
   }
-
-  const handleMouseUp = () => { dragging.current = false }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
       <canvas ref={canvasRef} width={180} height={180}
         style={{ borderRadius: '50%', cursor: onHueClick ? 'crosshair' : 'default' }}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
       />
       <div style={{
         fontFamily: 'monospace',
