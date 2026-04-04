@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
+import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
@@ -391,14 +392,19 @@ export default function Home() {
 
   const handleFilterChange = useCallback((filter) => {
     setActiveFilter(filter)
-    applyFilter(filter, filterStrength)
+    const cfg = FILTERS.find(f => f.id === filter)
+    const strength = cfg?.def ?? filterStrength
+    if (cfg?.def !== undefined) setFilterStrength(cfg.def)
+    applyFilter(filter, strength)
   }, [applyFilter, filterStrength])
 
   const handleStrengthChange = useCallback((strength) => {
     setFilterStrength(strength)
-    if (activeFilter !== 'soften') return
+    if (!activeFilter) return
+    const cfg = FILTERS.find(f => f.id === activeFilter)
+    if (!cfg?.min) return
     clearTimeout(filterDebounceRef.current)
-    filterDebounceRef.current = setTimeout(() => applyFilter('soften', strength), 300)
+    filterDebounceRef.current = setTimeout(() => applyFilter(activeFilter, strength), 300)
   }, [applyFilter, activeFilter])
 
   const addToPalette = useCallback(() => {
