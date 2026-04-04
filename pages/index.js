@@ -403,16 +403,48 @@ export default function Home() {
   }, [clickImagePos])
 
   const hasColor = color.r !== null
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const SIDEBAR_ICONS = [
+    { label: 'VG', title: 'Value Groups', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2" fill="currentColor" opacity="0.9"/><rect x="1" y="7" width="14" height="2" fill="currentColor" opacity="0.6"/><rect x="1" y="11" width="14" height="2" fill="currentColor" opacity="0.3"/></svg> },
+    { label: 'CG', title: 'Color Groups', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="#c87070"/><rect x="9" y="1" width="6" height="6" rx="1" fill="#70a0c8"/><rect x="1" y="9" width="6" height="6" rx="1" fill="#c8b470"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#70c89a"/></svg> },
+    { label: 'CP', title: 'Color Palette', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2.5" fill="#c87070"/><circle cx="12" cy="4" r="2.5" fill="#70a0c8"/><circle cx="4" cy="12" r="2.5" fill="#c8b470"/><circle cx="12" cy="12" r="2.5" fill="#70c89a"/><circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.4"/></svg> },
+    { label: 'Flt', title: 'Filters', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="6" cy="4" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="10" cy="12" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/></svg> },
+    { label: 'PM', title: 'Paint Match', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13 L10 6 L12 8 L5 15 Z" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/><path d="M10 6 L12 4 Q14 2 13 4 L12 8" stroke="currentColor" strokeWidth="1.2" fill="none"/></svg> },
+  ]
 
   return (
     <div className={styles.layout}>
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
+
+        {/* Collapsed icon strip */}
+        {sidebarCollapsed ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0 8px' }}>
+              <button className={styles.sidebarToggle} onClick={() => setSidebarCollapsed(false)} title="Expand sidebar">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="4,2 8,6 4,10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            </div>
+            <div className={styles.sidebarIconStrip}>
+              {SIDEBAR_ICONS.map(({ label, title, icon }) => (
+                <button key={label} className={styles.sidebarIconBtn} title={title} onClick={() => setSidebarCollapsed(false)}>
+                  {icon}
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+        <>
         <div className={styles.logo}>
           <span className={styles.logoMark}>AW</span>
-          <div>
+          <div style={{ flex: 1 }}>
             <div className={styles.logoName}>ArtWingman</div>
             <div className={styles.logoSub}>v0.6</div>
           </div>
+          <button className={styles.sidebarToggle} onClick={() => setSidebarCollapsed(true)} title="Collapse sidebar">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="8,2 4,6 8,10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
         </div>
 
         <div className={styles.accordion}>
@@ -535,6 +567,8 @@ export default function Home() {
           </AccordionDrawer>
 
         </div>
+        </>
+        )}
 
       </aside>
 

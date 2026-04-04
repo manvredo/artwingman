@@ -16,6 +16,65 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: width 0.2s ease;
+}
+
+.sidebarCollapsed {
+  width: 44px;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: #8a8680;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.sidebarToggle:hover {
+  color: #c8a96e;
+  border-color: rgba(200,169,110,0.3);
+}
+
+.sidebarIconStrip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebarIconBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #555250;
+  cursor: pointer;
+  font-size: 9px;
+  font-family: monospace;
+  gap: 2px;
+  padding: 0;
+}
+
+.sidebarIconBtn:hover {
+  color: #c8a96e;
+  background: rgba(200,169,110,0.08);
+  border-color: rgba(200,169,110,0.2);
 }
 
 .logo {
