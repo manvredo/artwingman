@@ -747,13 +747,13 @@ export default function Home() {
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
                     {/* Gray comparison strip with embedded slider */}
-                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 190, borderRadius: '16px 0 0 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ background: '#1a1a1a', padding: '10px 12px 8px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 228, borderRadius: '16px 0 0 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ background: '#1a1a1a', padding: '10px 0 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                         <input
                           type="range" min="0" max="255" value={compGray}
                           onChange={e => setCompGray(Number(e.target.value))}
                           className={styles.slider}
-                          style={{ width: '100%' }}
+                          style={{ width: 160 }}
                         />
                         <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#8a8680', textAlign: 'center' }}>
                           #{compGray.toString(16).padStart(2,'0').repeat(3)}
