@@ -947,6 +947,10 @@ export default function Home() {
               value={hasColor ? color.value : null}
               chroma={hasColor ? color.chroma : null}
               color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
+              onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
+                setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
+                setShowColorOverlay(true)
+              }}
             />
           </div>
 

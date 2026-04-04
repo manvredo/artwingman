@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { labToRgb } from '../lib/munsell'
 
 const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
@@ -14,10 +14,18 @@ const PAD_T = 44   // "Chroma" label + number labels
 const GAP   = 1
 const DETAIL_W = 120
 
-export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, color, compact }) {
+export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, color, compact, onCellOpen }) {
   const containerRef = useRef(null)
   const [sz, setSz] = useState({ w: 0, h: 0 })
   const [hovered, setHovered] = useState(null)
+  const [popup, setPopup] = useState(null) // { v, c, x, y }
+
+  useEffect(() => {
+    if (!popup) return
+    const close = () => setPopup(null)
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [popup])
 
   useEffect(() => {
     const el = containerRef.current
@@ -107,7 +115,12 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
                   <g
                     key={`${v}-${c}`}
                     onMouseEnter={() => inRange && setHovered({ v, c })}
-                    style={{ cursor: inRange ? 'crosshair' : 'default' }}
+                    onClick={(e) => {
+                      if (!inRange) return
+                      e.stopPropagation()
+                      setPopup({ v, c, x: e.clientX, y: e.clientY })
+                    }}
+                    style={{ cursor: inRange ? 'pointer' : 'default' }}
                   >
                     <rect
                       x={gx} y={gy} width={gw} height={gh}
@@ -167,5 +180,41 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
       </div>
 
     </div>
+
+    {/* Cell click popup */}
+    {popup && (() => {
+      const bg = cellColor(popup.v, popup.c)
+      const light = popup.v >= 5
+      const textColor = light ? '#1a1a1a' : '#c8a96e'
+      return (
+        <div
+          onMouseDown={e => e.stopPropagation()}
+          onClick={() => {
+            if (onCellOpen) {
+              const { r, g, b } = labToRgb(popup.v * 10, popup.c * 5 * Math.cos(hueRad), popup.c * 5 * Math.sin(hueRad))
+              onCellOpen({ r, g, b, hue: hueLabel, hueName, value: popup.v, chroma: popup.c })
+            }
+            setPopup(null)
+          }}
+          style={{
+            position: 'fixed',
+            left: popup.x + 10,
+            top: popup.y - 38,
+            width: 76, height: 76,
+            background: bg,
+            borderRadius: 8,
+            cursor: 'pointer',
+            zIndex: 2000,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: textColor }}>{hueLabel}</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 11, color: textColor }}>{popup.v}/{popup.c}</div>
+        </div>
+      )
+    })()}
   )
 }
