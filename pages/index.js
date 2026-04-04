@@ -775,12 +775,12 @@ export default function Home() {
                     </div>
                     {/* Color info — centered in the color area (right of gray stripe) */}
                     <div style={{ position: 'absolute', top: 0, left: 228, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 24, gap: 10 }}>
-                      <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
+                      <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>
                         {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                       </div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Hue: {color.hue} — {color.hueName}</div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Value: {color.value.toFixed(1)}</div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Chroma: {color.chroma.toFixed(1)}</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Hue: {color.hue} — {color.hueName}</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Value: {color.value.toFixed(1)}</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Chroma: {color.chroma.toFixed(1)}</div>
                     </div>
                   </div>
                 </div>
