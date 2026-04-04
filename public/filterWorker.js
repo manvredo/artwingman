@@ -96,7 +96,7 @@ self.onmessage = function (e) {
       out[i+3] = src[i+3]
     }
 
-  } else if (filter === 'kmeans') {
+  } else if (filter === 'kmeans' || filter === 'kmeans-analyze') {
     const k = Math.max(2, Math.min(10, strength))
     const pixelCount = w * h
 
@@ -173,6 +173,10 @@ self.onmessage = function (e) {
     const clusters = centers.map((c, i) => ({
       r: Math.round(c[0]), g: Math.round(c[1]), b: Math.round(c[2]), count: clusterCounts[i]
     }))
+    if (filter === 'kmeans-analyze') {
+      self.postMessage({ clusters })
+      return
+    }
     self.postMessage({ out: out.buffer, clusters }, [out.buffer])
     return
   }

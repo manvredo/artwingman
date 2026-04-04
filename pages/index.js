@@ -76,8 +76,10 @@ export default function Home() {
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
+  const [paletteClusters, setPaletteClusters] = useState([])
 
   const applyValueGroupsRef = useRef(null)
+  const paletteWorkerRef = useRef(null)
 
   const grayTones = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -105,6 +107,7 @@ export default function Home() {
         setShowColorDecreased(false)
         setColorRating(null)
         setColorClusters([])
+        setPaletteClusters([])
         setTimeout(() => {
           const canvas = canvasRef.current
           if (canvas) {
@@ -113,6 +116,18 @@ export default function Home() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
             originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
+            const src = originalImageDataRef.current
+            const buffer = new Uint8ClampedArray(src.data).buffer
+            if (paletteWorkerRef.current) paletteWorkerRef.current.terminate()
+            paletteWorkerRef.current = new Worker('/filterWorker.js')
+            paletteWorkerRef.current.onmessage = (e) => {
+              setPaletteClusters(e.data.clusters || [])
+              paletteWorkerRef.current = null
+            }
+            paletteWorkerRef.current.postMessage(
+              { filter: 'kmeans-analyze', strength: 6, buffer, width: src.width, height: src.height },
+              [buffer]
+            )
           }
         }, 50)
       }
@@ -475,6 +490,34 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
+          <AccordionDrawer title="Color Palette" isOpen={true} onToggle={() => {}} noToggle>
+            <div className={styles.drawerResult}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+                {(paletteClusters.length > 0
+                  ? [...paletteClusters].sort((a, b) =>
+                      (0.2126*b.r + 0.7152*b.g + 0.0722*b.b) - (0.2126*a.r + 0.7152*a.g + 0.0722*a.b)
+                    ).slice(0, 6)
+                  : Array.from({ length: 6 }, () => null)
+                ).map((c, i) => {
+                  const m = c ? rgbToMunsell(c.r, c.g, c.b) : null
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <div style={{
+                        width: '100%', height: 36, borderRadius: 3,
+                        background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }} />
+                      <span style={{ fontSize: 9, color: '#8a8680', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.3 }}>
+                        {m ? `${m.hue}` : '—'}<br/>
+                        {m ? `${m.value}/${m.chroma}` : ''}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </AccordionDrawer>
+
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
               <Filters
@@ -507,6 +550,7 @@ export default function Home() {
                   setShowColorDecreased(false)
                   setColorRating(null)
                   setColorClusters([])
+                  setPaletteClusters([])
                   originalImageDataRef.current = null
                 }}>
                   Load new image
