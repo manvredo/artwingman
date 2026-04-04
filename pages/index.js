@@ -15,6 +15,41 @@ const DEFAULT_COLOR = {
   value: null, chroma: null
 }
 
+function devTicks(min, max) {
+  const mid = (min + max) / 2
+  const q1 = (min + mid) / 2
+  const q3 = (mid + max) / 2
+  return [min, q1, mid, q3, max].map((v, i) => (
+    <div key={i} style={{
+      position: 'absolute',
+      left: `${(v - min) / (max - min) * 100}%`,
+      top: 0, width: 1,
+      height: v === mid ? 5 : 3,
+      background: v === mid ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
+      transform: 'translateX(-50%)',
+    }} />
+  ))
+}
+
+function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
+  const v = develop[k]
+  const display = fmt ? fmt(v) : `${v > 0 ? '+' : ''}${Number.isInteger(v) ? v : v.toFixed(1)}`
+  return (
+    <div style={{ marginBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>{label}</span>
+        <input type="range" min={min} max={max} step={step} value={v}
+          onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
+          className={styles.slider} style={{ flex: 1 }} />
+        <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#c8a96e' : '#555250' }}>
+          {display}
+        </span>
+      </div>
+      <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{devTicks(min, max)}</div>
+    </div>
+  )
+}
+
 function AccordionDrawer({ title, isOpen, onToggle, children, noToggle }) {
   return (
     <div className={styles.drawer}>
@@ -671,46 +706,10 @@ export default function Home() {
 
           <div className={styles.accordionSection}>Develop</div>
 
-          {/* Reusable slider row renderer */}
-          {(() => {
-            const ticks = (min, max) => {
-              const mid = (min + max) / 2
-              const q1 = (min + mid) / 2
-              const q3 = (mid + max) / 2
-              return [min, q1, mid, q3, max].map((v, i) => (
-                <div key={i} style={{
-                  position: 'absolute',
-                  left: `${(v - min) / (max - min) * 100}%`,
-                  top: 0, width: 1,
-                  height: v === mid ? 5 : 3,
-                  background: v === mid ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
-                  transform: 'translateX(-50%)',
-                }} />
-              ))
-            }
-            const SliderRow = ({ k, label, min, max, step=0.5, fmt }) => {
-              const v = develop[k]
-              const display = fmt ? fmt(v) : `${v > 0 ? '+' : ''}${Number.isInteger(v) ? v : v.toFixed(1)}`
-              return (
-              <div style={{ marginBottom: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>{label}</span>
-                  <input type="range" min={min} max={max} step={step} value={v}
-                    onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
-                    className={styles.slider} style={{ flex: 1 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#c8a96e' : '#555250' }}>
-                    {display}
-                  </span>
-                </div>
-                <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{ticks(min, max)}</div>
-              </div>
-            )}
-            return (
-              <>
-                <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
+          <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
                   <div className={styles.drawerControls}>
-                    <SliderRow k="temperature" label="Temp" min={-100} max={100} fmt={v => v > 0 ? `+${v} ☀` : v < 0 ? `${v} ❄` : '0'} />
-                    <SliderRow k="tint" label="Tint" min={-100} max={100} />
+                    <DevSlider k="temperature" label="Temp" min={-100} max={100} fmt={v => v > 0 ? `+${Math.round(v)} ☀` : v < 0 ? `${Math.round(v)} ❄` : '0'} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="tint" label="Tint" min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <div className={styles.btnRow} style={{ marginTop: 2 }}>
                       <button className={styles.btnSecondary}
                         onClick={() => setDevelop(d => ({ ...d, temperature:0, tint:0 }))}
@@ -721,12 +720,12 @@ export default function Home() {
 
                 <AccordionDrawer title="Basic" isOpen={openDrawer.includes('basic')} onToggle={() => toggleDrawer('basic')}>
                   <div className={styles.drawerControls}>
-                    <SliderRow k="exposure" label="Exposure" min={-5} max={5} step={0.1} fmt={v => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)} EV`} />
-                    <SliderRow k="contrast"   label="Contrast"   min={-100} max={100} />
-                    <SliderRow k="highlights" label="Highlights" min={-100} max={100} />
-                    <SliderRow k="shadows"    label="Shadows"    min={-100} max={100} />
-                    <SliderRow k="whites"     label="Whites"     min={-100} max={100} />
-                    <SliderRow k="blacks"     label="Blacks"     min={-100} max={100} />
+                    <DevSlider k="exposure"   label="Exposure"   min={-5}   max={5}   step={0.1} fmt={v => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)} EV`} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="contrast"   label="Contrast"   min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="highlights" label="Highlights" min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="shadows"    label="Shadows"    min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="whites"     label="Whites"     min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="blacks"     label="Blacks"     min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <div className={styles.btnRow} style={{ marginTop: 2 }}>
                       <button className={styles.btnSecondary}
                         onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0 }))}
@@ -737,11 +736,11 @@ export default function Home() {
 
                 <AccordionDrawer title="Presence" isOpen={openDrawer.includes('presence')} onToggle={() => toggleDrawer('presence')}>
                   <div className={styles.drawerControls}>
-                    <SliderRow k="texture"    label="Texture"    min={-100} max={100} />
-                    <SliderRow k="clarity"    label="Clarity"    min={-100} max={100} />
-                    <SliderRow k="dehaze"     label="Dehaze"     min={-100} max={100} />
-                    <SliderRow k="vibrance"   label="Vibrance"   min={-100} max={100} />
-                    <SliderRow k="saturation" label="Saturation" min={-100} max={100} />
+                    <DevSlider k="texture"    label="Texture"    min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="clarity"    label="Clarity"    min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="dehaze"     label="Dehaze"     min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="vibrance"   label="Vibrance"   min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="saturation" label="Saturation" min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <div className={styles.btnRow} style={{ marginTop: 2 }}>
                       <button className={styles.btnSecondary}
                         onClick={() => setDevelop(d => ({ ...d, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }))}
@@ -785,9 +784,6 @@ export default function Home() {
                     )}
                   </div>
                 </AccordionDrawer>
-              </>
-            )
-          })()}
 
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
