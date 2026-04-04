@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
+import { labToRgb } from '../lib/munsell'
 
 const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
-const VALUES  = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+const VALUES  = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 const MAX_CHROMA = {
   1: 6, 2: 8, 3: 12, 4: 16, 5: 20,
@@ -41,9 +42,12 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
 
   const hueLabel = hue && hue !== '—' ? hue : '—'
 
-  const hoveredColor = hovered
-    ? `hsl(${hueAngle}, ${hovered.c * 4.5}%, ${hovered.v * 11}%)`
-    : null
+  const hueRad = hueAngle * Math.PI / 180
+  const cellColor = (v, c) => {
+    const { r, g, b } = labToRgb(v * 10, c * 5 * Math.cos(hueRad), c * 5 * Math.sin(hueRad))
+    return `rgb(${r},${g},${b})`
+  }
+  const hoveredColor = hovered ? cellColor(hovered.v, hovered.c) : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0, alignSelf: 'stretch', overflow: 'hidden', background: '#161616' }}>
@@ -107,7 +111,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
                   >
                     <rect
                       x={gx} y={gy} width={gw} height={gh}
-                      fill={inRange ? `hsl(${hueAngle}, ${c * 4.5}%, ${v * 11}%)` : '#1a1a1a'}
+                      fill={inRange ? cellColor(v, c) : '#1a1a1a'}
                       rx={1}
                     />
                     {isActive && (

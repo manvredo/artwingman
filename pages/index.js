@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
-import { rgbToMunsell, chromaDescription, valueDescription, samplePixels } from '../lib/munsell'
+import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
@@ -408,7 +408,8 @@ export default function Home() {
   }, [])
 
   const handleHueWheelClick = useCallback((deg) => {
-    const { r, g, b } = hslToRgb(deg, 65, 55)
+    const rad = deg * Math.PI / 180
+    const { r, g, b } = labToRgb(55, 40 * Math.cos(rad), 40 * Math.sin(rad))
     setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
     setClickPos(null)
   }, [])

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { labToRgb } from '../lib/munsell'
 
 const HUE_NAMES = ['R','YR','Y','GY','G','BG','B','PB','P','RP']
 const HUE_ANGLES = [25, 55, 85, 115, 165, 210, 245, 280, 315, 355]
@@ -16,10 +17,12 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
 
     for (let deg = 0; deg < 360; deg++) {
       const angle = (deg - 90) * Math.PI / 180
+      const rad = deg * Math.PI / 180
+      const { r: cr, g: cg, b: cb } = labToRgb(55, 40 * Math.cos(rad), 40 * Math.sin(rad))
       ctx.beginPath()
       ctx.moveTo(cx + inner * Math.cos(angle), cy + inner * Math.sin(angle))
       ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle))
-      ctx.strokeStyle = `hsl(${deg}, 65%, 55%)`
+      ctx.strokeStyle = `rgb(${cr},${cg},${cb})`
       ctx.lineWidth = 2.5
       ctx.stroke()
     }
@@ -63,7 +66,7 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
     const cx = 90, cy = 90, inner = 32, r = 78
     const dx = x - cx, dy = y - cy
     const dist = Math.sqrt(dx * dx + dy * dy)
-    if (dist < inner) return
+    if (dist < inner || dist > r) return
     let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90
     deg = ((deg % 360) + 360) % 360
     onHueClick(deg)
