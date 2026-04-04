@@ -81,7 +81,8 @@ export default function Home() {
   const applyValueGroupsRef = useRef(null)
   const paletteWorkerRef = useRef(null)
 
-  const grayTones = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
+  // Munsell neutrals N8/ → N2/ (perceptually uniform), N5/ in centre (index 3)
+  const grayTones = ['#c6c6c6', '#aaaaaa', '#8f8f8f', '#737373', '#565656', '#3b3b3b', '#252525']
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
@@ -751,13 +752,20 @@ export default function Home() {
                       {/* 7 gray fields with slider overlaid */}
                       <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
                         <div style={{ display: 'flex', height: '100%' }}>
-                          {grayTones.map((g, i) => (
-                            <div key={i} style={{
-                              flex: 1, background: g,
-                              outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
-                              outlineOffset: -2
-                            }} />
-                          ))}
+                          {grayTones.map((g, i) => {
+                            const n = 8 - i
+                            const light = n >= 5
+                            return (
+                              <div key={i} style={{
+                                flex: 1, background: g, position: 'relative',
+                                outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
+                                outlineOffset: -2,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <span style={{ fontSize: 9, fontFamily: 'monospace', color: light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', lineHeight: 1, userSelect: 'none' }}>N{n}</span>
+                              </div>
+                            )
+                          })}
                         </div>
                         <input
                           type="range" min="0" max="6" step="1" value={compGray}
