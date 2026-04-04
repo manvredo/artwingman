@@ -87,7 +87,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
             ))}
 
             {/* Grid separator background */}
-            <rect x={PAD_L} y={PAD_T} width={CHROMAS.length * cellW} height={VALUES.length * cellH} fill="#878787" />
+            <rect x={PAD_L} y={PAD_T} width={CHROMAS.length * cellW} height={VALUES.length * cellH} fill="#5e5e5e" />
 
             {/* Cells */}
             {VALUES.map((v, row) =>
