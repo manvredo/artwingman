@@ -533,23 +533,20 @@ export default function Home() {
               <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
                 {colorSteps} colors
               </div>
-              {colorClusters.length > 0 && (() => {
-                const total = colorClusters.reduce((s, c) => s + c.count, 0)
-                return (
-                  <div style={{ display: 'flex', height: 18, marginTop: 4, borderRadius: 4, overflow: 'hidden' }}>
-                    {[...colorClusters]
-                      .sort((a, b) => b.count - a.count)
+              <div className={styles.valueSteps}>
+                {colorClusters.length > 0
+                  ? [...colorClusters]
+                      .sort((a, b) => (0.2126*a.r + 0.7152*a.g + 0.0722*a.b) - (0.2126*b.r + 0.7152*b.g + 0.0722*b.b))
                       .map((c, i) => (
-                        <div key={i} style={{
-                          flex: c.count / total,
-                          background: `rgb(${c.r},${c.g},${c.b})`,
-                          minWidth: 1,
-                        }} />
+                        <div key={i} className={styles.valueStep}
+                          style={{ background: `rgb(${c.r},${c.g},${c.b})` }} />
                       ))
-                    }
-                  </div>
-                )
-              })()}
+                  : Array.from({ length: colorSteps }).map((_, i) => (
+                      <div key={i} className={styles.valueStep}
+                        style={{ background: '#2a2a2a' }} />
+                    ))
+                }
+              </div>
             </div>
           </AccordionDrawer>
 
