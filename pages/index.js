@@ -688,20 +688,23 @@ export default function Home() {
                 }} />
               ))
             }
-            const SliderRow = ({ k, label, min, max, step=1, fmt }) => (
+            const SliderRow = ({ k, label, min, max, step=0.5, fmt }) => {
+              const v = develop[k]
+              const display = fmt ? fmt(v) : `${v > 0 ? '+' : ''}${Number.isInteger(v) ? v : v.toFixed(1)}`
+              return (
               <div style={{ marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>{label}</span>
-                  <input type="range" min={min} max={max} step={step} value={develop[k]}
+                  <input type="range" min={min} max={max} step={step} value={v}
                     onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
                     className={styles.slider} style={{ flex: 1 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: develop[k] !== 0 ? '#c8a96e' : '#555250' }}>
-                    {fmt ? fmt(develop[k]) : `${develop[k] > 0 ? '+' : ''}${develop[k]}`}
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#c8a96e' : '#555250' }}>
+                    {display}
                   </span>
                 </div>
                 <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{ticks(min, max)}</div>
               </div>
-            )
+            )}
             return (
               <>
                 <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
