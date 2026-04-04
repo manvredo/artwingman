@@ -10,7 +10,7 @@ const MAX_CHROMA = {
 
 const PAD_L = 44   // "Value" rotated label + number labels
 const PAD_T = 44   // "Chroma" label + number labels
-const GAP   = 2
+const GAP   = 1
 const DETAIL_W = 120
 
 export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, color, compact }) {
