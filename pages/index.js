@@ -77,6 +77,8 @@ export default function Home() {
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
 
+  const applyValueGroupsRef = useRef(null)
+
   const grayTones = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
 
   const bgColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#444444', '#222222', '#111111']
@@ -111,14 +113,14 @@ export default function Home() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
             originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
-            applyValueGroups()
+            applyValueGroupsRef.current?.()
           }
         }, 50)
       }
       img.src = e.target.result
     }
     reader.readAsDataURL(file)
-  }, [applyValueGroups])
+  }, [])
 
   const handleDrop = useCallback((e) => {
     e.preventDefault()
@@ -261,6 +263,7 @@ export default function Home() {
     else if (valueSteps <= 7) setValueRating('yellow')
     else setValueRating('red')
   }, [valueSteps])
+  applyValueGroupsRef.current = applyValueGroups
 
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
