@@ -533,26 +533,26 @@ export default function Home() {
 
         </div>
 
-        {image && (
-          <button className={styles.changeBtnSidebar} onClick={() => {
-            setImage(null)
-            setColor(DEFAULT_COLOR)
-            setShowGray(false)
-            setValueRating(null)
-            setActiveFilter(null)
-            setViewport({ zoom: 1, panX: 0, panY: 0 })
-            setShowColorDecreased(false)
-            setColorRating(null)
-            setColorClusters([])
-            originalImageDataRef.current = null
-          }}>
-            Load new image
-          </button>
-        )}
       </aside>
 
       <div className={styles.rightArea}>
         <div className={styles.toolbar} style={{ padding: '10px 12px 8px' }}>
+              {image && (
+                <button className={styles.toolBtn} onClick={() => {
+                  setImage(null)
+                  setColor(DEFAULT_COLOR)
+                  setShowGray(false)
+                  setValueRating(null)
+                  setActiveFilter(null)
+                  setViewport({ zoom: 1, panX: 0, panY: 0 })
+                  setShowColorDecreased(false)
+                  setColorRating(null)
+                  setColorClusters([])
+                  originalImageDataRef.current = null
+                }}>
+                  Load new image
+                </button>
+              )}
               <button
                 className={`${styles.toolBtn} ${gridMode === '3x3' ? styles.toolBtnActive : ''}`}
                 onClick={() => setGridMode(m => m === '3x3' ? null : '3x3')}
