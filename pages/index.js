@@ -219,7 +219,7 @@ export default function Home() {
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [image])
 
   useEffect(() => {
     const mc = minimapCanvasRef.current
