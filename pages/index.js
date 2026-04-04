@@ -488,10 +488,8 @@ export default function Home() {
             </div>
             {valueRating && (
               <div className={styles.drawerResult}>
-                <div className={`${styles.ampel} ${styles['ampel' + valueRating]}`}>
-                  {valueRating === 'green' && `${valueSteps} values — ideal for painting`}
-                  {valueRating === 'yellow' && `${valueSteps} values — acceptable`}
-                  {valueRating === 'red' && `${valueSteps} values — too complex, simplify`}
+                <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
+                  {valueSteps} values
                 </div>
                 <div className={styles.valueSteps}>
                   {Array.from({ length: valueSteps }).map((_, i) => (
