@@ -79,10 +79,15 @@ export default function Home() {
   const [paletteClusters, setPaletteClusters] = useState([])
   const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
+  const [lutData, setLutData] = useState(null)   // Float32Array | null
+  const [lutSize, setLutSize] = useState(0)
+  const [lutName, setLutName] = useState('')
+  const [lutIntensity, setLutIntensity] = useState(100)
 
   const applyValueGroupsRef = useRef(null)
   const paletteWorkerRef = useRef(null)
   const developWorkerRef = useRef(null)
+  const lutFileRef = useRef(null)
 
   // Munsell neutrals N8/ → N2/ (perceptually uniform), N5/ in centre (index 3)
   const grayTones = ['#c6c6c6', '#aaaaaa', '#8f8f8f', '#737373', '#565656', '#3b3b3b', '#252525']
@@ -319,7 +324,7 @@ export default function Home() {
     setValueRating(null)
   }, [])
 
-  const applyDevelop = useCallback((dev) => {
+  const applyDevelop = useCallback((dev, lut = null, lsz = 0, lint = 100) => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
     const src = originalImageDataRef.current
@@ -332,14 +337,18 @@ export default function Home() {
         .putImageData(new ImageData(out, src.width, src.height), 0, 0)
       developWorkerRef.current = null
     }
-    developWorkerRef.current.postMessage(
-      { filter: 'develop', ...dev, buffer, width: src.width, height: src.height },
-      [buffer]
-    )
+    const msg = { filter: 'develop', ...dev, buffer, width: src.width, height: src.height, lutSize: lsz, lutIntensity: lint }
+    const transferables = [buffer]
+    if (lut && lsz > 1) {
+      const lutBuf = lut.slice().buffer
+      msg.lutBuffer = lutBuf
+      transferables.push(lutBuf)
+    }
+    developWorkerRef.current.postMessage(msg, transferables)
   }, [])
 
   useEffect(() => {
-    const allZero = Object.values(develop).every(v => v === 0)
+    const allZero = Object.values(develop).every(v => v === 0) && !lutData
     if (allZero) {
       const canvas = canvasRef.current
       if (canvas && originalImageDataRef.current)
@@ -347,10 +356,10 @@ export default function Home() {
       return
     }
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
-    const delay = hasExpensive ? 450 : 180
-    const t = setTimeout(() => applyDevelop(develop), delay)
-    return () => clearTimeout(t)
-  }, [develop, applyDevelop])
+    const t1 = setTimeout(() => applyDevelop({ ...develop, clarity: 0, texture: 0 }, lutData, lutSize, lutIntensity), 150)
+    const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 800) : null
+    return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
+  }, [develop, applyDevelop, lutData, lutSize, lutIntensity])
 
   const applyFilter = useCallback((filter, strength) => {
     const canvas = canvasRef.current
@@ -409,6 +418,38 @@ export default function Home() {
     const { r, g, b } = labToRgb(55, 40 * Math.cos(rad), 40 * Math.sin(rad))
     setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
     setClickPos(null)
+  }, [])
+
+  const parseCube = useCallback((text, name) => {
+    const lines = text.split('\n')
+    let size = 0
+    const data = []
+    for (const line of lines) {
+      const t = line.trim()
+      if (!t || t.startsWith('#')) continue
+      if (t.startsWith('LUT_3D_SIZE')) { size = parseInt(t.split(/\s+/)[1]); continue }
+      if (/^(TITLE|DOMAIN_MIN|DOMAIN_MAX|LUT_1D_SIZE)/.test(t)) continue
+      const parts = t.split(/\s+/)
+      if (parts.length >= 3 && !isNaN(parts[0])) {
+        data.push(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]))
+      }
+    }
+    if (size > 0 && data.length === size * size * size * 3) {
+      setLutData(new Float32Array(data))
+      setLutSize(size)
+      setLutName(name)
+    } else {
+      alert(`LUT parse error: expected ${size ? size+'³' : '?'} entries, got ${data.length / 3}`)
+    }
+  }, [])
+
+  const handleExport = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const link = document.createElement('a')
+    link.download = 'artwingman-export.png'
+    link.href = canvas.toDataURL('image/png')
+    link.click()
   }, [])
 
   const centerImage = useCallback(() => {
@@ -667,6 +708,42 @@ export default function Home() {
                     </div>
                   </div>
                 </AccordionDrawer>
+
+                <AccordionDrawer title="LUT" isOpen={openDrawer.includes('lut')} onToggle={() => toggleDrawer('lut')}>
+                  <div className={styles.drawerControls}>
+                    <input ref={lutFileRef} type="file" accept=".cube" style={{ display: 'none' }}
+                      onChange={e => {
+                        const f = e.target.files[0]
+                        if (!f) return
+                        const reader = new FileReader()
+                        reader.onload = (ev) => parseCube(ev.target.result, f.name.replace(/\.cube$/i, ''))
+                        reader.readAsText(f)
+                        e.target.value = ''
+                      }} />
+                    {lutData ? (
+                      <>
+                        <div style={{ fontSize: 11, color: '#c8a96e', fontFamily: 'monospace', marginBottom: 6, wordBreak: 'break-all' }}>{lutName}</div>
+                        <div style={{ marginBottom: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>Intensity</span>
+                            <input type="range" min={0} max={100} step={1} value={lutIntensity}
+                              onChange={e => setLutIntensity(Number(e.target.value))}
+                              className={styles.slider} style={{ flex: 1 }} />
+                            <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: lutIntensity !== 100 ? '#c8a96e' : '#555250' }}>{lutIntensity}%</span>
+                          </div>
+                        </div>
+                        <div className={styles.btnRow}>
+                          <button className={styles.btnSecondary} onClick={() => lutFileRef.current?.click()}>Replace</button>
+                          <button className={styles.btnSecondary} onClick={() => { setLutData(null); setLutSize(0); setLutName(''); setLutIntensity(100) }}>Remove</button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className={styles.btnRow}>
+                        <button className={styles.btnPrimary} onClick={() => lutFileRef.current?.click()}>Load .cube LUT</button>
+                      </div>
+                    )}
+                  </div>
+                </AccordionDrawer>
               </>
             )
           })()}
@@ -778,6 +855,12 @@ export default function Home() {
               >
                 1:1
               </button>
+              {image && (
+                <button className={styles.toolBtn} onClick={handleExport} title="Export as PNG"
+                  style={{ marginLeft: 'auto', color: '#c8a96e', borderColor: 'rgba(200,169,110,0.3)' }}>
+                  Export PNG
+                </button>
+              )}
         </div>
         <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
         {!image ? (

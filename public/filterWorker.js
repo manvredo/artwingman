@@ -343,5 +343,34 @@ self.addEventListener('message', function(e) {
     }
   }
 
+  // Pass 4 — LUT (trilinear interpolation)
+  const { lutSize=0, lutIntensity=100 } = e.data
+  if (lutSize > 1 && e.data.lutBuffer) {
+    const lutData = new Float32Array(e.data.lutBuffer)
+    const intensity = Math.min(1, Math.max(0, lutIntensity / 100))
+    const s1 = lutSize - 1
+    for (let i = 0; i < out.length; i += 4) {
+      const r = out[i] / 255, g = out[i+1] / 255, b = out[i+2] / 255
+      const ri = r * s1, gi = g * s1, bi = b * s1
+      const r0 = Math.floor(ri), g0 = Math.floor(gi), b0 = Math.floor(bi)
+      const r1 = Math.min(r0+1, s1), g1 = Math.min(g0+1, s1), b1 = Math.min(b0+1, s1)
+      const fr = ri - r0, fg = gi - g0, fb = bi - b0
+      const li = (rr, gg, bb) => (rr + gg*lutSize + bb*lutSize*lutSize) * 3
+      const lerp = (ch) => {
+        const v000=lutData[li(r0,g0,b0)+ch], v100=lutData[li(r1,g0,b0)+ch]
+        const v010=lutData[li(r0,g1,b0)+ch], v110=lutData[li(r1,g1,b0)+ch]
+        const v001=lutData[li(r0,g0,b1)+ch], v101=lutData[li(r1,g0,b1)+ch]
+        const v011=lutData[li(r0,g1,b1)+ch], v111=lutData[li(r1,g1,b1)+ch]
+        return v000*(1-fr)*(1-fg)*(1-fb) + v100*fr*(1-fg)*(1-fb)
+             + v010*(1-fr)*fg*(1-fb)      + v110*fr*fg*(1-fb)
+             + v001*(1-fr)*(1-fg)*fb      + v101*fr*(1-fg)*fb
+             + v011*(1-fr)*fg*fb          + v111*fr*fg*fb
+      }
+      out[i]   = cl(lerp(0)*255*intensity + out[i]  *(1-intensity))
+      out[i+1] = cl(lerp(1)*255*intensity + out[i+1]*(1-intensity))
+      out[i+2] = cl(lerp(2)*255*intensity + out[i+2]*(1-intensity))
+    }
+  }
+
   self.postMessage({ out: out.buffer }, [out.buffer])
 })
