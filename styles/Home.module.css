@@ -335,6 +335,42 @@
   align-self: stretch;
 }
 
+.viewBtnStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.viewBtn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: #8a8680;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.viewBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: #f0ece4;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.viewBtn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
 .toolbar {
   display: flex;
   gap: 6px;

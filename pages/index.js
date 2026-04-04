@@ -67,6 +67,7 @@ export default function Home() {
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
+  const [clickCenterPos, setClickCenterPos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(null)
   const [colorSteps, setColorSteps] = useState(10)
@@ -96,6 +97,7 @@ export default function Home() {
         setActiveFilter(null)
         setViewport({ zoom: 1, panX: 0, panY: 0 })
         setClickPos(null)
+        setClickCenterPos(null)
         setShowColorDecreased(false)
         setColorRating(null)
         setColorClusters([])
@@ -143,6 +145,11 @@ export default function Home() {
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
+    const wrap = canvasWrapRef.current
+    if (wrap) {
+      const wr = wrap.getBoundingClientRect()
+      setClickCenterPos({ x: e.clientX - wr.left - wr.width / 2, y: e.clientY - wr.top - wr.height / 2 })
+    }
   }, [imgDims, sampleRadius, sampleAt, viewport.zoom])
 
   const handleCanvasMouseDown = useCallback((e) => {
@@ -414,6 +421,33 @@ export default function Home() {
     setClickPos(null)
   }, [])
 
+  const centerImage = useCallback(() => {
+    setViewport(v => ({ ...v, panX: 0, panY: 0 }))
+  }, [])
+
+  const fitHorizontal = useCallback(() => {
+    if (!imgDims.w || !imgDims.h || !wrapSz.w || !wrapSz.h) return
+    const aspect = imgDims.w / imgDims.h
+    const baseW = Math.min(wrapSz.w, wrapSz.h * aspect)
+    setViewport({ zoom: wrapSz.w / baseW, panX: 0, panY: 0 })
+  }, [imgDims, wrapSz])
+
+  const fitVertical = useCallback(() => {
+    if (!imgDims.w || !imgDims.h || !wrapSz.w || !wrapSz.h) return
+    const aspect = imgDims.w / imgDims.h
+    const baseH = Math.min(wrapSz.h, wrapSz.w / aspect)
+    setViewport({ zoom: wrapSz.h / baseH, panX: 0, panY: 0 })
+  }, [imgDims, wrapSz])
+
+  const zoomToClick = useCallback(() => {
+    if (!clickCenterPos) return
+    setViewport(v => {
+      const newZoom = Math.min(v.zoom * 2, 12)
+      const r = newZoom / v.zoom
+      return { zoom: newZoom, panX: clickCenterPos.x * (1 - r) + v.panX * r, panY: clickCenterPos.y * (1 - r) + v.panY * r }
+    })
+  }, [clickCenterPos])
+
   const hasColor = color.r !== null
 
   return (
@@ -642,6 +676,7 @@ export default function Home() {
           </div>
         ) : (
           <div className={styles.canvasSection}>
+            <div style={{ display: 'flex', flex: 1, minHeight: 0, gap: 6 }}>
             <div
               ref={canvasWrapRef}
               className={styles.canvasWrap}
@@ -778,6 +813,44 @@ export default function Home() {
                   </div>
                 </div>
               )}
+            </div>
+            <div className={styles.viewBtnStrip}>
+              <button className={styles.viewBtn} onClick={centerImage} title="Bild zentrieren">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+                  <line x1="8" y1="1" x2="8" y2="4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="8" y1="11.5" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="1" y1="8" x2="4.5" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="11.5" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className={styles.viewBtn} onClick={fitHorizontal} title="Breite anpassen">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <line x1="1" y1="2" x2="1" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="15" y1="2" x2="15" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5"/>
+                  <polyline points="5,5 1,8 5,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+                  <polyline points="11,5 15,8 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className={styles.viewBtn} onClick={fitVertical} title="Höhe anpassen">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <line x1="2" y1="1" x2="14" y2="1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="2" y1="15" x2="14" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5"/>
+                  <polyline points="5,5 8,1 11,5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+                  <polyline points="5,11 8,15 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickCenterPos}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5"/>
+                  <line x1="6.5" y1="4" x2="6.5" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="4" y1="6.5" x2="9" y2="6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
             </div>
           </div>
         )}
