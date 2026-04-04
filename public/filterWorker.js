@@ -188,6 +188,7 @@ self.addEventListener('message', function (e) {
 self.addEventListener('message', function(e) {
   if (e.data.filter !== 'develop') return
   const {
+    temperature=0, tint=0,
     exposure=0, contrast=0,
     highlights=0, shadows=0, whites=0, blacks=0,
     texture=0, clarity=0, dehaze=0,
@@ -204,9 +205,21 @@ self.addEventListener('message', function(e) {
   for (let i = 0; i < src.length; i += 4) {
     let r = src[i], g = src[i+1], b = src[i+2]
 
-    // Exposure (-100→-3EV … +100→+3EV)
+    // Temperature (warm/cool)
+    if (temperature !== 0) {
+      const t = temperature / 100
+      r = cl(r + t * 40); g = cl(g + t * 8); b = cl(b - t * 40)
+    }
+
+    // Tint (magenta↔green)
+    if (tint !== 0) {
+      const t = tint / 100
+      r = cl(r - t * 12); g = cl(g + t * 30); b = cl(b - t * 12)
+    }
+
+    // Exposure (-5 to +5 EV directly)
     if (exposure !== 0) {
-      const ef = Math.pow(2, exposure * 3 / 100)
+      const ef = Math.pow(2, exposure)
       r = cl(r * ef); g = cl(g * ef); b = cl(b * ef)
     }
 

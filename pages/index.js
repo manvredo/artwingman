@@ -77,7 +77,7 @@ export default function Home() {
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
   const [paletteClusters, setPaletteClusters] = useState([])
-  const DEVELOP_DEFAULTS = { exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
+  const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
 
   const applyValueGroupsRef = useRef(null)
@@ -590,64 +590,84 @@ export default function Home() {
 
           <div className={styles.accordionSection}>Develop</div>
 
-          <AccordionDrawer title="Basic" isOpen={openDrawer.includes('basic')} onToggle={() => toggleDrawer('basic')}>
-            <div className={styles.drawerControls}>
-              {[
-                { key: 'exposure',   label: 'Exposure',   min: -100, max: 100, fmt: v => `${v > 0 ? '+' : ''}${(v*3/100).toFixed(1)} EV` },
-                { key: 'contrast',   label: 'Contrast',   min: -100, max: 100 },
-                { key: 'highlights', label: 'Highlights', min: -100, max: 100 },
-                { key: 'shadows',    label: 'Shadows',    min: -100, max: 100 },
-                { key: 'whites',     label: 'Whites',     min: -100, max: 100 },
-                { key: 'blacks',     label: 'Blacks',     min: -100, max: 100 },
-              ].map(({ key, label, min, max, fmt }) => (
-                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 62, flexShrink: 0 }}>{label}</span>
-                  <input type="range" min={min} max={max} step="1" value={develop[key]}
-                    onChange={e => setDevelop(d => ({ ...d, [key]: Number(e.target.value) }))}
+          {/* Reusable slider row renderer */}
+          {(() => {
+            const ticks = (min, max) => {
+              const mid = (min + max) / 2
+              const q1 = (min + mid) / 2
+              const q3 = (mid + max) / 2
+              return [min, q1, mid, q3, max].map((v, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  left: `${(v - min) / (max - min) * 100}%`,
+                  top: 0, width: 1,
+                  height: v === mid ? 5 : 3,
+                  background: v === mid ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
+                  transform: 'translateX(-50%)',
+                }} />
+              ))
+            }
+            const SliderRow = ({ k, label, min, max, step=1, fmt }) => (
+              <div style={{ marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>{label}</span>
+                  <input type="range" min={min} max={max} step={step} value={develop[k]}
+                    onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
                     className={styles.slider} style={{ flex: 1 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 48, textAlign: 'right', color: develop[key] !== 0 ? '#c8a96e' : '#555250' }}>
-                    {fmt ? fmt(develop[key]) : `${develop[key] > 0 ? '+' : ''}${develop[key]}`}
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: develop[k] !== 0 ? '#c8a96e' : '#555250' }}>
+                    {fmt ? fmt(develop[k]) : `${develop[k] > 0 ? '+' : ''}${develop[k]}`}
                   </span>
                 </div>
-              ))}
-              <div className={styles.btnRow} style={{ marginTop: 4 }}>
-                <button className={styles.btnSecondary}
-                  onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0 }))}
-                  disabled={['exposure','contrast','highlights','shadows','whites','blacks'].every(k => develop[k] === 0)}>
-                  Reset
-                </button>
+                <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{ticks(min, max)}</div>
               </div>
-            </div>
-          </AccordionDrawer>
+            )
+            return (
+              <>
+                <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
+                  <div className={styles.drawerControls}>
+                    <SliderRow k="temperature" label="Temp" min={-100} max={100} fmt={v => v > 0 ? `+${v} ☀` : v < 0 ? `${v} ❄` : '0'} />
+                    <SliderRow k="tint" label="Tint" min={-100} max={100} />
+                    <div className={styles.btnRow} style={{ marginTop: 2 }}>
+                      <button className={styles.btnSecondary}
+                        onClick={() => setDevelop(d => ({ ...d, temperature:0, tint:0 }))}
+                        disabled={develop.temperature === 0 && develop.tint === 0}>Reset</button>
+                    </div>
+                  </div>
+                </AccordionDrawer>
 
-          <AccordionDrawer title="Presence" isOpen={openDrawer.includes('presence')} onToggle={() => toggleDrawer('presence')}>
-            <div className={styles.drawerControls}>
-              {[
-                { key: 'texture',    label: 'Texture'    },
-                { key: 'clarity',    label: 'Clarity'    },
-                { key: 'dehaze',     label: 'Dehaze'     },
-                { key: 'vibrance',   label: 'Vibrance'   },
-                { key: 'saturation', label: 'Saturation' },
-              ].map(({ key, label }) => (
-                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 62, flexShrink: 0 }}>{label}</span>
-                  <input type="range" min="-100" max="100" step="1" value={develop[key]}
-                    onChange={e => setDevelop(d => ({ ...d, [key]: Number(e.target.value) }))}
-                    className={styles.slider} style={{ flex: 1 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 36, textAlign: 'right', color: develop[key] !== 0 ? '#c8a96e' : '#555250' }}>
-                    {`${develop[key] > 0 ? '+' : ''}${develop[key]}`}
-                  </span>
-                </div>
-              ))}
-              <div className={styles.btnRow} style={{ marginTop: 4 }}>
-                <button className={styles.btnSecondary}
-                  onClick={() => setDevelop(d => ({ ...d, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }))}
-                  disabled={['texture','clarity','dehaze','vibrance','saturation'].every(k => develop[k] === 0)}>
-                  Reset
-                </button>
-              </div>
-            </div>
-          </AccordionDrawer>
+                <AccordionDrawer title="Basic" isOpen={openDrawer.includes('basic')} onToggle={() => toggleDrawer('basic')}>
+                  <div className={styles.drawerControls}>
+                    <SliderRow k="exposure" label="Exposure" min={-5} max={5} step={0.1} fmt={v => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)} EV`} />
+                    <SliderRow k="contrast"   label="Contrast"   min={-100} max={100} />
+                    <SliderRow k="highlights" label="Highlights" min={-100} max={100} />
+                    <SliderRow k="shadows"    label="Shadows"    min={-100} max={100} />
+                    <SliderRow k="whites"     label="Whites"     min={-100} max={100} />
+                    <SliderRow k="blacks"     label="Blacks"     min={-100} max={100} />
+                    <div className={styles.btnRow} style={{ marginTop: 2 }}>
+                      <button className={styles.btnSecondary}
+                        onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0 }))}
+                        disabled={['exposure','contrast','highlights','shadows','whites','blacks'].every(k => develop[k] === 0)}>Reset</button>
+                    </div>
+                  </div>
+                </AccordionDrawer>
+
+                <AccordionDrawer title="Presence" isOpen={openDrawer.includes('presence')} onToggle={() => toggleDrawer('presence')}>
+                  <div className={styles.drawerControls}>
+                    <SliderRow k="texture"    label="Texture"    min={-100} max={100} />
+                    <SliderRow k="clarity"    label="Clarity"    min={-100} max={100} />
+                    <SliderRow k="dehaze"     label="Dehaze"     min={-100} max={100} />
+                    <SliderRow k="vibrance"   label="Vibrance"   min={-100} max={100} />
+                    <SliderRow k="saturation" label="Saturation" min={-100} max={100} />
+                    <div className={styles.btnRow} style={{ marginTop: 2 }}>
+                      <button className={styles.btnSecondary}
+                        onClick={() => setDevelop(d => ({ ...d, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }))}
+                        disabled={['texture','clarity','dehaze','vibrance','saturation'].every(k => develop[k] === 0)}>Reset</button>
+                    </div>
+                  </div>
+                </AccordionDrawer>
+              </>
+            )
+          })()}
 
           <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
             <div className={styles.drawerControls}>
