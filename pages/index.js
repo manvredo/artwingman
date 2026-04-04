@@ -71,7 +71,7 @@ export default function Home() {
   const [clickPos, setClickPos] = useState(null)
   const [clickImagePos, setClickImagePos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
-  const [compGray, setCompGray] = useState(null)
+  const [compGray, setCompGray] = useState(102)
   const [colorSteps, setColorSteps] = useState(10)
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
@@ -743,29 +743,19 @@ export default function Home() {
                   >
                     {/* X Button */}
                     <button
-                      onClick={() => { setShowColorOverlay(false); setCompGray(null) }}
+                      onClick={() => { setShowColorOverlay(false); setCompGray(102) }}
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
-                    {/* Gray comparison circles */}
-                    <div style={{ position: 'absolute', top: 12, right: 52, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                      {grayTones.map((g, i) => (
-                        <div key={g} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                          <div
-                            onClick={e => { e.stopPropagation(); setCompGray(prev => prev === g ? null : g) }}
-                            style={{
-                              width: 32, height: 32, borderRadius: 4,
-                              background: g,
-                              cursor: 'pointer',
-                              border: compGray === g ? '3px solid #c8a96e' : '2px solid rgba(255,255,255,0.3)',
-                              boxSizing: 'border-box',
-                            }}
-                          />
-                          <div style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>
-                            {g.slice(1)}
-                          </div>
-                          {i === 3 && <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>◆</div>}
-                        </div>
-                      ))}
+                    {/* Gray comparison slider */}
+                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 16, left: 90, right: 52, display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 4 }}>
+                      <input
+                        type="range" min="0" max="255" value={compGray}
+                        onChange={e => setCompGray(Number(e.target.value))}
+                        style={{ width: '100%', cursor: 'pointer' }}
+                      />
+                      <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                        #{compGray.toString(16).padStart(2,'0').repeat(3)}
+                      </div>
                     </div>
                     {/* Color info */}
                     <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
@@ -775,9 +765,7 @@ export default function Home() {
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Value: {color.value.toFixed(1)}</div>
                     <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#000000' : '#ffffff' }}>Chroma: {color.chroma.toFixed(1)}</div>
                     {/* Gray comparison strip */}
-                    {compGray && (
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '25%', background: compGray, borderRadius: '0 0 16px 16px' }} />
-                    )}
+                    <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 72, background: `rgb(${compGray},${compGray},${compGray})`, borderRadius: '16px 0 0 16px' }} />
                   </div>
                 </div>
               )}
