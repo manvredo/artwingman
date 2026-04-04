@@ -71,7 +71,7 @@ export default function Home() {
   const [clickPos, setClickPos] = useState(null)
   const [clickImagePos, setClickImagePos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
-  const [compGray, setCompGray] = useState(102)
+  const [compGray, setCompGray] = useState(3)
   const [colorSteps, setColorSteps] = useState(10)
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
@@ -743,23 +743,27 @@ export default function Home() {
                   >
                     {/* X Button */}
                     <button
-                      onClick={() => { setShowColorOverlay(false); setCompGray(102) }}
+                      onClick={() => { setShowColorOverlay(false); setCompGray(3) }}
                       style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
                     >×</button>
                     {/* Gray comparison strip with embedded slider */}
                     <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 228, borderRadius: '16px 0 0 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ background: '#1a1a1a', padding: '10px 0 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                      {/* 7 gray fields with slider overlaid */}
+                      <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', height: '100%' }}>
+                          {grayTones.map((g, i) => (
+                            <div key={i} style={{ flex: 1, background: g, outline: compGray === i ? '2px solid #c8a96e' : 'none', outlineOffset: -2 }} />
+                          ))}
+                        </div>
                         <input
-                          type="range" min="0" max="255" value={compGray}
+                          type="range" min="0" max="6" step="1" value={compGray}
                           onChange={e => setCompGray(Number(e.target.value))}
                           className={styles.slider}
-                          style={{ width: 160 }}
+                          style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)', background: 'transparent' }}
                         />
-                        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#8a8680', textAlign: 'center' }}>
-                          #{compGray.toString(16).padStart(2,'0').repeat(3)}
-                        </div>
                       </div>
-                      <div style={{ flex: 1, background: `rgb(${compGray},${compGray},${compGray})` }} />
+                      {/* Gray area */}
+                      <div style={{ flex: 1, background: grayTones[compGray] }} />
                     </div>
                     {/* Color info */}
                     <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#000000' : '#ffffff' }}>
