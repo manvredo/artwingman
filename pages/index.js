@@ -87,6 +87,7 @@ export default function Home() {
   const applyValueGroupsRef = useRef(null)
   const paletteWorkerRef = useRef(null)
   const developWorkerRef = useRef(null)
+  const developGenRef = useRef(0)
   const lutFileRef = useRef(null)
 
   // Munsell neutrals N8/ → N2/ (perceptually uniform), N5/ in centre (index 3)
@@ -260,6 +261,13 @@ export default function Home() {
     ctx.drawImage(image, 0, 0, mc.width, mc.height)
   }, [image])
 
+  // Persistent develop worker — created once, never recreated
+  useEffect(() => {
+    const w = new Worker('/filterWorker.js')
+    developWorkerRef.current = w
+    return () => { w.terminate(); developWorkerRef.current = null }
+  }, [])
+
   const applyValueGroups = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -326,25 +334,25 @@ export default function Home() {
 
   const applyDevelop = useCallback((dev, lut = null, lsz = 0, lint = 100) => {
     const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
+    const worker = developWorkerRef.current
+    if (!canvas || !originalImageDataRef.current || !worker) return
+    const gen = ++developGenRef.current
     const src = originalImageDataRef.current
-    const buffer = new Uint8ClampedArray(src.data).buffer
-    if (developWorkerRef.current) developWorkerRef.current.terminate()
-    developWorkerRef.current = new Worker('/filterWorker.js')
-    developWorkerRef.current.onmessage = (e) => {
+    const buffer = src.data.slice().buffer
+    worker.onmessage = (e) => {
+      if (e.data.gen !== gen) return   // stale result — discard
       const out = new Uint8ClampedArray(e.data.out)
       canvas.getContext('2d', { willReadFrequently: true })
         .putImageData(new ImageData(out, src.width, src.height), 0, 0)
-      developWorkerRef.current = null
     }
-    const msg = { filter: 'develop', ...dev, buffer, width: src.width, height: src.height, lutSize: lsz, lutIntensity: lint }
+    const msg = { filter: 'develop', gen, ...dev, buffer, width: src.width, height: src.height, lutSize: lsz, lutIntensity: lint }
     const transferables = [buffer]
     if (lut && lsz > 1) {
       const lutBuf = lut.slice().buffer
       msg.lutBuffer = lutBuf
       transferables.push(lutBuf)
     }
-    developWorkerRef.current.postMessage(msg, transferables)
+    worker.postMessage(msg, transferables)
   }, [])
 
   useEffect(() => {
@@ -356,8 +364,8 @@ export default function Home() {
       return
     }
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
-    const t1 = setTimeout(() => applyDevelop({ ...develop, clarity: 0, texture: 0 }, lutData, lutSize, lutIntensity), 150)
-    const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 800) : null
+    const t1 = setTimeout(() => applyDevelop({ ...develop, clarity: 0, texture: 0 }, lutData, lutSize, lutIntensity), 40)
+    const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 600) : null
     return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
   }, [develop, applyDevelop, lutData, lutSize, lutIntensity])
 

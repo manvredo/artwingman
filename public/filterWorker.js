@@ -372,5 +372,5 @@ self.addEventListener('message', function(e) {
     }
   }
 
-  self.postMessage({ out: out.buffer }, [out.buffer])
+  self.postMessage({ out: out.buffer, gen: e.data.gen }, [out.buffer])
 })
