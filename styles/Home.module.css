@@ -211,20 +211,44 @@
 .slider {
   flex: 1;
   appearance: none;
+  height: 22px;          /* large hit area so thumb is actually grabbable */
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.slider::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 2px;
   background: rgba(255,255,255,0.1);
-  outline: none;
-  cursor: pointer;
 }
 
 .slider::-webkit-slider-thumb {
+  appearance: none;
+  margin-top: -5px;      /* center 13px thumb on 3px track */
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #c8a96e;
+  cursor: pointer;
+}
+
+.slider::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+}
+
+.slider::-moz-range-thumb {
   appearance: none;
   width: 13px;
   height: 13px;
   border-radius: 50%;
   background: #c8a96e;
   cursor: pointer;
+  border: none;
 }
 
 .sliderThin::-webkit-slider-thumb {
