@@ -507,7 +507,7 @@ export default function Home() {
                         background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
                         border: '1px solid rgba(255,255,255,0.08)',
                       }} />
-                      <span style={{ fontSize: 9, color: '#8a8680', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.3 }}>
+                      <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.3 }}>
                         {m ? `${m.hue}` : '—'}<br/>
                         {m ? `${m.value}/${m.chroma}` : ''}
                       </span>
