@@ -470,7 +470,7 @@ export default function Home() {
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="3" max="10" step="1" value={valueSteps}
+                <input type="range" min="2" max="10" step="1" value={valueSteps}
                   onChange={e => setValueSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{valueSteps}</span>
