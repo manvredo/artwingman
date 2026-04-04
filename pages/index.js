@@ -229,11 +229,6 @@ export default function Home() {
   }, [image])
 
   useEffect(() => {
-    if (!image || !originalImageDataRef.current) return
-    applyValueGroups()
-  }, [applyValueGroups])
-
-  useEffect(() => {
     const mc = minimapCanvasRef.current
     if (!mc || !image) return
     const ctx = mc.getContext('2d')
@@ -264,6 +259,11 @@ export default function Home() {
     else setValueRating('red')
   }, [valueSteps])
   applyValueGroupsRef.current = applyValueGroups
+
+  useEffect(() => {
+    if (!image || !originalImageDataRef.current) return
+    applyValueGroups()
+  }, [applyValueGroups])
 
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
