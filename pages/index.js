@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
@@ -89,6 +90,8 @@ export default function Home() {
   const developWorkerRef = useRef(null)
   const developGenRef = useRef(0)
   const lutFileRef = useRef(null)
+  const glCanvasRef = useRef(null)
+  const glStateRef = useRef(null)
 
   // Munsell neutrals N8/ → N2/ (perceptually uniform), N5/ in centre (index 3)
   const grayTones = ['#c6c6c6', '#aaaaaa', '#8f8f8f', '#737373', '#565656', '#3b3b3b', '#252525']
@@ -127,6 +130,7 @@ export default function Home() {
             const ctx = canvas.getContext('2d', { willReadFrequently: true })
             ctx.drawImage(img, 0, 0)
             originalImageDataRef.current = ctx.getImageData(0, 0, img.width, img.height)
+            if (glStateRef.current) glUploadImage(glStateRef.current, img)
             const src = originalImageDataRef.current
             const buffer = new Uint8ClampedArray(src.data).buffer
             if (paletteWorkerRef.current) paletteWorkerRef.current.terminate()
@@ -261,11 +265,22 @@ export default function Home() {
     ctx.drawImage(image, 0, 0, mc.width, mc.height)
   }, [image])
 
-  // Persistent develop worker — created once, never recreated
+  // Sync LUT to GL state whenever it changes
   useEffect(() => {
-    const w = new Worker('/filterWorker.js')
-    developWorkerRef.current = w
-    return () => { w.terminate(); developWorkerRef.current = null }
+    if (glStateRef.current) glUpdateLUT(glStateRef.current, lutData, lutSize)
+  }, [lutData, lutSize])
+
+  // Init WebGL develop pipeline once on mount; fall back to persistent worker if unavailable
+  useEffect(() => {
+    if (!glCanvasRef.current) return
+    const state = initGL(glCanvasRef.current)
+    if (state) {
+      glStateRef.current = state
+    } else {
+      const w = new Worker('/filterWorker.js')
+      developWorkerRef.current = w
+      return () => { w.terminate(); developWorkerRef.current = null }
+    }
   }, [])
 
   const applyValueGroups = useCallback(() => {
@@ -364,9 +379,24 @@ export default function Home() {
       return
     }
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
-    const t1 = setTimeout(() => applyDevelop({ ...develop, clarity: 0, texture: 0 }, lutData, lutSize, lutIntensity), 40)
-    const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 600) : null
-    return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
+    const gl = glStateRef.current
+    if (gl && gl.w > 1) {
+      // GPU path — near-instantaneous, minimal debounce
+      const t1 = setTimeout(() => {
+        const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
+        if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx)
+      }, 0)
+      const t2 = hasExpensive ? setTimeout(() => {
+        const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
+        if (ctx) glRunDevelop(gl, { ...develop, lutIntensity }, ctx)
+      }, 50) : null
+      return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
+    } else {
+      // Worker fallback
+      const t1 = setTimeout(() => applyDevelop({ ...develop, clarity: 0, texture: 0 }, lutData, lutSize, lutIntensity), 40)
+      const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 600) : null
+      return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
+    }
   }, [develop, applyDevelop, lutData, lutSize, lutIntensity])
 
   const applyFilter = useCallback((filter, strength) => {
@@ -1199,6 +1229,8 @@ export default function Home() {
 
         </div>
       </div>
+      {/* Hidden WebGL canvas for GPU develop pipeline */}
+      <canvas ref={glCanvasRef} style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }} />
     </div>
   )
 }
