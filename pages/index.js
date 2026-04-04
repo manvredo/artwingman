@@ -67,7 +67,7 @@ export default function Home() {
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
-  const [clickCenterPos, setClickCenterPos] = useState(null)
+  const [clickImagePos, setClickImagePos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(null)
   const [colorSteps, setColorSteps] = useState(10)
@@ -97,7 +97,7 @@ export default function Home() {
         setActiveFilter(null)
         setViewport({ zoom: 1, panX: 0, panY: 0 })
         setClickPos(null)
-        setClickCenterPos(null)
+        setClickImagePos(null)
         setShowColorDecreased(false)
         setColorRating(null)
         setColorClusters([])
@@ -148,9 +148,11 @@ export default function Home() {
     const wrap = canvasWrapRef.current
     if (wrap) {
       const wr = wrap.getBoundingClientRect()
-      setClickCenterPos({ x: e.clientX - wr.left - wr.width / 2, y: e.clientY - wr.top - wr.height / 2 })
+      const sx = e.clientX - wr.left - wr.width / 2
+      const sy = e.clientY - wr.top - wr.height / 2
+      setClickImagePos({ x: (sx - viewport.panX) / viewport.zoom, y: (sy - viewport.panY) / viewport.zoom })
     }
-  }, [imgDims, sampleRadius, sampleAt, viewport.zoom])
+  }, [imgDims, sampleRadius, sampleAt, viewport.zoom, viewport.panX, viewport.panY])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
@@ -439,14 +441,15 @@ export default function Home() {
     setViewport({ zoom: wrapSz.h / baseH, panX: 0, panY: 0 })
   }, [imgDims, wrapSz])
 
+  const ZOOM_TO_CLICK_LEVEL = 4
   const zoomToClick = useCallback(() => {
-    if (!clickCenterPos) return
-    setViewport(v => {
-      const newZoom = Math.min(v.zoom * 2, 12)
-      const r = newZoom / v.zoom
-      return { zoom: newZoom, panX: clickCenterPos.x * (1 - r) + v.panX * r, panY: clickCenterPos.y * (1 - r) + v.panY * r }
+    if (!clickImagePos) return
+    setViewport({
+      zoom: ZOOM_TO_CLICK_LEVEL,
+      panX: -clickImagePos.x * ZOOM_TO_CLICK_LEVEL,
+      panY: -clickImagePos.y * ZOOM_TO_CLICK_LEVEL,
     })
-  }, [clickCenterPos])
+  }, [clickImagePos])
 
   const hasColor = color.r !== null
 
@@ -817,7 +820,7 @@ export default function Home() {
           </div>
         )}
         <div className={styles.viewBtnStrip}>
-          <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickCenterPos}>
+          <button className={styles.viewBtn} onClick={zoomToClick} title="Zum Kreuz zoomen" disabled={!clickImagePos}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
               <line x1="8" y1="1" x2="8" y2="4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
