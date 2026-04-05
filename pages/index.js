@@ -1144,7 +1144,7 @@ export default function Home() {
                 <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '8px 16px 0' }}>
                   Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}
                 </div>
-                <div style={{ flex: 1, minHeight: 0 }}>
+                <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
                   <MunsellChart
                     hueAngle={color.hueAngle}
                     hueName={color.hueName}
