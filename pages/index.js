@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
-import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop } from '../lib/developGL'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
 import HueWheel from '../components/HueWheel'
@@ -321,20 +321,27 @@ export default function Home() {
   const applyValueGroups = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = new ImageData(
-      new Uint8ClampedArray(originalImageDataRef.current.data),
-      originalImageDataRef.current.width,
-      originalImageDataRef.current.height
-    )
-    const data = imageData.data
-    for (let i = 0; i < data.length; i += 4) {
-      const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2]
-      const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
-      const grayVal = Math.round((group / (valueSteps - 1)) * 255)
-      data[i] = data[i+1] = data[i+2] = grayVal
+    const gl = glStateRef.current
+    if (gl && gl.w > 1) {
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      glRunValueGroups(gl, valueSteps, ctx)
+    } else {
+      // CPU fallback
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const imageData = new ImageData(
+        new Uint8ClampedArray(originalImageDataRef.current.data),
+        originalImageDataRef.current.width,
+        originalImageDataRef.current.height
+      )
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2]
+        const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
+        const grayVal = Math.round((group / (valueSteps - 1)) * 255)
+        data[i] = data[i+1] = data[i+2] = grayVal
+      }
+      ctx.putImageData(imageData, 0, 0)
     }
-    ctx.putImageData(imageData, 0, 0)
     setShowGray(true)
     if (valueSteps <= 4) setValueRating('green')
     else if (valueSteps <= 7) setValueRating('yellow')
