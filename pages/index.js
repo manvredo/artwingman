@@ -399,6 +399,16 @@ export default function Home() {
     setColorClusters([])
   }, [])
 
+  const applyOriginalColor = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    ctx.putImageData(originalImageDataRef.current, 0, 0)
+    setShowColorDecreased(true)
+    setColorRating(null)
+    setColorClusters([])
+  }, [])
+
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -676,6 +686,9 @@ export default function Home() {
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
                   Analyze
+                </button>
+                <button className={styles.btnSecondary} onClick={applyOriginalColor} disabled={!image}>
+                  Original
                 </button>
                 {showColorDecreased && (
                   <button className={styles.btnSecondary} onClick={resetColorDecreaser}>
