@@ -1014,55 +1014,85 @@ export default function Home() {
             onClick={() => setShowColorOverlay(false)}
             onMouseDown={e => e.stopPropagation()}
             onMouseUp={e => e.stopPropagation()}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}
           >
             <div
               onClick={e => e.stopPropagation()}
               style={{
                 position: 'relative',
-                width: '60%', height: '80%',
-                background: `rgb(${color.r},${color.g},${color.b})`,
+                width: '75%', height: '88%',
+                background: '#1a1a1a',
                 borderRadius: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
               }}
             >
               {/* X Button */}
               <button
                 onClick={() => { setShowColorOverlay(false); setCompGray(3) }}
-                style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.3)', color: 'white', fontSize: 16, cursor: 'pointer' }}
+                style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', fontSize: 16, cursor: 'pointer', zIndex: 1 }}
               >×</button>
-              {/* Gray comparison strip with embedded slider */}
-              <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 228, borderRadius: '16px 0 0 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
-                  <div style={{ display: 'flex', height: '100%' }}>
-                    {grayTones.map((g, i) => (
-                      <div key={i} style={{
-                        flex: 1, background: g,
-                        outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
-                        outlineOffset: -2,
-                      }} />
-                    ))}
+
+              {/* Top section: color swatch + gray comparison + info */}
+              <div style={{ display: 'flex', height: 220, flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                {/* Color swatch */}
+                <div style={{ width: 220, flexShrink: 0, background: `rgb(${color.r},${color.g},${color.b})` }} />
+                {/* Gray comparison strip */}
+                <div onClick={e => e.stopPropagation()} style={{ width: 200, flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ position: 'relative', height: 40, flexShrink: 0 }}>
+                    <div style={{ display: 'flex', height: '100%' }}>
+                      {grayTones.map((g, i) => (
+                        <div key={i} style={{
+                          flex: 1, background: g,
+                          outline: compGray === i ? '2px solid #c8a96e' : i === 3 ? '1px solid rgba(255,255,255,0.8)' : 'none',
+                          outlineOffset: -2,
+                        }} />
+                      ))}
+                    </div>
+                    <input
+                      type="range" min="0" max="6" step="1" value={compGray}
+                      onChange={e => setCompGray(Number(e.target.value))}
+                      className={styles.sliderThin}
+                      style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)' }}
+                    />
                   </div>
-                  <input
-                    type="range" min="0" max="6" step="1" value={compGray}
-                    onChange={e => setCompGray(Number(e.target.value))}
-                    className={styles.sliderThin}
-                    style={{ position: 'absolute', top: '50%', left: 0, width: '100%', transform: 'translateY(-50%)' }}
-                  />
+                  <div style={{ flex: 1, background: grayTones[compGray], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: (8 - compGray) >= 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)', userSelect: 'none' }}>
+                      N{8 - compGray}/
+                    </span>
+                  </div>
                 </div>
-                <div style={{ flex: 1, background: grayTones[compGray], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: (8 - compGray) >= 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)', userSelect: 'none' }}>
-                    N{8 - compGray}/
-                  </span>
+                {/* Munsell info */}
+                <div style={{ flex: 1, borderLeft: '1px solid rgba(255,255,255,0.08)', padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10 }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: '#c8a96e' }}>
+                    {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Hue: {color.hue} — {color.hueName}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Value: {color.value.toFixed(1)} — {valueDescription(color.value)}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Chroma: {color.chroma.toFixed(1)} — {chromaDescription(color.chroma)}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#555250', marginTop: 4 }}>RGB {color.r}, {color.g}, {color.b}</div>
                 </div>
               </div>
-              {/* Color info */}
-              <div style={{ position: 'absolute', top: 0, left: 228, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 24, gap: 10 }}>
-                <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>
-                  {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+
+              {/* Bottom section: large MunsellChart */}
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '8px 16px 0' }}>
+                  Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}
                 </div>
-                <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Hue: {color.hue} — {color.hueName}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Value: {color.value.toFixed(1)}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: 16, color: color.value > 5 ? '#1a1a1a' : '#c8a96e' }}>Chroma: {color.chroma.toFixed(1)}</div>
+                <div style={{ flex: 1, minHeight: 0 }}>
+                  <MunsellChart
+                    hueAngle={color.hueAngle}
+                    hueName={color.hueName}
+                    hue={color.hue}
+                    value={color.value}
+                    chroma={color.chroma}
+                    color={`rgb(${color.r},${color.g},${color.b})`}
+                    onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
+                      setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
