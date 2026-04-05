@@ -349,6 +349,25 @@ export default function Home() {
   }, [valueSteps])
   applyValueGroupsRef.current = applyValueGroups
 
+  const applyOriginalBW = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const imageData = new ImageData(
+      new Uint8ClampedArray(originalImageDataRef.current.data),
+      originalImageDataRef.current.width,
+      originalImageDataRef.current.height
+    )
+    const data = imageData.data
+    for (let i = 0; i < data.length; i += 4) {
+      const lum = Math.round(0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2])
+      data[i] = data[i+1] = data[i+2] = lum
+    }
+    ctx.putImageData(imageData, 0, 0)
+    setShowGray(true)
+    setValueRating(null)
+  }, [])
+
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -621,6 +640,9 @@ export default function Home() {
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
                   Analyze
+                </button>
+                <button className={styles.btnSecondary} onClick={applyOriginalBW} disabled={!image}>
+                  S/W
                 </button>
                 {showGray && (
                   <button className={styles.btnSecondary} onClick={resetCanvas}>
