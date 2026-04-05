@@ -1096,10 +1096,7 @@ export default function Home() {
                 style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: 'white', fontSize: 16, cursor: 'pointer', zIndex: 1 }}
               >×</button>
 
-              {/* Big color field */}
-              <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})` }} />
-
-              {/* Right panel: gray strip + Munsell info */}
+              {/* Left panel: gray strip + Munsell info */}
               <div style={{ width: 220, flexShrink: 0, background: '#1a1a1a', display: 'flex', flexDirection: 'column' }}>
                 {/* Gray comparison strip */}
                 <div onClick={e => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -1136,6 +1133,9 @@ export default function Home() {
                   <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', marginTop: 2 }}>RGB {color.r}, {color.g}, {color.b}</div>
                 </div>
               </div>
+
+              {/* Big color field */}
+              <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})` }} />
             </div>
           </div>
         )}
