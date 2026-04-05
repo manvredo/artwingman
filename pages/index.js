@@ -337,7 +337,7 @@ export default function Home() {
       for (let i = 0; i < data.length; i += 4) {
         const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2]
         const group = Math.min(valueSteps - 1, Math.floor((lum / 255) * valueSteps))
-        const grayVal = Math.round((group / (valueSteps - 1)) * 255)
+        const grayVal = Math.round((0.02 + (group / (valueSteps - 1)) * 0.98) * 255)
         data[i] = data[i+1] = data[i+2] = grayVal
       }
       ctx.putImageData(imageData, 0, 0)
@@ -636,7 +636,7 @@ export default function Home() {
               <div className={styles.valueSteps}>
                 {Array.from({ length: valueSteps }).map((_, i) => (
                   <div key={i} className={styles.valueStep}
-                    style={{ background: `hsl(0,0%,${Math.round((i / (valueSteps - 1)) * 100)}%)` }} />
+                    style={{ background: `hsl(0,0%,${Math.round(2 + (i / (valueSteps - 1)) * 98)}%)` }} />
                 ))}
               </div>
             </div>
