@@ -672,7 +672,8 @@ export default function Home() {
                       .sort((a, b) => (0.2126*a.r + 0.7152*a.g + 0.0722*a.b) - (0.2126*b.r + 0.7152*b.g + 0.0722*b.b))
                       .map((c, i) => (
                         <div key={i} className={styles.valueStep}
-                          style={{ background: `rgb(${c.r},${c.g},${c.b})` }} />
+                          style={{ background: `rgb(${c.r},${c.g},${c.b})`, cursor: 'pointer' }}
+                          onClick={() => { setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsell(c.r, c.g, c.b) }); setShowColorOverlay(true) }} />
                       ))
                   : Array.from({ length: colorSteps }).map((_, i) => (
                       <div key={i} className={styles.valueStep}
@@ -699,7 +700,10 @@ export default function Home() {
                         width: '100%', height: 36, borderRadius: 3,
                         background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
                         border: '1px solid rgba(255,255,255,0.08)',
-                      }} />
+                        cursor: c ? 'pointer' : 'default',
+                      }}
+                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsell(c.r, c.g, c.b) }); setShowColorOverlay(true) }}
+                      />
                       <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.3 }}>
                         {m ? `${m.hue}` : '—'}<br/>
                         {m ? `${m.value}/${m.chroma}` : ''}
