@@ -1087,9 +1087,9 @@ export default function Home() {
                 width: '75%', height: '88%',
                 background: '#1a1a1a',
                 borderRadius: 16,
-                display: 'flex',
-                flexDirection: 'column',
                 overflow: 'hidden',
+                display: 'grid',
+                gridTemplateRows: '220px 28px 1fr',
               }}
             >
               {/* X Button */}
@@ -1098,8 +1098,8 @@ export default function Home() {
                 style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', fontSize: 16, cursor: 'pointer', zIndex: 1 }}
               >×</button>
 
-              {/* Top section: color swatch + gray comparison + info */}
-              <div style={{ display: 'flex', height: 220, flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              {/* Row 1: color swatch + gray comparison + info (220px) */}
+              <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                 {/* Color swatch */}
                 <div style={{ width: 220, flexShrink: 0, background: `rgb(${color.r},${color.g},${color.b})` }} />
                 {/* Gray comparison strip */}
@@ -1139,24 +1139,24 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Bottom section: large MunsellChart */}
-              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '8px 16px 0' }}>
-                  Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}
-                </div>
-                <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
-                  <MunsellChart
-                    hueAngle={color.hueAngle}
-                    hueName={color.hueName}
-                    hue={color.hue}
-                    value={color.value}
-                    chroma={color.chroma}
-                    color={`rgb(${color.r},${color.g},${color.b})`}
-                    onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
-                      setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
-                    }}
-                  />
-                </div>
+              {/* Row 2: chart label (28px) */}
+              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '8px 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}
+              </div>
+
+              {/* Row 3: MunsellChart fills remaining space */}
+              <div style={{ overflow: 'hidden', display: 'flex' }}>
+                <MunsellChart
+                  hueAngle={color.hueAngle}
+                  hueName={color.hueName}
+                  hue={color.hue}
+                  value={color.value}
+                  chroma={color.chroma}
+                  color={`rgb(${color.r},${color.g},${color.b})`}
+                  onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
+                    setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
+                  }}
+                />
               </div>
             </div>
           </div>
