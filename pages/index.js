@@ -763,9 +763,7 @@ export default function Home() {
               {/* Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: `repeat(${paletteCount <= 8 ? 4 : paletteCount <= 12 ? 4 : 6}, 1fr)`, gap: 3 }}>
                 {(paletteClusters.length > 0
-                  ? [...paletteClusters].sort((a, b) =>
-                      (0.2126*b.r + 0.7152*b.g + 0.0722*b.b) - (0.2126*a.r + 0.7152*a.g + 0.0722*a.b)
-                    ).slice(0, paletteCount)
+                  ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
                   : Array.from({ length: paletteCount }, () => null)
                 ).map((c, i) => {
                   const m = c ? rgbToMunsell(c.r, c.g, c.b) : null
