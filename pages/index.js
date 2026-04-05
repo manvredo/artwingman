@@ -1131,12 +1131,15 @@ export default function Home() {
 
               {/* Big color field */}
               <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})`, position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, pointerEvents: 'none' }}>
+                <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
                   <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: color.value > 5 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }}>
                     {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                   </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: color.value > 5 ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: color.value > 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)' }}>
                     {color.hueName}
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: color.value > 5 ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                    {valueDescription(color.value)} · {chromaDescription(color.chroma)}
                   </div>
                 </div>
               </div>
