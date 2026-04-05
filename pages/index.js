@@ -649,7 +649,7 @@ export default function Home() {
 
           <div className={styles.accordionSection}>Analyze</div>
 
-          <AccordionDrawer title="Value Groups" isOpen={true} onToggle={() => {}} noToggle>
+          <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
@@ -692,7 +692,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Color Groups" isOpen={true} onToggle={() => {}} noToggle>
+          <AccordionDrawer title="Color Groups" isOpen={openDrawer.includes('color')} onToggle={() => toggleDrawer('color')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
@@ -744,7 +744,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Color Palette" isOpen={true} onToggle={() => {}} noToggle>
+          <AccordionDrawer title="Color Palette" isOpen={openDrawer.includes('palette')} onToggle={() => toggleDrawer('palette')}>
             <div className={styles.drawerResult}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
                 {(paletteClusters.length > 0
