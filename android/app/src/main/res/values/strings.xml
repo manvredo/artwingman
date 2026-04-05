@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">artwingman</string>
+    <string name="title_activity_main">artwingman</string>
+    <string name="package_name">com.artwingman.app</string>
+    <string name="custom_url_scheme">com.artwingman.app</string>
+</resources>
