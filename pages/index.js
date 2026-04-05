@@ -1084,27 +1084,26 @@ export default function Home() {
               onClick={e => e.stopPropagation()}
               style={{
                 position: 'relative',
-                width: '75%', height: '88%',
-                background: '#1a1a1a',
+                width: '70%', height: '80%',
                 borderRadius: 16,
                 overflow: 'hidden',
-                display: 'grid',
-                gridTemplateRows: '220px 28px 1fr',
+                display: 'flex',
               }}
             >
               {/* X Button */}
               <button
                 onClick={() => { setShowColorOverlay(false); setCompGray(3) }}
-                style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', fontSize: 16, cursor: 'pointer', zIndex: 1 }}
+                style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: 'white', fontSize: 16, cursor: 'pointer', zIndex: 1 }}
               >×</button>
 
-              {/* Row 1: color swatch + gray comparison + info (220px) */}
-              <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                {/* Color swatch */}
-                <div style={{ width: 220, flexShrink: 0, background: `rgb(${color.r},${color.g},${color.b})` }} />
+              {/* Big color field */}
+              <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})` }} />
+
+              {/* Right panel: gray strip + Munsell info */}
+              <div style={{ width: 220, flexShrink: 0, background: '#1a1a1a', display: 'flex', flexDirection: 'column' }}>
                 {/* Gray comparison strip */}
-                <div onClick={e => e.stopPropagation()} style={{ width: 200, flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ position: 'relative', height: 40, flexShrink: 0 }}>
+                <div onClick={e => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div style={{ position: 'relative', height: 48, flexShrink: 0 }}>
                     <div style={{ display: 'flex', height: '100%' }}>
                       {grayTones.map((g, i) => (
                         <div key={i} style={{
@@ -1122,41 +1121,20 @@ export default function Home() {
                     />
                   </div>
                   <div style={{ flex: 1, background: grayTones[compGray], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: (8 - compGray) >= 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)', userSelect: 'none' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: (8 - compGray) >= 5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)', userSelect: 'none' }}>
                       N{8 - compGray}/
                     </span>
                   </div>
                 </div>
                 {/* Munsell info */}
-                <div style={{ flex: 1, borderLeft: '1px solid rgba(255,255,255,0.08)', padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10 }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 600, color: '#c8a96e' }}>
+                <div style={{ padding: '16px 16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 600, color: '#c8a96e' }}>
                     {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                   </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Hue: {color.hue} — {color.hueName}</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Value: {color.value.toFixed(1)} — {valueDescription(color.value)}</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 15, color: '#a8a4a0' }}>Chroma: {color.chroma.toFixed(1)} — {chromaDescription(color.chroma)}</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#555250', marginTop: 4 }}>RGB {color.r}, {color.g}, {color.b}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#a8a4a0' }}>{color.hueName}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#a8a4a0' }}>V {color.value.toFixed(1)} · C {color.chroma.toFixed(1)}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', marginTop: 2 }}>RGB {color.r}, {color.g}, {color.b}</div>
                 </div>
-              </div>
-
-              {/* Row 2: chart label (28px) */}
-              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '8px 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}
-              </div>
-
-              {/* Row 3: MunsellChart fills remaining space */}
-              <div style={{ overflow: 'hidden', display: 'flex' }}>
-                <MunsellChart
-                  hueAngle={color.hueAngle}
-                  hueName={color.hueName}
-                  hue={color.hue}
-                  value={color.value}
-                  chroma={color.chroma}
-                  color={`rgb(${color.r},${color.g},${color.b})`}
-                  onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
-                    setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
-                  }}
-                />
               </div>
             </div>
           </div>
