@@ -1123,19 +1123,23 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                {/* Munsell info */}
-                <div style={{ padding: '16px 16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 600, color: '#c8a96e' }}>
-                    {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
-                  </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#a8a4a0' }}>{color.hueName}</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#a8a4a0' }}>V {color.value.toFixed(1)} · C {color.chroma.toFixed(1)}</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250', marginTop: 2 }}>RGB {color.r}, {color.g}, {color.b}</div>
+                {/* RGB info */}
+                <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250' }}>RGB {color.r}, {color.g}, {color.b}</div>
                 </div>
               </div>
 
               {/* Big color field */}
-              <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})` }} />
+              <div style={{ flex: 1, background: `rgb(${color.r},${color.g},${color.b})`, position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, pointerEvents: 'none' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: color.value > 5 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }}>
+                    {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: color.value > 5 ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)' }}>
+                    {color.hueName}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
