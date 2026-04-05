@@ -108,7 +108,9 @@ export default function Home() {
   const [clickImagePos, setClickImagePos] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(3)
+  const [valueSoften, setValueSoften] = useState(0)
   const [colorSteps, setColorSteps] = useState(10)
+  const [colorSoften, setColorSoften] = useState(0)
   const [showColorDecreased, setShowColorDecreased] = useState(false)
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
@@ -324,7 +326,7 @@ export default function Home() {
     const gl = glStateRef.current
     if (gl && gl.w > 1) {
       const ctx = canvas.getContext('2d', { willReadFrequently: true })
-      glRunValueGroups(gl, valueSteps, ctx)
+      glRunValueGroups(gl, valueSteps, valueSoften, ctx)
     } else {
       // CPU fallback
       const ctx = canvas.getContext('2d', { willReadFrequently: true })
@@ -346,7 +348,7 @@ export default function Home() {
     if (valueSteps <= 4) setValueRating('green')
     else if (valueSteps <= 7) setValueRating('yellow')
     else setValueRating('red')
-  }, [valueSteps])
+  }, [valueSteps, valueSoften])
   applyValueGroupsRef.current = applyValueGroups
 
   const applyOriginalBW = useCallback(() => {
@@ -375,10 +377,19 @@ export default function Home() {
     const buffer = new Uint8ClampedArray(src.data).buffer
     if (workerRef.current) workerRef.current.terminate()
     workerRef.current = new Worker('/filterWorker.js')
+    const soften = colorSoften
     workerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      canvas.getContext('2d', { willReadFrequently: true })
-        .putImageData(new ImageData(out, src.width, src.height), 0, 0)
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
+      if (soften > 0) {
+        const tmp = document.createElement('canvas')
+        tmp.width = src.width; tmp.height = src.height
+        tmp.getContext('2d').drawImage(canvas, 0, 0)
+        ctx.filter = `blur(${soften}px)`
+        ctx.drawImage(tmp, 0, 0)
+        ctx.filter = 'none'
+      }
       setShowColorDecreased(true)
       setColorClusters(e.data.clusters || [])
       workerRef.current = null
@@ -387,7 +398,7 @@ export default function Home() {
       { filter: 'kmeans', strength: colorSteps, buffer, width: src.width, height: src.height },
       [buffer]
     )
-  }, [colorSteps])
+  }, [colorSteps, colorSoften])
 
   const resetColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
@@ -647,6 +658,13 @@ export default function Home() {
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{valueSteps}</span>
               </div>
+              <div className={styles.sectionLabel}>Soften</div>
+              <div className={styles.sliderRow}>
+                <input type="range" min="0" max="20" step="1" value={valueSoften}
+                  onChange={e => setValueSoften(Number(e.target.value))}
+                  className={styles.slider} />
+                <span className={styles.sliderVal}>{valueSoften === 0 ? 'off' : valueSoften}</span>
+              </div>
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
                   Analyze
@@ -682,6 +700,13 @@ export default function Home() {
                   onChange={e => setColorSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
+              </div>
+              <div className={styles.sectionLabel}>Soften</div>
+              <div className={styles.sliderRow}>
+                <input type="range" min="0" max="20" step="1" value={colorSoften}
+                  onChange={e => setColorSoften(Number(e.target.value))}
+                  className={styles.slider} />
+                <span className={styles.sliderVal}>{colorSoften === 0 ? 'off' : colorSoften}</span>
               </div>
               <div className={styles.btnRow}>
                 <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
