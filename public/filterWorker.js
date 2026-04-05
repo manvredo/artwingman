@@ -98,7 +98,7 @@ self.addEventListener('message', function (e) {
     }
 
   } else if (filter === 'kmeans' || filter === 'kmeans-analyze') {
-    const k = Math.max(2, Math.min(10, strength))
+    const k = Math.max(2, Math.min(20, strength))
     const pixelCount = w * h
 
     // Sample up to 8000 pixels for training
