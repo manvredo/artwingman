@@ -213,6 +213,7 @@ export default function Home() {
     const scaleY = imgDims.h / rect.height
     const px = Math.floor((e.clientX - rect.left) * scaleX)
     const py = Math.floor((e.clientY - rect.top) * scaleY)
+    if (px < 0 || py < 0 || px >= imgDims.w || py >= imgDims.h) return
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
