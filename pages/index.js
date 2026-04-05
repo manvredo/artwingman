@@ -1123,10 +1123,6 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                {/* RGB info */}
-                <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250' }}>RGB {color.r}, {color.g}, {color.b}</div>
-                </div>
               </div>
 
               {/* Big color field */}
