@@ -93,6 +93,7 @@ export default function Home() {
   const [showGray, setShowGray] = useState(false)
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
+  const [paletteCount, setPaletteCount] = useState(6)
   const [selectedSwatch, setSelectedSwatch] = useState(null)
   const [gridMode, setGridMode] = useState(null)
   const [squareGridSize, setSquareGridSize] = useState(4)
@@ -177,7 +178,7 @@ export default function Home() {
               paletteWorkerRef.current = null
             }
             paletteWorkerRef.current.postMessage(
-              { filter: 'kmeans-analyze', strength: 6, buffer, width: src.width, height: src.height },
+              { filter: 'kmeans-analyze', strength: 24, buffer, width: src.width, height: src.height },
               [buffer]
             )
           }
@@ -747,28 +748,43 @@ export default function Home() {
 
           <AccordionDrawer title="Color Palette" isOpen={openDrawer.includes('palette')} onToggle={() => toggleDrawer('palette')}>
             <div className={styles.drawerResult}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+              {/* Count buttons */}
+              <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                {[6, 8, 12, 24].map(n => (
+                  <button key={n} onClick={() => setPaletteCount(n)} style={{
+                    flex: 1, padding: '3px 0', fontSize: 11, fontFamily: 'monospace',
+                    background: paletteCount === n ? 'rgba(200,169,110,0.2)' : 'transparent',
+                    border: paletteCount === n ? '1px solid rgba(200,169,110,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    color: paletteCount === n ? '#c8a96e' : '#555250',
+                    borderRadius: 4, cursor: 'pointer',
+                  }}>{n}</button>
+                ))}
+              </div>
+              {/* Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${paletteCount <= 8 ? 4 : paletteCount <= 12 ? 4 : 6}, 1fr)`, gap: 3 }}>
                 {(paletteClusters.length > 0
                   ? [...paletteClusters].sort((a, b) =>
                       (0.2126*b.r + 0.7152*b.g + 0.0722*b.b) - (0.2126*a.r + 0.7152*a.g + 0.0722*a.b)
-                    ).slice(0, 6)
-                  : Array.from({ length: 6 }, () => null)
+                    ).slice(0, paletteCount)
+                  : Array.from({ length: paletteCount }, () => null)
                 ).map((c, i) => {
                   const m = c ? rgbToMunsell(c.r, c.g, c.b) : null
                   return (
                     <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <div style={{
-                        width: '100%', height: 36, borderRadius: 3,
+                        width: '100%', height: paletteCount <= 8 ? 32 : paletteCount <= 12 ? 28 : 22,
+                        borderRadius: 3,
                         background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
                         border: '1px solid rgba(255,255,255,0.08)',
                         cursor: c ? 'pointer' : 'default',
                       }}
                         onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsell(c.r, c.g, c.b) }); setShowColorOverlay(true) }}
                       />
-                      <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.3 }}>
-                        {m ? `${m.hue}` : '—'}<br/>
-                        {m ? `${m.value}/${m.chroma}` : ''}
-                      </span>
+                      {paletteCount <= 12 && (
+                        <span style={{ fontSize: 9, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
+                          {m ? `${m.hue}` : '—'}
+                        </span>
+                      )}
                     </div>
                   )
                 })}
