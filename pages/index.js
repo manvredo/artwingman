@@ -1276,9 +1276,10 @@ export default function Home() {
                 return (
                   <div style={{
                     width: '100%',
-                    padding: '5px 8px',
+                    padding: '6px 8px',
                     fontFamily: 'monospace',
                     fontSize: 15,
+                    textAlign: 'center',
                     color: light ? '#141414' : '#e9e9e9',
                     lineHeight: 1.4,
                     textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
@@ -1317,9 +1318,10 @@ export default function Home() {
                 return (
                   <div style={{
                     width: '100%',
-                    padding: '5px 8px',
+                    padding: '6px 8px',
                     fontFamily: 'monospace',
                     fontSize: 15,
+                    textAlign: 'center',
                     color: light ? '#141414' : '#e9e9e9',
                     lineHeight: 1.4,
                     textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
