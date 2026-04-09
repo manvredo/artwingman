@@ -1270,17 +1270,23 @@ export default function Home() {
                 alignItems: 'flex-end',
               }}
             >
-              <div style={{
-                width: '100%',
-                padding: '5px 8px',
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: 'rgba(255,255,255,0.9)',
-                lineHeight: 1.4,
-                textShadow: '0 1px 3px rgba(0,0,0,0.7)',
-              }}>
-                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
-              </div>
+              {(() => {
+                const lum = hasColor ? (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255 : 0;
+                const light = lum > 0.55;
+                return (
+                  <div style={{
+                    width: '100%',
+                    padding: '5px 8px',
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    color: light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+                    lineHeight: 1.4,
+                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.4)' : '0 1px 3px rgba(0,0,0,0.7)',
+                  }}>
+                    {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -1299,27 +1305,32 @@ export default function Home() {
                 alignItems: 'flex-end',
               }}
             >
-              <div style={{
-                width: '100%',
-                padding: '5px 8px',
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: 'rgba(255,255,255,0.9)',
-                lineHeight: 1.4,
-                textShadow: '0 1px 3px rgba(0,0,0,0.7)',
-              }}>
-                {hasColor ? (() => {
-                  const { r, g, b } = color;
-                  const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
-                  const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
-                  const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
-                  const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
-                  return (<>
-                    <div>{`RGB ${r}, ${g}, ${b}`}</div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 3, paddingTop: 3 }}>{`CMYK ${C}, ${M}, ${Y}, ${K}`}</div>
-                  </>);
-                })() : (<><div>RGB — — —</div><div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 3, paddingTop: 3 }}>CMYK — — — —</div></>)}
-              </div>
+              {(() => {
+                const lum = hasColor ? (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255 : 0;
+                const light = lum > 0.55;
+                const dividerColor = light ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)';
+                const { r, g, b } = color;
+                const K = hasColor ? Math.round((1 - Math.max(r, g, b) / 255) * 100) : 0;
+                const C = K === 100 ? 0 : hasColor ? Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100) : 0;
+                const M = K === 100 ? 0 : hasColor ? Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100) : 0;
+                const Y = K === 100 ? 0 : hasColor ? Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100) : 0;
+                return (
+                  <div style={{
+                    width: '100%',
+                    padding: '5px 8px',
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    color: light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+                    lineHeight: 1.4,
+                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.4)' : '0 1px 3px rgba(0,0,0,0.7)',
+                  }}>
+                    <div>{hasColor ? `RGB ${r}, ${g}, ${b}` : 'RGB — — —'}</div>
+                    <div style={{ borderTop: `1px solid ${dividerColor}`, marginTop: 3, paddingTop: 3 }}>
+                      {hasColor ? `CMYK ${C}, ${M}, ${Y}, ${K}` : 'CMYK — — — —'}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
