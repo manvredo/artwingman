@@ -1272,13 +1272,12 @@ export default function Home() {
             >
               <div style={{
                 width: '100%',
-                padding: '5px 6px',
-                background: 'rgba(0,0,0,0.45)',
-                borderRadius: '0 0 5px 5px',
+                padding: '5px 8px',
                 fontFamily: 'monospace',
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.85)',
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.9)',
                 lineHeight: 1.4,
+                textShadow: '0 1px 3px rgba(0,0,0,0.7)',
               }}>
                 {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
               </div>
@@ -1302,13 +1301,12 @@ export default function Home() {
             >
               <div style={{
                 width: '100%',
-                padding: '5px 6px',
-                background: 'rgba(0,0,0,0.45)',
-                borderRadius: '0 0 5px 5px',
+                padding: '5px 8px',
                 fontFamily: 'monospace',
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.85)',
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.9)',
                 lineHeight: 1.4,
+                textShadow: '0 1px 3px rgba(0,0,0,0.7)',
               }}>
                 {hasColor ? (() => {
                   const { r, g, b } = color;
