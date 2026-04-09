@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
-import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
+import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
@@ -205,7 +205,7 @@ export default function Home() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
     const { r, g, b } = samplePixels(imageData, px, py, radius, imgDims.w, imgDims.h)
-    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
+    setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) })
   }, [imgDims])
 
   const sampleColor = useCallback((e) => {
@@ -564,7 +564,7 @@ export default function Home() {
   const handleHueWheelClick = useCallback((deg) => {
     const rad = deg * Math.PI / 180
     const { r, g, b } = labToRgb(55, 40 * Math.cos(rad), 40 * Math.sin(rad))
-    setColor({ r, g, b, ...rgbToMunsell(r, g, b) })
+    setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) })
     setClickPos(null)
   }, [])
 
@@ -772,7 +772,7 @@ export default function Home() {
                       .map((c, i) => (
                         <div key={i} className={styles.valueStep}
                           style={{ background: `rgb(${c.r},${c.g},${c.b})`, cursor: 'pointer' }}
-                          onClick={() => { setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsell(c.r, c.g, c.b) }); setShowColorOverlay(true) }} />
+                          onClick={() => { setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setShowColorOverlay(true) }} />
                       ))
                   : Array.from({ length: colorSteps }).map((_, i) => (
                       <div key={i} className={styles.valueStep}
@@ -803,7 +803,7 @@ export default function Home() {
                   ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
                   : Array.from({ length: paletteCount }, () => null)
                 ).map((c, i) => {
-                  const m = c ? rgbToMunsell(c.r, c.g, c.b) : null
+                  const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
                   return (
                     <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <div style={{
@@ -813,7 +813,7 @@ export default function Home() {
                         border: '1px solid rgba(255,255,255,0.08)',
                         cursor: c ? 'pointer' : 'default',
                       }}
-                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsell(c.r, c.g, c.b) }); setShowColorOverlay(true) }}
+                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setShowColorOverlay(true) }}
                       />
                       {paletteCount <= 12 && (
                         <span style={{ fontSize: 9, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
