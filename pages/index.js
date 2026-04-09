@@ -1252,9 +1252,9 @@ export default function Home() {
           {isMobile && (
             <button onClick={() => setInfoBarOpen(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 28, cursor: 'pointer', fontSize: 10, zIndex: 1 }}>▼</button>
           )}
-          {/* Panel 1: Swatch + RGB */}
+          {/* Panel 1: Munsell Color Swatch */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
-            <div className={styles.infoLabel}>Color</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Munsell Color</div>
             <div
               onClick={() => hasColor && setShowColorOverlay(true)}
               title="Click to compare color"
@@ -1269,6 +1269,34 @@ export default function Home() {
             />
             <div className={styles.rgbLabel}>
               {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
+            </div>
+          </div>
+
+          {/* Panel 1b: Image Color (RGB + CMYK) */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Image Color</div>
+            <div
+              style={{
+                flex: 1,
+                borderRadius: 6,
+                background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
+                border: '1px solid rgba(255,255,255,0.08)',
+                minHeight: 0,
+              }}
+            />
+            <div className={styles.rgbLabel}>
+              {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
+            </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+            <div className={styles.rgbLabel}>
+              {hasColor ? (() => {
+                const { r, g, b } = color;
+                const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
+                const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
+                const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
+                const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
+                return `CMYK ${C}, ${M}, ${Y}, ${K}`;
+              })() : 'CMYK — — — —'}
             </div>
           </div>
 
