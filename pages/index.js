@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
-import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
+import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
@@ -1284,7 +1284,7 @@ export default function Home() {
               style={{
                 flex: 1,
                 borderRadius: 6,
-                background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
+                background: hasColor ? (() => { const m = munsellHvcToRgb(color.hue, color.value, color.chroma); return m ? `rgb(${m.r},${m.g},${m.b})` : '#2a2a2a' })() : '#2a2a2a',
                 border: '1px solid rgba(255,255,255,0.08)',
                 minHeight: 0,
                 cursor: hasColor ? 'pointer' : 'default',
@@ -1294,7 +1294,8 @@ export default function Home() {
               }}
             >
               {(() => {
-                const lum = hasColor ? (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255 : 0;
+                const mc = hasColor ? munsellHvcToRgb(color.hue, color.value, color.chroma) : null;
+                const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : 0;
                 const light = lum > 0.55;
                 return (
                   <div style={{
