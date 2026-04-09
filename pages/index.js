@@ -1268,7 +1268,7 @@ export default function Home() {
               }}
             />
             <div className={styles.rgbLabel}>
-              {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
+              {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
             </div>
           </div>
 
