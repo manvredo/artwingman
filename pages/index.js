@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, chromaDescription, valueDescription, samplePixels, labToRgb } from '../lib/munsell'
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
@@ -81,6 +82,7 @@ export default function Home() {
   const workerRef = useRef(null)
   const filterDebounceRef = useRef(null)
   const dragRef = useRef(null)
+  const touchRef = useRef(null)
   const minimapCanvasRef = useRef(null)
   const [image, setImage] = useState(null)
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 })
@@ -243,6 +245,30 @@ export default function Home() {
     dragRef.current = null
     if (!drag || e.button !== 0) return
     if (!drag.moved) sampleColor(e)
+  }, [sampleColor])
+
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length !== 1) { touchRef.current = null; return }
+    const t = e.touches[0]
+    touchRef.current = { startX: t.clientX, startY: t.clientY, startPanX: viewport.panX, startPanY: viewport.panY, moved: false }
+  }, [viewport.panX, viewport.panY])
+
+  const handleTouchMove = useCallback((e) => {
+    if (!touchRef.current || e.touches.length !== 1) return
+    e.preventDefault()
+    const t = e.touches[0]
+    const dx = t.clientX - touchRef.current.startX
+    const dy = t.clientY - touchRef.current.startY
+    if (!touchRef.current.moved && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) touchRef.current.moved = true
+    if (touchRef.current.moved) setViewport(v => ({ ...v, panX: touchRef.current.startPanX + dx, panY: touchRef.current.startPanY + dy }))
+  }, [])
+
+  const handleTouchEnd = useCallback((e) => {
+    const touch = touchRef.current
+    touchRef.current = null
+    if (!touch || touch.moved) return
+    const t = e.changedTouches[0]
+    sampleColor({ clientX: t.clientX, clientY: t.clientY })
   }, [sampleColor])
 
   const handleMouseMove = useCallback((e) => {
@@ -603,7 +629,18 @@ export default function Home() {
   }, [clickImagePos])
 
   const hasColor = color.r !== null
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try { return Capacitor.isNativePlatform() } catch { return false }
+  })
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try { return Capacitor.isNativePlatform() } catch { return false }
+  })
+  const [infoBarOpen, setInfoBarOpen] = useState(() => {
+    if (typeof window === 'undefined') return true
+    try { return !Capacitor.isNativePlatform() } catch { return true }
+  })
 
   const SIDEBAR_ICONS = [
     { label: 'VG', title: 'Value Groups', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2" fill="currentColor" opacity="0.9"/><rect x="1" y="7" width="14" height="2" fill="currentColor" opacity="0.6"/><rect x="1" y="11" width="14" height="2" fill="currentColor" opacity="0.3"/></svg> },
@@ -637,10 +674,10 @@ export default function Home() {
         ) : (
         <>
         <div className={styles.logo}>
-          <span className={styles.logoMark}>AW</span>
+          <img src="/logo.svg" width={32} height={32} style={{borderRadius: 6}} alt="ArtWingman" />
           <div style={{ flex: 1 }}>
             <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.6</div>
+            <div className={styles.logoSub}>v0.6 α</div>
           </div>
           <button className={styles.sidebarToggle} onClick={() => setSidebarCollapsed(true)} title="Collapse sidebar">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="8,2 4,6 8,10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1014,6 +1051,9 @@ export default function Home() {
               onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); dragRef.current = null }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {(() => {
                 const minimapW = 150
@@ -1192,7 +1232,26 @@ export default function Home() {
         </div>
         </div>
 
+        {isMobile && !infoBarOpen && (
+          <div style={{ height: 56, flexShrink: 0, background: '#1a1a1a', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10 }}>
+            <div
+              onClick={() => hasColor && setShowColorOverlay(true)}
+              style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)', cursor: hasColor ? 'pointer' : 'default' }}
+            />
+            <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 15, color: '#c8a96e' }}>
+              {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+            </div>
+            <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#706c68' }}>
+              {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : ''}
+            </div>
+            <button onClick={() => setInfoBarOpen(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, flexShrink: 0 }}>▲</button>
+          </div>
+        )}
+        {(!isMobile || infoBarOpen) && (
         <div className={styles.infoBar}>
+          {isMobile && (
+            <button onClick={() => setInfoBarOpen(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 28, cursor: 'pointer', fontSize: 10, zIndex: 1 }}>▼</button>
+          )}
           {/* Panel 1: Swatch + RGB */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
             <div className={styles.infoLabel}>Color</div>
@@ -1324,6 +1383,7 @@ export default function Home() {
           </div>
 
         </div>
+        )}
       </div>
       {/* Hidden WebGL canvas for GPU develop pipeline */}
       <canvas ref={glCanvasRef} style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }} />
