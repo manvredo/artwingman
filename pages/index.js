@@ -1279,9 +1279,9 @@ export default function Home() {
                     padding: '5px 8px',
                     fontFamily: 'monospace',
                     fontSize: 13,
-                    color: light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+                    color: light ? '#141414' : '#efefef',
                     lineHeight: 1.4,
-                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.4)' : '0 1px 3px rgba(0,0,0,0.7)',
+                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
                   }}>
                     {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
                   </div>
@@ -1320,9 +1320,9 @@ export default function Home() {
                     padding: '5px 8px',
                     fontFamily: 'monospace',
                     fontSize: 13,
-                    color: light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+                    color: light ? '#141414' : '#efefef',
                     lineHeight: 1.4,
-                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.4)' : '0 1px 3px rgba(0,0,0,0.7)',
+                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
                   }}>
                     <div>{hasColor ? `RGB ${r}, ${g}, ${b}` : 'RGB — — —'}</div>
                     <div style={{ borderTop: `1px solid ${dividerColor}`, marginTop: 3, paddingTop: 3 }}>
