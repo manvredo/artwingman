@@ -1265,10 +1265,23 @@ export default function Home() {
                 border: '1px solid rgba(255,255,255,0.08)',
                 minHeight: 0,
                 cursor: hasColor ? 'pointer' : 'default',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'flex-end',
               }}
-            />
-            <div className={styles.rgbLabel}>
-              {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+            >
+              <div style={{
+                width: '100%',
+                padding: '5px 6px',
+                background: 'rgba(0,0,0,0.45)',
+                borderRadius: '0 0 5px 5px',
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.85)',
+                lineHeight: 1.4,
+              }}>
+                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+              </div>
             </div>
           </div>
 
@@ -1282,21 +1295,33 @@ export default function Home() {
                 background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a',
                 border: '1px solid rgba(255,255,255,0.08)',
                 minHeight: 0,
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'flex-end',
               }}
-            />
-            <div className={styles.rgbLabel}>
-              {hasColor ? `RGB ${color.r}, ${color.g}, ${color.b}` : 'RGB — — —'}
-            </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
-            <div className={styles.rgbLabel}>
-              {hasColor ? (() => {
-                const { r, g, b } = color;
-                const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
-                const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
-                const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
-                const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
-                return `CMYK ${C}, ${M}, ${Y}, ${K}`;
-              })() : 'CMYK — — — —'}
+            >
+              <div style={{
+                width: '100%',
+                padding: '5px 6px',
+                background: 'rgba(0,0,0,0.45)',
+                borderRadius: '0 0 5px 5px',
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.85)',
+                lineHeight: 1.4,
+              }}>
+                {hasColor ? (() => {
+                  const { r, g, b } = color;
+                  const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
+                  const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
+                  const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
+                  const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
+                  return (<>
+                    <div>{`RGB ${r}, ${g}, ${b}`}</div>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 3, paddingTop: 3 }}>{`CMYK ${C}, ${M}, ${Y}, ${K}`}</div>
+                  </>);
+                })() : (<><div>RGB — — —</div><div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 3, paddingTop: 3 }}>CMYK — — — —</div></>)}
+              </div>
             </div>
           </div>
 
