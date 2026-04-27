@@ -125,6 +125,7 @@ export default function Home() {
   const [munsellInput, setMunsellInput] = useState('')
   const [munsellPreview, setMunsellPreview] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
+  const [colorOverlayView, setColorOverlayView] = useState('munsell') // 'munsell' | 'rgb'
   const [compGray, setCompGray] = useState(3)
   const [valueSoften, setValueSoften] = useState(0)
   const [colorSteps, setColorSteps] = useState(10)
@@ -857,7 +858,7 @@ export default function Home() {
                       .map((c, i) => (
                         <div key={i} className={styles.valueStep}
                           style={{ background: `rgb(${c.r},${c.g},${c.b})`, cursor: 'pointer' }}
-                          onClick={() => { setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setShowColorOverlay(true) }} />
+                          onClick={() => { setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }} />
                       ))
                   : Array.from({ length: colorSteps }).map((_, i) => (
                       <div key={i} className={styles.valueStep}
@@ -898,7 +899,7 @@ export default function Home() {
                         border: '1px solid rgba(255,255,255,0.08)',
                         cursor: c ? 'pointer' : 'default',
                       }}
-                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setShowColorOverlay(true) }}
+                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
                       />
                       {paletteCount <= 12 && (
                         <span style={{ fontSize: 9, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
@@ -1307,53 +1308,95 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Big color field — RGB Image Color */}
-              {(() => {
-                const { r, g, b } = color;
-                const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
-                const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
-                const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
-                const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
-                const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                const tc = (v) => lum > 0.55 ? `rgba(0,0,0,${v})` : `rgba(255,255,255,${v})`;
-                return (
-                  <div style={{ flex: 1, background: `rgb(${r},${g},${b})`, position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
-                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
+              {/* Center panel — switches between RGB and Munsell based on colorOverlayView */}
+              {colorOverlayView === 'munsell' ? (
+                /* Munsell large in center */
+                (() => {
+                  const mc = munsellHvcToRgb(color.hue, color.value, color.chroma);
+                  const bg = mc ? `rgb(${mc.r},${mc.g},${mc.b})` : `rgb(${color.r},${color.g},${color.b})`;
+                  const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : color.value / 10;
+                  const tc = (v) => lum > 0.55 ? `rgba(0,0,0,${v})` : `rgba(255,255,255,${v})`;
+                  return (
+                    <div style={{ flex: 1, background: bg, position: 'relative', cursor: 'pointer' }} onClick={() => setColorOverlayView('rgb')}>
+                      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
+                        <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
+                          {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+                        </div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 14, color: tc(0.5) }}>
+                          {color.hueName}
+                        </div>
+                        <div style={{ width: 80, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
+                        <div style={{ fontFamily: 'monospace', fontSize: 14, color: tc(0.5) }}>
+                          {valueDescription(color.value)} · {chromaDescription(color.chroma)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                /* RGB large in center */
+                (() => {
+                  const { r, g, b } = color;
+                  const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
+                  const C = K === 100 ? 0 : Math.round((1 - r / 255 - K / 100) / (1 - K / 100) * 100);
+                  const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
+                  const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
+                  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                  const tc = (v) => lum > 0.55 ? `rgba(0,0,0,${v})` : `rgba(255,255,255,${v})`;
+                  return (
+                    <div style={{ flex: 1, background: `rgb(${r},${g},${b})`, position: 'relative', cursor: 'pointer' }} onClick={() => setColorOverlayView('munsell')}>
+                      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
+                        <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
+                          {`RGB ${r}, ${g}, ${b}`}
+                        </div>
+                        <div style={{ width: 80, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
+                        <div style={{ fontFamily: 'monospace', fontSize: 16, fontWeight: 600, color: tc(0.6) }}>
+                          {`CMYK ${C}, ${M}, ${Y}, ${K}`}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
+
+              {/* Right panel — opposite of center */}
+              {colorOverlayView === 'munsell' ? (
+                /* RGB small on right when Munsell is center */
+                (() => {
+                  const { r, g, b } = color;
+                  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                  const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+                  return (
+                    <div style={{ width: 220, flexShrink: 0, background: `rgb(${r},${g},${b})`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer' }} onClick={() => setColorOverlayView('rgb')}>
+                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: textColor }}>
                         {`RGB ${r}, ${g}, ${b}`}
                       </div>
-                      <div style={{ width: 80, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
-                      <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: tc(0.6) }}>
-                        {`CMYK ${C}, ${M}, ${Y}, ${K}`}
+                    </div>
+                  );
+                })()
+              ) : (
+                /* Munsell small on right when RGB is center */
+                (() => {
+                  const mc = munsellHvcToRgb(color.hue, color.value, color.chroma);
+                  const bg = mc ? `rgb(${mc.r},${mc.g},${mc.b})` : `rgb(${color.r},${color.g},${color.b})`;
+                  const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : color.value / 10;
+                  const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+                  return (
+                    <div style={{ width: 220, flexShrink: 0, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, borderLeft: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer' }} onClick={() => setColorOverlayView('munsell')}>
+                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 16, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.3 }}>
+                        {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
+                      </div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 13, color: textColor }}>
+                        {color.hueName}
                       </div>
                     </div>
-                  </div>
-                );
-              })()}
-
-              {/* Right panel: Munsell */}
-              {(() => {
-                const mc = munsellHvcToRgb(color.hue, color.value, color.chroma);
-                const bg = mc ? `rgb(${mc.r},${mc.g},${mc.b})` : `rgb(${color.r},${color.g},${color.b})`;
-                const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : color.value / 10;
-                const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
-                return (
-                  <div style={{ width: 220, flexShrink: 0, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.3 }}>
-                      {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
-                    </div>
-                    <div style={{ fontFamily: 'monospace', fontSize: 14, color: textColor }}>
-                      {color.hueName}
-                    </div>
-                    <div style={{ width: 60, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
-                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textAlign: 'center' }}>
-                      {valueDescription(color.value)} · {chromaDescription(color.chroma)}
-                    </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()
+              )}
             </div>
           </div>
         )}
@@ -1395,7 +1438,7 @@ export default function Home() {
         {isMobile && !infoBarOpen && (
           <div style={{ height: 56, flexShrink: 0, background: '#1a1a1a', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10 }}>
             <div
-              onClick={() => hasColor && setShowColorOverlay(true)}
+              onClick={() => { if (!hasColor) return; setColorOverlayView('rgb'); setShowColorOverlay(true); }}
               style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, background: hasColor ? `rgb(${color.r},${color.g},${color.b})` : '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)', cursor: hasColor ? 'pointer' : 'default' }}
             />
             <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 15, color: '#c8a96e' }}>
@@ -1416,7 +1459,7 @@ export default function Home() {
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Munsell Color</div>
             <div
-              onClick={() => hasColor && setShowColorOverlay(true)}
+              onClick={() => { if (!hasColor) return; setColorOverlayView('munsell'); setShowColorOverlay(true); }}
               title="Click to compare color"
               style={{
                 flex: 1,
@@ -1647,6 +1690,7 @@ export default function Home() {
               color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
               onCellOpen={({ r, g, b, hue, hueName, value, chroma }) => {
                 setColor(prev => ({ ...prev, r, g, b, hue, hueName, value, chroma }))
+                setColorOverlayView('munsell')
                 setShowColorOverlay(true)
               }}
             />
