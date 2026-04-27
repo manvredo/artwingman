@@ -307,7 +307,8 @@ export default function Home() {
       const imgX = Math.floor(sx / viewport.zoom)
       const imgY = Math.floor(sy / viewport.zoom)
       const imgW = originalImageDataRef.current.width
-      if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < originalImageDataRef.current.height) {
+      const imgH = originalImageDataRef.current.height
+      if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < imgH) {
         const i = (imgY * imgW + imgX) * 4
         const r = originalImageDataRef.current.data[i]
         const g = originalImageDataRef.current.data[i + 1]
