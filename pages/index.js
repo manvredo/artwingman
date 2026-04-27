@@ -1563,9 +1563,6 @@ export default function Home() {
                   }}
                 >Set</button>
               </div>
-              <div className={styles.munsellNotation}>
-                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
-              </div>
             </div>
           </div>
 
