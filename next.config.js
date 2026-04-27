@@ -5,8 +5,9 @@ const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
   transpilePackages: ['munsell'],
-  webpack: (config, { isServer }) => {
-    // Force resolution of 'munsell' to node_modules
+  webpack: (config) => {
+    config.resolve.alias = config.resolve.alias || {}
+    config.resolve.alias.munsell = path.resolve(__dirname, 'node_modules/munsell/dist/src/index.js')
     config.resolve.modules = [
       path.resolve(__dirname, 'node_modules'),
       'node_modules',
