@@ -1515,7 +1515,8 @@ export default function Home() {
                 <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Munsell Input</div>
               <div style={{ display: 'flex', gap: 4 }}>
                 <input
                   placeholder="5YR 4/6"
