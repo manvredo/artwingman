@@ -1309,60 +1309,27 @@ export default function Home() {
                 border: '1px solid rgba(255,255,255,0.08)',
                 minHeight: 0,
                 cursor: hasColor ? 'pointer' : 'default',
-                position: 'relative',
                 display: 'flex',
                 alignItems: 'flex-end',
               }}
             >
               {(() => {
-                const [inputVal, setInputVal] = useState('')
                 const mc = hasColor ? munsellHvcToRgb(color.hue, color.value, color.chroma) : null;
                 const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : 0;
                 const light = lum > 0.55;
                 return (
-                  <>
-                    <div style={{ position: 'absolute', top: 4, right: 4 }}>
-                      <input
-                        value={inputVal}
-                        onChange={e => {
-                          setInputVal(e.target.value)
-                          const v = e.target.value.trim()
-                          if (!v) { setMunsellPreview(null); return }
-                          const p = parseMunsell(v)
-                          if (p) {
-                            const mc2 = munsellHvcToRgb(p.hue, p.value, p.chroma)
-                            setMunsellPreview(mc2)
-                          } else {
-                            setMunsellPreview(null)
-                          }
-                        }}
-                        placeholder="5YR 4/6"
-                        style={{
-                          width: 72,
-                          background: 'rgba(0,0,0,0.7)',
-                          border: '1px solid rgba(255,255,255,0.35)',
-                          borderRadius: 4,
-                          padding: '3px 6px',
-                          fontFamily: 'monospace',
-                          fontSize: 11,
-                          color: '#e9e9e9',
-                          outline: 'none',
-                        }}
-                      />
-                    </div>
-                    <div style={{
-                      width: '100%',
-                      padding: '6px 8px',
-                      fontFamily: 'monospace',
-                      fontSize: 15,
-                      textAlign: 'center',
-                      color: light ? '#141414' : '#e9e9e9',
-                      lineHeight: 1.4,
-                      textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
-                    }}>
-                      {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
-                    </div>
-                  </>
+                  <div style={{
+                    width: '100%',
+                    padding: '6px 8px',
+                    fontFamily: 'monospace',
+                    fontSize: 15,
+                    textAlign: 'center',
+                    color: light ? '#141414' : '#e9e9e9',
+                    lineHeight: 1.4,
+                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
+                  }}>
+                    {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+                  </div>
                 );
               })()}
             </div>
@@ -1433,8 +1400,35 @@ export default function Home() {
                 <div className={styles.metricDesc}>{hasColor ? chromaDescription(color.chroma) : 'saturation'}</div>
               </div>
             </div>
-            <div className={styles.munsellNotation}>
-              {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <input
+                placeholder="5YR 4/6"
+                onChange={e => {
+                  const v = e.target.value.trim()
+                  if (!v) { setMunsellPreview(null); return }
+                  const p = parseMunsell(v)
+                  if (p) {
+                    const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
+                    setMunsellPreview(mc)
+                  } else {
+                    setMunsellPreview(null)
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  background: 'rgba(0,0,0,0.5)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: 4,
+                  padding: '4px 8px',
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  color: '#c8a96e',
+                  outline: 'none',
+                }}
+              />
+              <div className={styles.munsellNotation}>
+                {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+              </div>
             </div>
           </div>
 
