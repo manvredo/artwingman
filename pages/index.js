@@ -1402,7 +1402,7 @@ export default function Home() {
           </div>
         )}
         {(!isMobile || infoBarOpen) && (
-        <div className={styles.infoBar}>
+        <div className={styles.infoBar} style={{ zIndex: 10 }}>
           {isMobile && (
             <button onClick={() => setInfoBarOpen(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 28, cursor: 'pointer', fontSize: 10, zIndex: 1 }}>▼</button>
           )}
