@@ -72,6 +72,16 @@ function hslToRgb(h, s, l) {
   return { r: Math.round(f(0) * 255), g: Math.round(f(8) * 255), b: Math.round(f(4) * 255) }
 }
 
+function parseMunsell(str) {
+  const match = str.trim().match(/^(\d+\.?\d*\s*[A-Z]{1,2})\s+(\d+\.?\d*)\/(\d+\.?\d*)$/i)
+  if (!match) return null
+  return {
+    hue: match[1].trim().toUpperCase(),
+    value: parseFloat(match[2]),
+    chroma: parseFloat(match[3]),
+  }
+}
+
 const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
 
 export default function Home() {
@@ -109,6 +119,7 @@ export default function Home() {
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
   const [clickImagePos, setClickImagePos] = useState(null)
+  const [munsellPreview, setMunsellPreview] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(3)
   const [valueSoften, setValueSoften] = useState(0)
@@ -1116,6 +1127,7 @@ export default function Home() {
                           top: clickPos.y - half,
                           width: sq,
                           height: sq,
+                          background: munsellPreview ? `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)` : undefined,
                           border: '1px solid rgba(255,255,255,0.9)',
                           boxSizing: 'border-box',
                           pointerEvents: 'none',
@@ -1303,22 +1315,52 @@ export default function Home() {
               }}
             >
               {(() => {
+                const [inputVal, setInputVal] = useState('')
+                const handlePreview = () => {
+                  if (!inputVal.trim()) { setMunsellPreview(null); return }
+                  const p = parseMunsell(inputVal)
+                  if (!p) return
+                  const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
+                  setMunsellPreview(mc)
+                }
                 const mc = hasColor ? munsellHvcToRgb(color.hue, color.value, color.chroma) : null;
                 const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : 0;
                 const light = lum > 0.55;
                 return (
-                  <div style={{
-                    width: '100%',
-                    padding: '6px 8px',
-                    fontFamily: 'monospace',
-                    fontSize: 15,
-                    textAlign: 'center',
-                    color: light ? '#141414' : '#e9e9e9',
-                    lineHeight: 1.4,
-                    textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
-                  }}>
-                    {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
-                  </div>
+                  <>
+                    <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 4, alignItems: 'center' }}>
+                      <input
+                        value={inputVal}
+                        onChange={e => setInputVal(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handlePreview()}
+                        placeholder="5YR 4/6"
+                        style={{
+                          width: 72,
+                          background: 'rgba(0,0,0,0.5)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: 4,
+                          padding: '2px 6px',
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          color: '#e9e9e9',
+                          outline: 'none',
+                        }}
+                      />
+                      <button onClick={handlePreview} style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4, padding: '2px 6px', fontFamily: 'monospace', fontSize: 10, color: '#c8a96e', cursor: 'pointer' }}>→</button>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      padding: '6px 8px',
+                      fontFamily: 'monospace',
+                      fontSize: 15,
+                      textAlign: 'center',
+                      color: light ? '#141414' : '#e9e9e9',
+                      lineHeight: 1.4,
+                      textShadow: light ? '0 1px 2px rgba(255,255,255,0.3)' : '0 1px 3px rgba(0,0,0,0.6)',
+                    }}>
+                      {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
+                    </div>
+                  </>
                 );
               })()}
             </div>
