@@ -1498,6 +1498,7 @@ export default function Home() {
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Image Color</div>
             <div
+              onClick={() => { if (!hasColor) return; setColorOverlayView('rgb'); setShowColorOverlay(true); }}
               style={{
                 flex: 1,
                 borderRadius: 6,
@@ -1507,6 +1508,7 @@ export default function Home() {
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'flex-end',
+                cursor: hasColor ? 'pointer' : 'default',
               }}
             >
               {(() => {
