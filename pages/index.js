@@ -1319,7 +1319,7 @@ export default function Home() {
                   return (
                     <div style={{ flex: 1, background: bg, position: 'relative', cursor: 'pointer' }} onClick={() => setColorOverlayView('rgb')}>
                       <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
-                        <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 24, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
                         <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
                           {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                         </div>
@@ -1347,7 +1347,7 @@ export default function Home() {
                   return (
                     <div style={{ flex: 1, background: `rgb(${r},${g},${b})`, position: 'relative', cursor: 'pointer' }} onClick={() => setColorOverlayView('munsell')}>
                       <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
-                        <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 24, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
                         <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
                           {`RGB ${r}, ${g}, ${b}`}
                         </div>
@@ -1370,7 +1370,7 @@ export default function Home() {
                   const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
                   return (
                     <div style={{ width: 220, flexShrink: 0, background: `rgb(${r},${g},${b})`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer' }} onClick={() => setColorOverlayView('rgb')}>
-                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 14, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
                       <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: textColor }}>
                         {`RGB ${r}, ${g}, ${b}`}
                       </div>
@@ -1386,7 +1386,7 @@ export default function Home() {
                   const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
                   return (
                     <div style={{ width: 220, flexShrink: 0, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, borderLeft: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer' }} onClick={() => setColorOverlayView('munsell')}>
-                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 14, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
                       <div style={{ fontFamily: 'monospace', fontSize: 16, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.3 }}>
                         {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                       </div>
