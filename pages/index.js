@@ -107,6 +107,8 @@ export default function Home() {
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
   const [paletteCount, setPaletteCount] = useState(6)
+  const [hoverMunsell, setHoverMunsell] = useState(null)
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
   const [selectedSwatch, setSelectedSwatch] = useState(null)
   const [gridMode, setGridMode] = useState(null)
   const [squareGridSize, setSquareGridSize] = useState(4)
@@ -297,12 +299,28 @@ export default function Home() {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    setCursor({
-      x: (e.clientX - rect.left) / viewport.zoom,
-      y: (e.clientY - rect.top) / viewport.zoom,
-      visible: true,
-    })
-  }, [viewport.zoom])
+    const sx = e.clientX - rect.left
+    const sy = e.clientY - rect.top
+    setCursor({ x: sx / viewport.zoom, y: sy / viewport.zoom, visible: true })
+
+    if (image && originalImageDataRef.current) {
+      const imgX = Math.floor(sx / viewport.zoom)
+      const imgY = Math.floor(sy / viewport.zoom)
+      const imgW = originalImageDataRef.current.width
+      if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < originalImageDataRef.current.height) {
+        const i = (imgY * imgW + imgX) * 4
+        const r = originalImageDataRef.current.data[i]
+        const g = originalImageDataRef.current.data[i + 1]
+        const b = originalImageDataRef.current.data[i + 2]
+        const m = rgbToMunsell(r, g, b)
+        const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
+        setHoverMunsell({ munsellStr, r, g, b })
+        setHoverPos({ x: sx, y: sy })
+      } else {
+        setHoverMunsell(null)
+      }
+    }
+  }, [viewport.zoom, image])
 
   useEffect(() => {
     const el = canvasWrapRef.current
@@ -1098,7 +1116,7 @@ export default function Home() {
               className={styles.canvasWrap}
               style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); dragRef.current = null }}
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
               onTouchStart={handleTouchStart}
@@ -1173,6 +1191,30 @@ export default function Home() {
                         }} />
                       )}
                     </>
+                  )
+                })()}
+                {hoverMunsell && image && (() => {
+                  const lum = (0.299 * hoverMunsell.r + 0.587 * hoverMunsell.g + 0.114 * hoverMunsell.b) / 255
+                  const isLight = lum > 0.5
+                  return (
+                    <div style={{
+                      position: 'absolute',
+                      left: hoverPos.x + 14,
+                      top: hoverPos.y - 28,
+                      transition: 'left 0.08s ease-out, top 0.08s ease-out',
+                      padding: '3px 8px',
+                      borderRadius: 4,
+                      fontSize: 14,
+                      fontFamily: 'monospace',
+                      backdropFilter: 'blur(4px)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      pointerEvents: 'none',
+                      zIndex: 100,
+                      background: isLight ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)',
+                      color: isLight ? '#ffffff' : '#000000',
+                    }}>
+                      {hoverMunsell.munsellStr}
+                    </div>
                   )
                 })()}
               </div>
