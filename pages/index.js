@@ -1553,6 +1553,8 @@ export default function Home() {
                     color: '#c8a96e',
                     cursor: 'pointer',
                     minWidth: 36,
+                    position: 'relative',
+                    zIndex: 20,
                   }}
                 >Set</button>
               </div>
