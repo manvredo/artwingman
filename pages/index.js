@@ -1307,31 +1307,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Big color field — Munsell reconstructed color */}
-              {(() => {
-                const mc = munsellHvcToRgb(color.hue, color.value, color.chroma);
-                const bg = mc ? `rgb(${mc.r},${mc.g},${mc.b})` : `rgb(${color.r},${color.g},${color.b})`;
-                const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : color.value / 10;
-                const tc = (v) => lum > 0.55 ? `rgba(0,0,0,${v})` : `rgba(255,255,255,${v})`;
-                return (
-                  <div style={{ flex: 1, background: bg, position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
-                      <div style={{ fontFamily: 'monospace', fontSize: 10, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
-                        {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
-                      </div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 13, color: tc(0.4) }}>
-                        {color.hueName}
-                      </div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: tc(0.35), marginTop: 2 }}>
-                        {valueDescription(color.value)} · {chromaDescription(color.chroma)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Right panel: RGB + CMYK */}
+              {/* Big color field — RGB Image Color */}
               {(() => {
                 const { r, g, b } = color;
                 const K = Math.round((1 - Math.max(r, g, b) / 255) * 100);
@@ -1339,16 +1315,41 @@ export default function Home() {
                 const M = K === 100 ? 0 : Math.round((1 - g / 255 - K / 100) / (1 - K / 100) * 100);
                 const Y = K === 100 ? 0 : Math.round((1 - b / 255 - K / 100) / (1 - K / 100) * 100);
                 const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                const tc = (v) => lum > 0.55 ? `rgba(0,0,0,${v})` : `rgba(255,255,255,${v})`;
+                return (
+                  <div style={{ flex: 1, background: `rgb(${r},${g},${b})`, position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, pointerEvents: 'none' }}>
+                      <div style={{ fontFamily: 'monospace', fontSize: 10, color: tc(0.4), textTransform: 'uppercase', letterSpacing: '0.1em' }}>RGB Color</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: tc(0.6) }}>
+                        {`RGB ${r}, ${g}, ${b}`}
+                      </div>
+                      <div style={{ width: 80, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
+                      <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: tc(0.6) }}>
+                        {`CMYK ${C}, ${M}, ${Y}, ${K}`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Right panel: Munsell */}
+              {(() => {
+                const mc = munsellHvcToRgb(color.hue, color.value, color.chroma);
+                const bg = mc ? `rgb(${mc.r},${mc.g},${mc.b})` : `rgb(${color.r},${color.g},${color.b})`;
+                const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : color.value / 10;
                 const textColor = lum > 0.55 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
                 return (
-                  <div style={{ width: 220, flexShrink: 0, background: `rgb(${r},${g},${b})`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 10, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image Color</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.3 }}>
-                      {`RGB\n${r}, ${g}, ${b}`}
+                  <div style={{ width: 220, flexShrink: 0, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ fontFamily: 'monospace', fontSize: 10, color: textColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Munsell Color</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.3 }}>
+                      {color.hue} {color.value.toFixed(1)}/{color.chroma.toFixed(1)}
                     </div>
-                    <div style={{ width: 80, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
-                    <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: textColor, textAlign: 'center', lineHeight: 1.4 }}>
-                      {`CMYK\n${C}, ${M}, ${Y}, ${K}`}
+                    <div style={{ fontFamily: 'monospace', fontSize: 14, color: textColor }}>
+                      {color.hueName}
+                    </div>
+                    <div style={{ width: 60, borderTop: '1px solid', borderColor: lum > 0.55 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }} />
+                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: textColor, textAlign: 'center' }}>
+                      {valueDescription(color.value)} · {chromaDescription(color.chroma)}
                     </div>
                   </div>
                 );
