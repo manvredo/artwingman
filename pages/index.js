@@ -82,6 +82,17 @@ function parseMunsell(str) {
   }
 }
 
+function handleMunsellInput(str) {
+  const parsed = parseMunsell(str)
+  if (!parsed) return
+  const rgb = munsellHvcToRgb(parsed.hue, parsed.value, parsed.chroma)
+  if (!rgb) return
+  setMunsellPreview({ ...parsed, ...rgb })
+  // Set color state so all panels update
+  const munsell = rgbToMunsell(rgb.r, rgb.g, rgb.b)
+  setColor({ r: rgb.r, g: rgb.g, b: rgb.b, ...munsell })
+}
+
 const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
 
 export default function Home() {
@@ -122,6 +133,7 @@ export default function Home() {
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
   const [clickPos, setClickPos] = useState(null)
   const [clickImagePos, setClickImagePos] = useState(null)
+  const [munsellInput, setMunsellInput] = useState('')
   const [munsellPreview, setMunsellPreview] = useState(null)
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [compGray, setCompGray] = useState(3)
@@ -1177,19 +1189,33 @@ export default function Home() {
                       {/* Crosshair */}
                       <div style={{ position: 'absolute', left: clickPos.x - 12, top: clickPos.y, width: 24, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
                       <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 12, width: 1, height: 24, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-                      {/* Sample radius square */}
-                      {sampleRadius >= 10 && (
-                        <div style={{
-                          position: 'absolute',
-                          left: clickPos.x - half,
-                          top: clickPos.y - half,
-                          width: sq,
-                          height: sq,
-                          background: munsellPreview ? `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)` : undefined,
-                          border: '1px solid rgba(255,255,255,0.9)',
-                          boxSizing: 'border-box',
-                          pointerEvents: 'none',
-                        }} />
+                      {/* Sample radius square / munsell preview square */}
+                      {munsellPreview && clickPos && (
+                        sampleRadius >= 10 ? (
+                          <div style={{
+                            position: 'absolute',
+                            left: clickPos.x - half,
+                            top: clickPos.y - half,
+                            width: sq,
+                            height: sq,
+                            background: `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)`,
+                            border: '1px solid rgba(255,255,255,0.9)',
+                            boxSizing: 'border-box',
+                            pointerEvents: 'none',
+                          }} />
+                        ) : (
+                          <div style={{
+                            position: 'absolute',
+                            left: clickPos.x - 10,
+                            top: clickPos.y - 10,
+                            width: 20,
+                            height: 20,
+                            background: `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)`,
+                            border: '1px solid rgba(255,255,255,0.9)',
+                            boxSizing: 'border-box',
+                            pointerEvents: 'none',
+                          }} />
+                        )
                       )}
                     </>
                   )
@@ -1485,51 +1511,48 @@ export default function Home() {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <input
-                placeholder="5YR 4/6"
-                onChange={e => {
-                  const v = e.target.value.trim()
-                  if (!v) { setMunsellPreview(null); return }
-                  const p = parseMunsell(v)
-                  if (p) {
-                    const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
-                    setMunsellPreview(mc)
-                  } else {
-                    setMunsellPreview(null)
-                  }
-                }}
-                onKeyDown={e => {
-                  if (e.key !== 'Enter') return
-                  const v = e.target.value.trim()
-                  if (!v) return
-                  const p = parseMunsell(v)
-                  if (!p) return
-                  const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
-                  if (!mc) return
-                  // Get full Munsell info including hueAngle via rgbToMunsell
-                  const mInfo = rgbToMunsell(mc.r, mc.g, mc.b)
-                  setColor({
-                    r: mc.r, g: mc.g, b: mc.b,
-                    hue: p.hue,
-                    hueName: mInfo.hueName,
-                    hueAngle: mInfo.hueAngle,
-                    value: p.value,
-                    chroma: p.chroma,
-                  })
-                  e.target.blur()
-                }}
-                style={{
-                  width: '100%',
-                  background: 'rgba(0,0,0,0.5)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  borderRadius: 4,
-                  padding: '4px 8px',
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                  color: '#c8a96e',
-                  outline: 'none',
-                }}
-              />
+              <div style={{ display: 'flex', gap: 4 }}>
+                <input
+                  placeholder="5YR 4/6"
+                  value={munsellInput}
+                  onChange={e => {
+                    const v = e.target.value.trim()
+                    setMunsellInput(v)
+                    if (!v) { setMunsellPreview(null); return }
+                    handleMunsellInput(v)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key !== 'Enter') return
+                    if (!munsellInput.trim()) return
+                    handleMunsellInput(munsellInput.trim())
+                    e.target.blur()
+                  }}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: 4,
+                    padding: '4px 8px',
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    color: '#c8a96e',
+                    outline: 'none',
+                  }}
+                />
+                <button
+                  onClick={() => { if (munsellInput.trim()) { handleMunsellInput(munsellInput.trim()); } }}
+                  style={{
+                    background: 'rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: 4,
+                    padding: '4px 8px',
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    color: '#c8a96e',
+                    cursor: 'pointer',
+                  }}
+                >Set</button>
+              </div>
               <div className={styles.munsellNotation}>
                 {hasColor ? `${color.hue} ${color.value.toFixed(1)}/${color.chroma.toFixed(1)}` : '— / —'}
               </div>
