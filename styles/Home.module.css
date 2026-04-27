@@ -635,7 +635,7 @@
 .infoPanel {
   padding: 10px 12px;
   border-right: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 8px;

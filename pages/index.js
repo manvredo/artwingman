@@ -1512,7 +1512,7 @@ export default function Home() {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ display: 'flex', gap: 4, overflow: 'visible' }}>
+              <div style={{ display: 'flex', gap: 4 }}>
                 <input
                   placeholder="5YR 4/6"
                   value={munsellInput}

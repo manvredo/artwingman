@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(npx next:*)",
+      "Bash(wget \"http://www.rit-mcsl.org/MunsellRenotation/real_CIELAB.xls\" -O /tmp/munsell_cielab.xls)",
+      "Bash(curl -L \"http://www.rit-mcsl.org/MunsellRenotation/real_CIELAB.xls\" -o /tmp/munsell_cielab.xls)",
+      "Bash(pip install:*)",
+      "Bash(python3)",
+      "Bash(python3 -m pip install xlrd --break-system-packages -q)",
+      "Bash(node:*)",
+      "Bash(curl -L \"http://www.rit-mcsl.org/MunsellRenotation/real_CIELAB.xls\" -o \"C:/artwingman/munsell_cielab.xls\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(mkdir -p lib/munsell-lib)",
+      "Bash(cp -r node_modules/munsell/dist/src/* lib/munsell-lib/)",
+      "Bash(cp node_modules/munsell/dist/src/index.js lib/munsell-lib/)",
+      "Bash(cp -r node_modules/munsell/dist/src/MRD.js lib/munsell-lib/)",
+      "Bash(cp -r node_modules/munsell/dist/src/*.js lib/munsell-lib/)"
+    ]
+  }
+}
