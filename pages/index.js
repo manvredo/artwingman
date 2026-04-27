@@ -103,6 +103,7 @@ export default function Home() {
   const [openDrawer, setOpenDrawer] = useState(['color', 'value'])
   const [valueSteps, setValueSteps] = useState(10)
   const [showGray, setShowGray] = useState(false)
+  const [chromaMode, setChromaMode] = useState(false)
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
   const [paletteCount, setPaletteCount] = useState(6)
@@ -406,6 +407,41 @@ export default function Home() {
     }
     ctx.putImageData(imageData, 0, 0)
     setShowGray(true)
+    setValueRating(null)
+  }, [])
+
+  const applyChromaMode = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const imageData = new ImageData(
+      new Uint8ClampedArray(originalImageDataRef.current.data),
+      originalImageDataRef.current.width,
+      originalImageDataRef.current.height
+    )
+    const data = imageData.data
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2]
+      const R = r / 255, G = g / 255, B = b / 255
+      const rl = R > 0.04045 ? Math.pow((R + 0.055) / 1.055, 2.4) : R / 12.92
+      const gl = G > 0.04045 ? Math.pow((G + 0.055) / 1.055, 2.4) : G / 12.92
+      const bl = B > 0.04045 ? Math.pow((B + 0.055) / 1.055, 2.4) : B / 12.92
+      const x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375
+      const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750
+      const z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041
+      const Xn = 0.95047, Yn = 1.0, Zn = 1.08883
+      const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116
+      const fy = f(y / Yn)
+      const L = 116 * fy - 16
+      const a = 500 * (f(x / Xn) - fy)
+      const bv = 200 * (fy - f(z / Zn))
+      const chroma = Math.sqrt(a * a + bv * bv)
+      const gray = Math.round(Math.min(255, (chroma / 60) * 255))
+      data[i] = data[i+1] = data[i+2] = gray
+    }
+    ctx.putImageData(imageData, 0, 0)
+    setChromaMode(true)
+    setShowGray(false)
     setValueRating(null)
   }, [])
 
@@ -722,7 +758,10 @@ export default function Home() {
                 <button className={styles.btnSecondary} onClick={applyOriginalBW} disabled={!image}>
                   S/W
                 </button>
-                {showGray && (
+                <button className={styles.btnSecondary} onClick={applyChromaMode} disabled={!image}>
+                  Chroma
+                </button>
+                {(showGray || chromaMode) && (
                   <button className={styles.btnSecondary} onClick={resetCanvas}>
                     Reset
                   </button>
