@@ -1540,16 +1540,18 @@ export default function Home() {
                   }}
                 />
                 <button
+                  type="button"
                   onClick={() => { if (munsellInput.trim()) { handleMunsellInput(munsellInput.trim()); } }}
                   style={{
-                    background: 'rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.25)',
+                    background: 'rgba(60,50,40,0.9)',
+                    border: '1px solid rgba(200,169,110,0.4)',
                     borderRadius: 4,
-                    padding: '4px 8px',
+                    padding: '4px 10px',
                     fontFamily: 'monospace',
                     fontSize: 11,
                     color: '#c8a96e',
                     cursor: 'pointer',
+                    minWidth: 36,
                   }}
                 >Set</button>
               </div>
