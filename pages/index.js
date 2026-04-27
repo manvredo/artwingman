@@ -1316,37 +1316,39 @@ export default function Home() {
             >
               {(() => {
                 const [inputVal, setInputVal] = useState('')
-                const handlePreview = () => {
-                  if (!inputVal.trim()) { setMunsellPreview(null); return }
-                  const p = parseMunsell(inputVal)
-                  if (!p) return
-                  const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
-                  setMunsellPreview(mc)
-                }
                 const mc = hasColor ? munsellHvcToRgb(color.hue, color.value, color.chroma) : null;
                 const lum = mc ? (0.299 * mc.r + 0.587 * mc.g + 0.114 * mc.b) / 255 : 0;
                 const light = lum > 0.55;
                 return (
                   <>
-                    <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <div style={{ position: 'absolute', top: 4, right: 4 }}>
                       <input
                         value={inputVal}
-                        onChange={e => setInputVal(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handlePreview()}
+                        onChange={e => {
+                          setInputVal(e.target.value)
+                          const v = e.target.value.trim()
+                          if (!v) { setMunsellPreview(null); return }
+                          const p = parseMunsell(v)
+                          if (p) {
+                            const mc2 = munsellHvcToRgb(p.hue, p.value, p.chroma)
+                            setMunsellPreview(mc2)
+                          } else {
+                            setMunsellPreview(null)
+                          }
+                        }}
                         placeholder="5YR 4/6"
                         style={{
                           width: 72,
-                          background: 'rgba(0,0,0,0.5)',
-                          border: '1px solid rgba(255,255,255,0.2)',
+                          background: 'rgba(0,0,0,0.7)',
+                          border: '1px solid rgba(255,255,255,0.35)',
                           borderRadius: 4,
-                          padding: '2px 6px',
+                          padding: '3px 6px',
                           fontFamily: 'monospace',
-                          fontSize: 10,
+                          fontSize: 11,
                           color: '#e9e9e9',
                           outline: 'none',
                         }}
                       />
-                      <button onClick={handlePreview} style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4, padding: '2px 6px', fontFamily: 'monospace', fontSize: 10, color: '#c8a96e', cursor: 'pointer' }}>→</button>
                     </div>
                     <div style={{
                       width: '100%',
