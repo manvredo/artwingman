@@ -1197,12 +1197,14 @@ export default function Home() {
                 {hoverMunsell && image && (() => {
                   const lum = (0.299 * hoverMunsell.r + 0.587 * hoverMunsell.g + 0.114 * hoverMunsell.b) / 255
                   const isLight = lum > 0.5
+                  const cx = viewport.panX + (hoverPos.x - imgDims.w / 2) * viewport.zoom + imgDims.w / 2 * viewport.zoom
+                  const cy = viewport.panY + (hoverPos.y - imgDims.h / 2) * viewport.zoom + imgDims.h / 2 * viewport.zoom
                   return (
                     <div style={{
                       position: 'absolute',
-                      left: hoverPos.x + 14,
-                      top: hoverPos.y - 28,
-                      transition: 'left 0.08s ease-out, top 0.08s ease-out',
+                      left: hoverPos.x + 20,
+                      top: hoverPos.y - 32,
+                      transition: 'left 0.05s ease-out, top 0.05s ease-out',
                       padding: '3px 8px',
                       borderRadius: 4,
                       fontSize: 14,
