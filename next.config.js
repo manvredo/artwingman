@@ -5,7 +5,7 @@ const nextConfig = {
   images: { unoptimized: true },
   webpack: (config) => {
     config.resolve.alias = config.resolve.alias || {}
-    config.resolve.alias.munsell = require.resolve('munsell')
+    config.resolve.alias.munsell = require('path').resolve(__dirname, 'node_modules/munsell')
     return config
   },
 }
