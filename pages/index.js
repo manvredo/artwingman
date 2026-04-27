@@ -1498,6 +1498,26 @@ export default function Home() {
                     setMunsellPreview(null)
                   }
                 }}
+                onKeyDown={e => {
+                  if (e.key !== 'Enter') return
+                  const v = e.target.value.trim()
+                  if (!v) return
+                  const p = parseMunsell(v)
+                  if (!p) return
+                  const mc = munsellHvcToRgb(p.hue, p.value, p.chroma)
+                  if (!mc) return
+                  // Get full Munsell info including hueAngle via rgbToMunsell
+                  const mInfo = rgbToMunsell(mc.r, mc.g, mc.b)
+                  setColor({
+                    r: mc.r, g: mc.g, b: mc.b,
+                    hue: p.hue,
+                    hueName: mInfo.hueName,
+                    hueAngle: mInfo.hueAngle,
+                    value: p.value,
+                    chroma: p.chroma,
+                  })
+                  e.target.blur()
+                }}
                 style={{
                   width: '100%',
                   background: 'rgba(0,0,0,0.5)',
