@@ -83,14 +83,18 @@ function parseMunsell(str) {
 }
 
 function handleMunsellInput(str) {
-  const parsed = parseMunsell(str)
-  if (!parsed) return
-  const rgb = munsellHvcToRgb(parsed.hue, parsed.value, parsed.chroma)
-  if (!rgb) return
-  setMunsellPreview({ ...parsed, ...rgb })
-  // Set color state so all panels update
-  const munsell = rgbToMunsell(rgb.r, rgb.g, rgb.b)
-  setColor({ r: rgb.r, g: rgb.g, b: rgb.b, ...munsell })
+  try {
+    const parsed = parseMunsell(str)
+    if (!parsed) { console.warn('parseMunsell returned null for:', str); return }
+    const rgb = munsellHvcToRgb(parsed.hue, parsed.value, parsed.chroma)
+    if (!rgb) { console.warn('munsellHvcToRgb returned null for:', parsed); return }
+    setMunsellPreview({ ...parsed, ...rgb })
+    // Set color state so all panels update
+    const munsell = rgbToMunsell(rgb.r, rgb.g, rgb.b)
+    setColor({ r: rgb.r, g: rgb.g, b: rgb.b, ...munsell })
+  } catch (e) {
+    console.error('handleMunsellInput error:', e)
+  }
 }
 
 const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
