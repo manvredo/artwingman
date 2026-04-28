@@ -1205,12 +1205,12 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {loupeMode && image && loupeData && viewport.zoom < 1.5 && (() => {
+                {loupeMode && image && hoverMunsell && viewport.zoom < 1.5 && (() => {
                   return (
                     <div style={{
-                      position: 'fixed',
-                      transform: `translate3d(${loupeData.x + 15}px, ${loupeData.y - 130}px, 0)`,
-                      willChange: 'transform',
+                      position: 'absolute',
+                      left: hoverPos.x + 20,
+                      top: hoverPos.y - 130,
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
                       borderRadius: 8,
@@ -1227,11 +1227,11 @@ export default function Home() {
                       </div>
                       <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                         <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                          <div style={{ flex: 1, height: 10, background: `rgb(${loupeData.r},${loupeData.g},${loupeData.b})`, borderRadius: 2 }} />
-                          <div style={{ flex: 1, height: 10, background: loupeData.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
+                          <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
+                          <div style={{ flex: 1, height: 10, background: loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
                         </div>
                         <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
-                          {loupeData.munsellStr}
+                          {hoverMunsell.munsellStr}
                         </div>
                       </div>
                     </div>
