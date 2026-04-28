@@ -324,9 +324,13 @@ export default function Home() {
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
 
-    // Image pixel coordinates (for color sampling)
-    const imgX = Math.floor((e.clientX - rect.left) / viewport.zoom)
-    const imgY = Math.floor((e.clientY - rect.top) / viewport.zoom)
+    // Image pixel coordinates — account for centering offset and pan
+    const visualX = e.clientX - rect.left
+    const visualY = e.clientY - rect.top
+    const centerOffsetX = (rect.width - imgDims.w * viewport.zoom) / 2
+    const centerOffsetY = (rect.height - imgDims.h * viewport.zoom) / 2
+    const imgX = Math.floor((visualX - centerOffsetX - viewport.panX) / viewport.zoom)
+    const imgY = Math.floor((visualY - centerOffsetY - viewport.panY) / viewport.zoom)
     const imgW = originalImageDataRef.current?.width || 0
     const imgH = originalImageDataRef.current?.height || 0
     if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < imgH && image) {
@@ -1209,7 +1213,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'absolute',
-                      left: hoverPos.x + 20,
+                      left: hoverPos.x - 110,
                       top: hoverPos.y - 130,
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
