@@ -347,7 +347,6 @@ export default function Home() {
         loupeCtx.drawImage(canvas, imgX - 10, imgY - 10, 20, 20, 0, 0, 100, 100)
       }
 
-      // Loupe UI data: clientX/Y = screen space, constant offset
       mouseRef.current = { x: e.clientX, y: e.clientY }
       const parts = munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
       const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
@@ -1210,7 +1209,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'fixed',
-                      transform: `translate3d(${loupeData.x + 5}px, ${loupeData.y - 130}px, 0)`,
+                      transform: `translate3d(${loupeData.x + 15}px, ${loupeData.y - 130}px, 0)`,
                       willChange: 'transform',
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
