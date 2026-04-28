@@ -108,9 +108,8 @@ export default function Home() {
   const [palette, setPalette] = useState([])
   const [paletteCount, setPaletteCount] = useState(6)
   const [hoverMunsell, setHoverMunsell] = useState(null)
-  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
-  const [loupePos, setLoupePos] = useState({ x: 0, y: 0 })
-  const loupeCanvasRef = useRef(null)
+  const [loupeData, setLoupeData] = useState(null)
+  const mouseRef = useRef({ x: 0, y: 0 })
   const [selectedSwatch, setSelectedSwatch] = useState(null)
   const [gridMode, setGridMode] = useState(null)
   const [squareGridSize, setSquareGridSize] = useState(4)
@@ -322,39 +321,37 @@ export default function Home() {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    const sx = e.clientX - rect.left
-    const sy = e.clientY - rect.top
-    setCursor({ x: sx / viewport.zoom, y: sy / viewport.zoom, visible: true })
 
-    if (image && originalImageDataRef.current) {
-      const imgX = Math.floor(sx / viewport.zoom)
-      const imgY = Math.floor(sy / viewport.zoom)
-      const imgW = originalImageDataRef.current.width
-      const imgH = originalImageDataRef.current.height
-      if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < imgH) {
-        const i = (imgY * imgW + imgX) * 4
-        const r = originalImageDataRef.current.data[i]
-        const g = originalImageDataRef.current.data[i + 1]
-        const b = originalImageDataRef.current.data[i + 2]
-        const m = rgbToMunsell(r, g, b)
-        const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
-        setHoverMunsell({ munsellStr, r, g, b })
-        setHoverPos({ x: sx, y: sy })
-        setHoverImgPos({ x: imgX, y: imgY })
+    // Image pixel coordinates (for color sampling)
+    const imgX = Math.floor((e.clientX - rect.left) / viewport.zoom)
+    const imgY = Math.floor((e.clientY - rect.top) / viewport.zoom)
+    const imgW = originalImageDataRef.current?.width || 0
+    const imgH = originalImageDataRef.current?.height || 0
+    if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < imgH && image) {
+      const i = (imgY * imgW + imgX) * 4
+      const r = originalImageDataRef.current.data[i]
+      const g = originalImageDataRef.current.data[i + 1]
+      const b = originalImageDataRef.current.data[i + 2]
+      const m = rgbToMunsell(r, g, b)
+      const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
+      setHoverMunsell({ munsellStr, r, g, b })
 
-        // Loupe: 20x20px crop from image space at cursor, 5x zoom → 100x100 canvas
-        const px = Math.floor((sx - viewport.panX) / viewport.zoom)
-        const py = Math.floor((sy - viewport.panY) / viewport.zoom)
-        const loupeCtx = loupeCanvasRef.current?.getContext('2d')
-        if (loupeCtx && canvasRef.current) {
-          loupeCtx.clearRect(0, 0, 100, 100)
-          loupeCtx.imageSmoothingEnabled = false
-          loupeCtx.drawImage(canvasRef.current, px - 10, py - 10, 20, 20, 0, 0, 100, 100)
-          setLoupePos({ x: sx, y: sy })
-        }
-      } else {
-        setHoverMunsell(null)
+      // Loupe: 20x20px crop in image space → 100x100 canvas on screen
+      const loupeCtx = canvas?.getContext('2d')
+      if (loupeCtx && canvas) {
+        loupeCtx.clearRect(0, 0, 100, 100)
+        loupeCtx.imageSmoothingEnabled = false
+        loupeCtx.drawImage(canvas, imgX - 10, imgY - 10, 20, 20, 0, 0, 100, 100)
       }
+
+      // Loupe UI data: clientX/Y = screen space, constant offset
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+      const parts = munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
+      const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
+      setLoupeData({ x: e.clientX, y: e.clientY, munsellStr, r, g, b, munsellChip })
+    } else {
+      setHoverMunsell(null)
+      setLoupeData(null)
     }
   }, [viewport.zoom, image])
 
@@ -1205,18 +1202,11 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {/* Loupe */}
-                {loupeMode && image && hoverMunsell && viewport.zoom < 1.5 && (() => {
-                  const sx = hoverPos.x
-                  const sy = hoverPos.y
-                  const loupeLeft = sx + 20
-                  const loupeTop = sy - 130
-                  const parts = hoverMunsell.munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
-                  const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
+                {loupeMode && image && loupeData && viewport.zoom < 1.5 && (() => {
                   return (
                     <div style={{
-                      position: 'absolute',
-                      transform: `translate3d(${loupeLeft}px, ${loupeTop}px, 0)`,
+                      position: 'fixed',
+                      transform: `translate3d(${loupeData.x + 20}px, ${loupeData.y - 130}px, 0)`,
                       willChange: 'transform',
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
@@ -1234,11 +1224,11 @@ export default function Home() {
                       </div>
                       <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                         <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                          <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
-                          <div style={{ flex: 1, height: 10, background: munsellChip ? `rgb(${munsellChip.r},${munsellChip.g},${munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
+                          <div style={{ flex: 1, height: 10, background: `rgb(${loupeData.r},${loupeData.g},${loupeData.b})`, borderRadius: 2 }} />
+                          <div style={{ flex: 1, height: 10, background: loupeData.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
                         </div>
                         <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
-                          {hoverMunsell.munsellStr}
+                          {loupeData.munsellStr}
                         </div>
                       </div>
                     </div>
