@@ -108,6 +108,7 @@ export default function Home() {
   const [palette, setPalette] = useState([])
   const [paletteCount, setPaletteCount] = useState(6)
   const [hoverMunsell, setHoverMunsell] = useState(null)
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
   const [loupeData, setLoupeData] = useState(null)
   const mouseRef = useRef({ x: 0, y: 0 })
   const loupeCanvasRef = useRef(null)
@@ -336,6 +337,7 @@ export default function Home() {
       const m = rgbToMunsell(r, g, b)
       const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
       setHoverMunsell({ munsellStr, r, g, b })
+      setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
 
       // Loupe: 20x20px crop in image space → 100x100 canvas on screen
       const loupeCtx = loupeCanvasRef.current?.getContext('2d')
@@ -353,6 +355,7 @@ export default function Home() {
     } else {
       setHoverMunsell(null)
       setLoupeData(null)
+      setHoverPos({ x: 0, y: 0 })
     }
   }, [viewport.zoom, image])
 
