@@ -350,7 +350,7 @@ export default function Home() {
       if (loupeCtx && canvas) {
         loupeCtx.clearRect(0, 0, 100, 100)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, imgX - 10, imgY - 10, 20, 20, 0, 0, 100, 100)
+        loupeCtx.drawImage(canvas, imgX - 20, imgY - 20, 40, 40, 0, 0, 100, 100)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
