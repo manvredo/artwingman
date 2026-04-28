@@ -110,6 +110,7 @@ export default function Home() {
   const [hoverMunsell, setHoverMunsell] = useState(null)
   const [loupeData, setLoupeData] = useState(null)
   const mouseRef = useRef({ x: 0, y: 0 })
+  const loupeCanvasRef = useRef(null)
   const [selectedSwatch, setSelectedSwatch] = useState(null)
   const [gridMode, setGridMode] = useState(null)
   const [squareGridSize, setSquareGridSize] = useState(4)
@@ -337,7 +338,7 @@ export default function Home() {
       setHoverMunsell({ munsellStr, r, g, b })
 
       // Loupe: 20x20px crop in image space → 100x100 canvas on screen
-      const loupeCtx = canvas?.getContext('2d')
+      const loupeCtx = loupeCanvasRef.current?.getContext('2d')
       if (loupeCtx && canvas) {
         loupeCtx.clearRect(0, 0, 100, 100)
         loupeCtx.imageSmoothingEnabled = false
