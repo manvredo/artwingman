@@ -136,6 +136,7 @@ export default function Home() {
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
   const [paletteClusters, setPaletteClusters] = useState([])
+  const [loupeMode, setLoupeMode] = useState(true)
   const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
   const [lutData, setLutData] = useState(null)   // Float32Array | null
@@ -1091,6 +1092,14 @@ export default function Home() {
               </div>
               <button
                 className={styles.toolBtn}
+                onClick={() => setLoupeMode(m => !m)}
+                title="Toggle loupe"
+                style={{ color: loupeMode ? '#c8a96e' : '#555250', borderColor: loupeMode ? 'rgba(200,169,110,0.4)' : 'rgba(255,255,255,0.15)' }}
+              >
+                Lupe
+              </button>
+              <button
+                className={styles.toolBtn}
                 onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}
                 title="Reset zoom"
                 style={{ opacity: viewport.zoom === 1 && viewport.panX === 0 && viewport.panY === 0 ? 0.35 : 1 }}
@@ -1199,7 +1208,7 @@ export default function Home() {
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {/* Loupe */}
-                {image && hoverMunsell && (() => {
+                {loupeMode && image && hoverMunsell && (() => {
                   const sx = hoverPos.x
                   const sy = hoverPos.y
                   const imgHalf = (imgDims.w / 2) * viewport.zoom
