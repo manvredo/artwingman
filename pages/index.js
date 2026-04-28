@@ -1210,7 +1210,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'fixed',
-                      transform: `translate3d(${loupeData.x + 20}px, ${loupeData.y - 130}px, 0)`,
+                      transform: `translate3d(${loupeData.x + 5}px, ${loupeData.y - 130}px, 0)`,
                       willChange: 'transform',
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
