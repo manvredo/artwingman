@@ -1209,8 +1209,7 @@ export default function Home() {
                 {loupeMode && image && hoverMunsell && viewport.zoom < 1.5 && (() => {
                   const sx = hoverPos.x
                   const sy = hoverPos.y
-                  const imgHalf = (imgDims.w / 2) * viewport.zoom
-                  const loupeLeft = sx > imgHalf ? sx - 130 : sx + 20
+                  const loupeLeft = sx + 20
                   const loupeTop = sy - 130
                   const parts = hoverMunsell.munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
                   const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
@@ -1218,6 +1217,7 @@ export default function Home() {
                     <div style={{
                       position: 'absolute',
                       transform: `translate3d(${loupeLeft}px, ${loupeTop}px, 0)`,
+                      willChange: 'transform',
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
                       borderRadius: 8,
