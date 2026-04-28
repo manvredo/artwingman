@@ -1201,7 +1201,7 @@ export default function Home() {
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {/* Loupe */}
-                {loupeMode && image && hoverMunsell && (() => {
+                {loupeMode && showMunsellValues && image && hoverMunsell && (() => {
                   const sx = hoverPos.x
                   const sy = hoverPos.y
                   const imgHalf = (imgDims.w / 2) * viewport.zoom
