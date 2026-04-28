@@ -1198,14 +1198,15 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {/* Loupe — only when hovering over image */}
+                {/* Loupe */}
                 {image && hoverMunsell && (() => {
                   const sx = hoverPos.x
                   const sy = hoverPos.y
                   const imgHalf = (imgDims.w / 2) * viewport.zoom
                   const loupeLeft = sx > imgHalf ? sx - 130 : sx + 20
-                  const loupeTop = sy - 130
-                  const munsellChip = munsellHvcToRgb(...(hoverMunsell.munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)?.slice(1).map(Number) || [null, null, null]))
+                  const loupeTop = Math.max(0, sy - 130)
+                  const parts = hoverMunsell.munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
+                  const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
                   return (
                     <div style={{
                       position: 'absolute',
@@ -1221,14 +1222,11 @@ export default function Home() {
                       zIndex: 200,
                     }}>
                       <canvas ref={loupeCanvasRef} width={100} height={100} style={{ display: 'block', width: 100, height: 100, borderRadius: 0 }} />
-                      {/* Crosshair */}
                       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
                         <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
                         <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
                       </div>
-                      {/* Info panel below loupe */}
                       <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                        {/* Color comparison strip */}
                         <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
                           <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
                           <div style={{ flex: 1, height: 10, background: munsellChip ? `rgb(${munsellChip.r},${munsellChip.g},${munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
