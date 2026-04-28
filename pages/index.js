@@ -181,6 +181,8 @@ export default function Home() {
         setColorRating(null)
         setColorClusters([])
         setPaletteClusters([])
+        setLoupeMode(false)
+        setShowMunsellValues(false)
         setDevelop(DEVELOP_DEFAULTS)
         setTimeout(() => {
           const canvas = canvasRef.current
