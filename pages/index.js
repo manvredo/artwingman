@@ -137,6 +137,7 @@ export default function Home() {
   const [colorClusters, setColorClusters] = useState([])
   const [paletteClusters, setPaletteClusters] = useState([])
   const [loupeMode, setLoupeMode] = useState(true)
+  const [showMunsellValues, setShowMunsellValues] = useState(true)
   const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
   const [lutData, setLutData] = useState(null)   // Float32Array | null
@@ -1090,15 +1091,7 @@ export default function Home() {
                   />
                 ))}
               </div>
-              <button
-                className={styles.toolBtn}
-                onClick={() => setLoupeMode(m => !m)}
-                title="Toggle loupe"
-                style={{ color: loupeMode ? '#c8a96e' : '#555250', borderColor: loupeMode ? 'rgba(200,169,110,0.4)' : 'rgba(255,255,255,0.15)' }}
-              >
-                Lupe
-              </button>
-              <button
+                            <button
                 className={styles.toolBtn}
                 onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })}
                 title="Reset zoom"
@@ -1288,7 +1281,7 @@ export default function Home() {
                     </>
                   )
                 })()}
-                {hoverMunsell && image && (() => {
+                {showMunsellValues && hoverMunsell && image && (() => {
                   const lum = (0.299 * hoverMunsell.r + 0.587 * hoverMunsell.g + 0.114 * hoverMunsell.b) / 255
                   const isLight = lum > 0.5
                   const cx = viewport.panX + (hoverPos.x - imgDims.w / 2) * viewport.zoom + imgDims.w / 2 * viewport.zoom
@@ -1492,6 +1485,20 @@ export default function Home() {
               <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5"/>
               <polyline points="5,5 1,8 5,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
               <polyline points="11,5 15,8 11,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+          <button className={styles.viewBtn} onClick={() => setLoupeMode(m => !m)} title="Lupe an/aus" style={{ color: loupeMode ? '#c8a96e' : '#555250' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/>
+              <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <button className={styles.viewBtn} onClick={() => setShowMunsellValues(m => !m)} title="Munsell-Werte an/aus" style={{ color: showMunsellValues ? '#c8a96e' : '#555250' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+              <line x1="5" y1="6" x2="11" y2="6" stroke="currentColor" strokeWidth="1.2"/>
+              <line x1="5" y1="9" x2="9" y2="9" stroke="currentColor" strokeWidth="1.2"/>
             </svg>
           </button>
         </div>
