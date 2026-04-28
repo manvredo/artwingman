@@ -1285,7 +1285,7 @@ export default function Home() {
                     </>
                   )
                 })()}
-                {!loupeMode && showMunsellValues && hoverMunsell && image && viewport.zoom < 1.5 && (() => {
+                {!loupeMode && showMunsellValues && hoverMunsell && image && (() => {
                   const lum = (0.299 * hoverMunsell.r + 0.587 * hoverMunsell.g + 0.114 * hoverMunsell.b) / 255
                   const isLight = lum > 0.5
                   const cx = viewport.panX + (hoverPos.x - imgDims.w / 2) * viewport.zoom + imgDims.w / 2 * viewport.zoom
