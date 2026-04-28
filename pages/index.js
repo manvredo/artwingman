@@ -1488,13 +1488,13 @@ export default function Home() {
             </svg>
           </button>
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-          <button className={styles.viewBtn} onClick={() => { if (loupeMode) { setLoupeMode(false) } else { setLoupeMode(true); setShowMunsellValues(false) } }} title="Lupe an/aus" style={{ color: loupeMode ? '#c8a96e' : '#555250' }}>
+          <button className={styles.viewBtn} onClick={() => { if (loupeMode) { setLoupeMode(false) } else { setLoupeMode(true); setShowMunsellValues(false) } }} title="Lupe an/aus" style={{ color: loupeMode ? '#8a8680' : '#555250' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="7" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/>
               <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </button>
-          <button className={styles.viewBtn} onClick={() => { if (showMunsellValues) { setShowMunsellValues(false) } else { setShowMunsellValues(true); setLoupeMode(false) } }} title="Munsell-Werte an/aus" style={{ color: showMunsellValues ? '#c8a96e' : '#555250' }}>
+          <button className={styles.viewBtn} onClick={() => { if (showMunsellValues) { setShowMunsellValues(false) } else { setShowMunsellValues(true); setLoupeMode(false) } }} title="Munsell-Werte an/aus" style={{ color: showMunsellValues ? '#8a8680' : '#555250' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
               <line x1="5" y1="6" x2="11" y2="6" stroke="currentColor" strokeWidth="1.2"/>
