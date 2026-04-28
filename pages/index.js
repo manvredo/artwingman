@@ -329,8 +329,10 @@ export default function Home() {
     const visualY = e.clientY - rect.top
     const centerOffsetX = (rect.width - imgDims.w * viewport.zoom) / 2
     const centerOffsetY = (rect.height - imgDims.h * viewport.zoom) / 2
-    const imgX = Math.floor((visualX - centerOffsetX - viewport.panX) / viewport.zoom)
-    const imgY = Math.floor((visualY - centerOffsetY - viewport.panY) / viewport.zoom)
+    const innerX = visualX - centerOffsetX
+    const innerY = visualY - centerOffsetY
+    const imgX = Math.floor((innerX - viewport.panX) / viewport.zoom)
+    const imgY = Math.floor((innerY - viewport.panY) / viewport.zoom)
     const imgW = originalImageDataRef.current?.width || 0
     const imgH = originalImageDataRef.current?.height || 0
     if (imgX >= 0 && imgX < imgW && imgY >= 0 && imgY < imgH && image) {
@@ -341,7 +343,7 @@ export default function Home() {
       const m = rgbToMunsell(r, g, b)
       const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
       setHoverMunsell({ munsellStr, r, g, b })
-      setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+      setHoverPos({ x: innerX, y: innerY })
 
       // Loupe: 20x20px crop in image space → 100x100 canvas on screen
       const loupeCtx = loupeCanvasRef.current?.getContext('2d')
@@ -1213,8 +1215,8 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'absolute',
-                      left: hoverPos.x - 110,
-                      top: hoverPos.y - 130,
+                      left: hoverPos.x - 50,
+                      top: hoverPos.y - 50,
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
                       borderRadius: 8,
