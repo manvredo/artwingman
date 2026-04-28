@@ -109,7 +109,6 @@ export default function Home() {
   const [paletteCount, setPaletteCount] = useState(6)
   const [hoverMunsell, setHoverMunsell] = useState(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
-  const [hoverImgPos, setHoverImgPos] = useState({ x: 0, y: 0 })
   const [loupePos, setLoupePos] = useState({ x: 0, y: 0 })
   const loupeCanvasRef = useRef(null)
   const [selectedSwatch, setSelectedSwatch] = useState(null)
@@ -342,11 +341,10 @@ export default function Home() {
         setHoverMunsell({ munsellStr, r, g, b })
         setHoverPos({ x: sx, y: sy })
         setHoverImgPos({ x: imgX, y: imgY })
-        setHoverImgPos({ x: imgX, y: imgY })
 
         // Loupe: 20x20px crop from image space at cursor, 5x zoom → 100x100 canvas
-        const px = hoverImgPos.x
-        const py = hoverImgPos.y
+        const px = Math.floor((sx - viewport.panX) / viewport.zoom)
+        const py = Math.floor((sy - viewport.panY) / viewport.zoom)
         const loupeCtx = loupeCanvasRef.current?.getContext('2d')
         if (loupeCtx && canvasRef.current) {
           loupeCtx.clearRect(0, 0, 100, 100)
@@ -356,7 +354,6 @@ export default function Home() {
         }
       } else {
         setHoverMunsell(null)
-        setHoverImgPos({ x: 0, y: 0 })
       }
     }
   }, [viewport.zoom, image])
@@ -1214,14 +1211,13 @@ export default function Home() {
                   const sy = hoverPos.y
                   const imgHalf = (imgDims.w / 2) * viewport.zoom
                   const loupeLeft = sx > imgHalf ? sx - 130 : sx + 20
-                  const loupeTop = Math.max(0, sy - 130)
+                  const loupeTop = sy - 130
                   const parts = hoverMunsell.munsellStr.match(/^([^\s]+)\s+([\d.]+)\/([\d.]+)/)
                   const munsellChip = parts ? munsellHvcToRgb(parts[1], parseFloat(parts[2]), parseFloat(parts[3])) : null
                   return (
                     <div style={{
                       position: 'absolute',
-                      left: loupeLeft,
-                      top: loupeTop,
+                      transform: `translate3d(${loupeLeft}px, ${loupeTop}px, 0)`,
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
                       borderRadius: 8,
