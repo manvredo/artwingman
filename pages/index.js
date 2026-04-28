@@ -1111,6 +1111,8 @@ export default function Home() {
                   setColorRating(null)
                   setColorClusters([])
                   setPaletteClusters([])
+                  setLoupeMode(false)
+                  setShowMunsellValues(false)
                   originalImageDataRef.current = null
                 }}>
                   Load new image
