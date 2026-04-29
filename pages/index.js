@@ -1211,12 +1211,14 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {loupeMode && image && hoverMunsell && viewport.zoom < 1.5 && (() => {
+                {loupeMode && image && hoverMunsell && zoom <= 1.15 && loupeData && (() => {
+                  const loupeX = loupeData.x > window.innerWidth / 2 ? loupeData.x - 130 : loupeData.x + 20
+                  const loupeY = loupeData.y - 130
                   return (
                     <div style={{
-                      position: 'absolute',
-                      left: hoverPos.x - 50,
-                      top: hoverPos.y - 50,
+                      position: 'fixed',
+                      left: loupeX,
+                      top: loupeY,
                       width: 100,
                       background: 'rgba(14,14,14,0.9)',
                       borderRadius: 8,
