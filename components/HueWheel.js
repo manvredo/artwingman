@@ -18,8 +18,9 @@ export default function HueWheel({ hueAngle, hueName, color, active, onHueClick 
     ctx.clearRect(0, 0, 180, 180)
 
     for (let deg = 0; deg < 360; deg++) {
+      const hue100 = (deg / 360) * 100
       const angle = (deg - 90) * Math.PI / 180
-      const rgb = munsellHvcToRgb(deg, 5, 40)
+      const rgb = munsellHvcToRgb(hue100, 5, 40)
       const { r: cr, g: cg, b: cb } = rgb || { r: 0, g: 0, b: 0 }
       ctx.beginPath()
       ctx.moveTo(cx + inner * Math.cos(angle), cy + inner * Math.sin(angle))
