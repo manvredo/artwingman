@@ -1211,9 +1211,12 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {loupeMode && image && hoverMunsell && viewport.zoom <= 1.15 && loupeData && (() => {
-                  const loupeX = loupeData.x > window.innerWidth / 2 ? loupeData.x - 130 : loupeData.x + 20
-                  const loupeY = loupeData.y - 130
+                {loupeMode && image && hoverMunsell && viewport.zoom <= 1.15 && clickPos && (() => {
+                  const loupeLeft = clickPos.x > window.innerWidth / 2
+                  const rawX = loupeLeft ? clickPos.x - 130 : clickPos.x + 20
+                  const rawY = clickPos.y - 130
+                  const loupeX = Math.max(0, Math.min(rawX, window.innerWidth - 100))
+                  const loupeY = Math.max(0, rawY)
                   return (
                     <div style={{
                       position: 'fixed',
