@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { labToRgb } from '../lib/munsell'
+import { munsellHvcToRgb } from '../lib/munsell'
 
 const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
 const VALUES  = [9, 8, 7, 6, 5, 4, 3, 2, 1]
@@ -52,10 +52,10 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
 
   const hueLabel = hue && hue !== '—' ? hue : '—'
 
-  const hueRad = hueAngle * Math.PI / 180
   const cellColor = (v, c) => {
-    const { r, g, b } = labToRgb(v * 10, c * 5 * Math.cos(hueRad), c * 5 * Math.sin(hueRad))
-    return `rgb(${r},${g},${b})`
+    const rgb = munsellHvcToRgb(hue, v, c)
+    if (!rgb) return '#1a1a1a'
+    return `rgb(${rgb.r},${rgb.g},${rgb.b})`
   }
   const hoveredColor = hovered ? cellColor(hovered.v, hovered.c) : null
 
@@ -194,8 +194,8 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
           onMouseDown={e => e.stopPropagation()}
           onClick={() => {
             if (onCellOpen) {
-              const { r, g, b } = labToRgb(popup.v * 10, popup.c * 5 * Math.cos(hueRad), popup.c * 5 * Math.sin(hueRad))
-              onCellOpen({ r, g, b, hue: hueLabel, hueName, value: popup.v, chroma: popup.c })
+              const rgb = munsellHvcToRgb(hue, popup.v, popup.c)
+              if (rgb) onCellOpen({ r: rgb.r, g: rgb.g, b: rgb.b, hue: hueLabel, hueName, value: popup.v, chroma: popup.c })
             }
             setPopup(null)
           }}
