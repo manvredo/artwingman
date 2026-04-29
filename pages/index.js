@@ -1211,7 +1211,7 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
-                {loupeMode && image && hoverMunsell && zoom <= 1.15 && loupeData && (() => {
+                {loupeMode && image && hoverMunsell && viewport.zoom <= 1.15 && loupeData && (() => {
                   const loupeX = loupeData.x > window.innerWidth / 2 ? loupeData.x - 130 : loupeData.x + 20
                   const loupeY = loupeData.y - 130
                   return (
