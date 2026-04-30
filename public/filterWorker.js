@@ -83,6 +83,29 @@ self.addEventListener('message', function (e) {
       out[i+3] = src[i+3]
     }
 
+  } else if (filter === 'emboss') {
+    const amount = Math.max(0, Math.min(10, strength)) / 5
+    const wgt = [[-1,0,1],[0,0,0],[1,0,-1]]
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let r = 0, g = 0, b = 0
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const ny = Math.max(0, Math.min(h-1, y+dy))
+            const nx = Math.max(0, Math.min(w-1, x+dx))
+            const i = (ny * w + nx) * 4
+            const w = wgt[dy+1][dx+1]
+            r += src[i] * w; g += src[i+1] * w; b += src[i+2] * w
+          }
+        }
+        const i = (y * w + x) * 4
+        out[i]   = Math.min(255, Math.max(0, src[i]   + Math.round(r * amount)))
+        out[i+1] = Math.min(255, Math.max(0, src[i+1] + Math.round(g * amount)))
+        out[i+2] = Math.min(255, Math.max(0, src[i+2] + Math.round(b * amount)))
+        out[i+3] = src[i+3]
+      }
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {

@@ -3,6 +3,7 @@ import styles from '../styles/Home.module.css'
 const FILTERS = [
   { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
   { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
+  { id: 'emboss',    label: 'Emboss',    min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
 ]
 
 export { FILTERS }
