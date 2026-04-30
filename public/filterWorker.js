@@ -84,7 +84,7 @@ self.addEventListener('message', function (e) {
     }
 
   } else if (filter === 'emboss') {
-    const amount = Math.max(0, Math.min(10, strength)) / 5
+    const amount = Math.max(0, Math.min(10, strength)) / 15
     const wgt = [[-1,0,1],[0,0,0],[1,0,-1]]
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
