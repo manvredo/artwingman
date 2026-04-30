@@ -139,6 +139,7 @@ export default function Home() {
   const [paletteClusters, setPaletteClusters] = useState([])
   const [loupeMode, setLoupeMode] = useState(true)
   const [showMunsellValues, setShowMunsellValues] = useState(true)
+  const [showMinimap, setShowMinimap] = useState(true)
   const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
   const [lutData, setLutData] = useState(null)   // Float32Array | null
@@ -1167,7 +1168,7 @@ export default function Home() {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              {(() => {
+              {showMinimap && (() => {
                 const minimapW = 150
                 const minimapH = 150
                 const { zoom, panX, panY } = viewport
@@ -1505,6 +1506,13 @@ export default function Home() {
               <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
               <line x1="5" y1="6" x2="11" y2="6" stroke="currentColor" strokeWidth="1.2"/>
               <line x1="5" y1="9" x2="9" y2="9" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </button>
+          <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+          <button className={styles.viewBtn} onClick={() => setShowMinimap(m => !m)} title="Minimap an/aus" disabled={!image} style={{ color: showMinimap && image ? '#8a8680' : '#555250' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+              <rect x="5" y="5" width="6" height="6" rx="0.5" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1"/>
             </svg>
           </button>
         </div>
