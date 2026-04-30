@@ -509,7 +509,6 @@ export default function Home() {
 
   const applyColorGroups = useCallback(() => {
     if (!originalImageDataRef.current) return
-    // Always analyze from ORIGINAL image
     const src = originalImageDataRef.current
     const buffer = new Uint8ClampedArray(src.data).buffer
     const width = src.width
@@ -518,9 +517,11 @@ export default function Home() {
     colorWorkerRef.current = new Worker('/filterWorker.js')
     colorWorkerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      // Upload to GL only — glRunDevelop will combine with develop params and draw to canvas
       const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
+      // Immediately run develop pipeline to show reduced colors on canvas
+      const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
+      if (ctx && gl) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx, gl.colorGroupsTex)
       setColorActive(true)
       setColorClusters(e.data.clusters || [])
       colorWorkerRef.current = null
@@ -529,7 +530,7 @@ export default function Home() {
       { filter: 'kmeans', strength: colorSteps, buffer, width, height },
       [buffer]
     )
-  }, [colorSteps])
+  }, [colorSteps, develop, lutIntensity])
 
   // Real-time color groups: re-run k-means when sliders change
   useEffect(() => {
@@ -590,7 +591,8 @@ export default function Home() {
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
     if (gl && gl.w > 1) {
       // GPU path — near-instantaneous, minimal debounce
-      const sourceTex = gl.colorGroupsTex
+      // Use colorGroupsTex when Color Groups are active, otherwise origTex
+      const sourceTex = colorActive ? gl.colorGroupsTex : gl.origTex
       const t1 = setTimeout(() => {
         const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
         if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx, sourceTex)
