@@ -132,6 +132,7 @@ export default function Home() {
   const [valueSoften, setValueSoften] = useState(0)
   const [colorSteps, setColorSteps] = useState(30)
   const [colorSoften, setColorSoften] = useState(0)
+  const colorTouchedRef = useRef(false) // true after user first drags the slider
   const [colorActive, setColorActive] = useState(false) // color groups on/off
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
@@ -186,6 +187,9 @@ export default function Home() {
         setPaletteClusters([])
         setLoupeMode(false)
         setShowMunsellValues(false)
+        setColorSteps(30)
+        setColorSoften(0)
+        colorTouchedRef.current = false
         setDevelop(DEVELOP_DEFAULTS)
         setTimeout(() => {
           const canvas = canvasRef.current
@@ -532,9 +536,9 @@ export default function Home() {
     )
   }, [colorSteps, develop, lutIntensity])
 
-  // Real-time color groups: re-run k-means when sliders change
+  // Real-time color groups: re-run k-means when slider changes — only after user touched
   useEffect(() => {
-    if (!image) return
+    if (!image || !colorTouchedRef.current) return
     clearTimeout(colorDebounceRef.current)
     colorDebounceRef.current = setTimeout(() => applyColorGroups(), 150)
     return () => clearTimeout(colorDebounceRef.current)
@@ -832,8 +836,8 @@ export default function Home() {
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="2" max="64" step="1" value={colorSteps}
-                  onChange={e => setColorSteps(Number(e.target.value))}
+                <input type="range" min="2" max="30" step="1" value={colorSteps}
+                  onChange={e => { colorTouchedRef.current = true; setColorSteps(Number(e.target.value)) }}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
               </div>
