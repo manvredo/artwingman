@@ -1,6 +1,6 @@
 self.addEventListener('message', function (e) {
   if (e.data.filter === 'develop') return
-  const { filter, strength, buffer, width, height } = e.data
+  const { filter, strength, soften=0, buffer, width, height } = e.data
   const src = new Uint8ClampedArray(buffer)
   const out = new Uint8ClampedArray(src.length)
   const w = width, h = height
