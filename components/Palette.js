@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Palette({ palette, onRemove, onClear, onSelect, selected }) {
+export default function Palette({ palette, onRemove, onClear, onSelect, selected, onAddToPalette, hasColor }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
@@ -8,19 +8,34 @@ export default function Palette({ palette, onRemove, onClear, onSelect, selected
         <span style={{ fontSize: 11, color: '#555250', fontFamily: 'monospace' }}>
           {palette.length}/24 colors
         </span>
-        {palette.length > 0 && (
-          <button onClick={onClear} style={{
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#555250',
-            borderRadius: 4,
-            padding: '3px 10px',
-            fontSize: 11,
-            cursor: 'pointer',
-          }}>
-            Clear all
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {hasColor && palette.length < 24 && onAddToPalette && (
+            <button onClick={onAddToPalette} style={{
+              background: 'rgba(200,169,110,0.15)',
+              border: '1px solid rgba(200,169,110,0.4)',
+              color: '#c8a96e',
+              borderRadius: 4,
+              padding: '3px 10px',
+              fontSize: 11,
+              cursor: 'pointer',
+            }}>
+              + Add
+            </button>
+          )}
+          {palette.length > 0 && (
+            <button onClick={onClear} style={{
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#555250',
+              borderRadius: 4,
+              padding: '3px 10px',
+              fontSize: 11,
+              cursor: 'pointer',
+            }}>
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {palette.length === 0 ? (

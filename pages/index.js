@@ -1259,34 +1259,6 @@ export default function Home() {
                       {/* Crosshair */}
                       <div style={{ position: 'absolute', left: clickPos.x - 12, top: clickPos.y, width: 24, height: 1, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
                       <div style={{ position: 'absolute', left: clickPos.x, top: clickPos.y - 12, width: 1, height: 24, background: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-                      {/* Sample radius square / munsell preview square */}
-                      {munsellPreview && clickPos && (
-                        sampleRadius >= 10 ? (
-                          <div style={{
-                            position: 'absolute',
-                            left: clickPos.x - half,
-                            top: clickPos.y - half,
-                            width: sq,
-                            height: sq,
-                            background: `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)`,
-                            border: '1px solid rgba(255,255,255,0.9)',
-                            boxSizing: 'border-box',
-                            pointerEvents: 'none',
-                          }} />
-                        ) : (
-                          <div style={{
-                            position: 'absolute',
-                            left: clickPos.x - 10,
-                            top: clickPos.y - 10,
-                            width: 20,
-                            height: 20,
-                            background: `rgba(${munsellPreview.r},${munsellPreview.g},${munsellPreview.b},0.6)`,
-                            border: '1px solid rgba(255,255,255,0.9)',
-                            boxSizing: 'border-box',
-                            pointerEvents: 'none',
-                          }} />
-                        )
-                      )}
                     </>
                   )
                 })()}
@@ -1695,49 +1667,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Panel 3: Sample + Add to Palette */}
-          <div style={{
-            width: 140,
-            flexShrink: 0,
-            borderLeft: '1px solid rgba(255,255,255,0.08)',
-            padding: 12,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-          }}>
-            <div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Sample Radius</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="range" min="1" max="50" value={sampleRadius}
-                  onChange={e => {
-                    const r = Number(e.target.value)
-                    setSampleRadius(r)
-                    if (lastImgPosRef.current) sampleAt(lastImgPosRef.current.px, lastImgPosRef.current.py, r)
-                  }}
-                  className={styles.slider} style={{ flex: 1 }} />
-                <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#8a8680', flexShrink: 0 }}>{sampleRadius}px</span>
-              </div>
-            </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
-            {hasColor && palette.length < 24 ? (
-              <button onClick={addToPalette} style={{
-                background: 'rgba(200,169,110,0.15)',
-                border: '1px solid rgba(200,169,110,0.4)',
-                color: '#c8a96e',
-                borderRadius: 6,
-                padding: 8,
-                fontSize: 12,
-                width: '100%',
-                cursor: 'pointer',
-              }}>+ Add to Palette</button>
-            ) : (
-              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#555250' }}>
-                {palette.length >= 24 ? 'Palette full' : 'Click image first'}
-              </div>
-            )}
-          </div>
-
-          {/* Panel 4: Hue Wheel */}
+          {/* Panel 3: Hue Wheel */}
           <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
             <HueWheel
               hueAngle={color.hueAngle}
@@ -1758,6 +1688,8 @@ export default function Home() {
                 onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
                 onRemove={removeFromPalette}
                 onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+                onAddToPalette={hasColor ? addToPalette : null}
+                hasColor={hasColor}
               />
             </div>
           </div>
