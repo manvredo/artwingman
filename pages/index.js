@@ -530,8 +530,6 @@ export default function Home() {
       if (gl) glUploadColorGroups(gl, out, src.width, src.height)
       setShowColorDecreased(true)
       setColorClusters(e.data.clusters || [])
-      // Reset all develop sliders so they start fresh on top of color groups
-      setDevelop(DEVELOP_DEFAULTS)
       workerRef.current = null
     }
     workerRef.current.postMessage(
