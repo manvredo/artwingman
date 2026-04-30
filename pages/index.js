@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
-import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
 import Palette from '../components/Palette'
@@ -525,6 +525,9 @@ export default function Home() {
         ctx.drawImage(tmp, 0, 0)
         ctx.filter = 'none'
       }
+      // Upload analyzed result to GL texture for pipeline
+      const gl = glStateRef.current
+      if (gl) glUploadColorGroups(gl, out, src.width, src.height)
       setShowColorDecreased(true)
       setColorClusters(e.data.clusters || [])
       workerRef.current = null
@@ -597,15 +600,17 @@ export default function Home() {
     }
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
     const gl = glStateRef.current
+    // When Color Groups are active, use colorGroupsTex as pipeline source
+    const sourceTex = showColorDecreased && gl ? gl.colorGroupsTex : null
     if (gl && gl.w > 1) {
       // GPU path — near-instantaneous, minimal debounce
       const t1 = setTimeout(() => {
         const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
-        if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx)
+        if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx, sourceTex)
       }, 0)
       const t2 = hasExpensive ? setTimeout(() => {
         const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
-        if (ctx) glRunDevelop(gl, { ...develop, lutIntensity }, ctx)
+        if (ctx) glRunDevelop(gl, { ...develop, lutIntensity }, ctx, sourceTex)
       }, 50) : null
       return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
     } else {
@@ -614,7 +619,7 @@ export default function Home() {
       const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 600) : null
       return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
     }
-  }, [develop, applyDevelop, lutData, lutSize, lutIntensity])
+  }, [develop, applyDevelop, lutData, lutSize, lutIntensity, showColorDecreased])
 
   const applyFilter = useCallback((filter, strength) => {
     const canvas = canvasRef.current
