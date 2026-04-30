@@ -94,8 +94,8 @@ self.addEventListener('message', function (e) {
             const ny = Math.max(0, Math.min(h-1, y+dy))
             const nx = Math.max(0, Math.min(w-1, x+dx))
             const i = (ny * w + nx) * 4
-            const w = wgt[dy+1][dx+1]
-            r += src[i] * w; g += src[i+1] * w; b += src[i+2] * w
+            const k = wgt[dy+1][dx+1]
+            r += src[i] * k; g += src[i+1] * k; b += src[i+2] * k
           }
         }
         const i = (y * w + x) * 4
