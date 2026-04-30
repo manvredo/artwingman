@@ -848,6 +848,17 @@ export default function Home() {
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSoften === 0 ? 'off' : colorSoften}</span>
               </div>
+              <div className={styles.btnRow}>
+                <button className={styles.btnSecondary} onClick={() => {
+                  setColorActive(false)
+                  setColorSteps(30)
+                  setColorSoften(0)
+                  setColorClusters([])
+                  colorTouchedRef.current = false
+                }} disabled={!image}>
+                  Reset
+                </button>
+              </div>
             </div>
             <div className={styles.drawerResult}>
               <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
