@@ -132,9 +132,10 @@ export default function Home() {
   const [valueSoften, setValueSoften] = useState(0)
   const [colorSteps, setColorSteps] = useState(10)
   const [colorSoften, setColorSoften] = useState(0)
-  const [showColorDecreased, setShowColorDecreased] = useState(false)
+  const [colorActive, setColorActive] = useState(false) // color groups on/off
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
+  const colorWorkerRef = useRef(null)
   const [paletteClusters, setPaletteClusters] = useState([])
   const [loupeMode, setLoupeMode] = useState(true)
   const [showMunsellValues, setShowMunsellValues] = useState(true)
@@ -150,6 +151,7 @@ export default function Home() {
   const paletteWorkerRef = useRef(null)
   const developWorkerRef = useRef(null)
   const developGenRef = useRef(0)
+  const colorDebounceRef = useRef(null)
   const lutFileRef = useRef(null)
   const glCanvasRef = useRef(null)
   const glStateRef = useRef(null)
@@ -505,7 +507,7 @@ export default function Home() {
     setValueRating(null)
   }, [])
 
-  const applyColorDecreaser = useCallback(() => {
+  const applyColorGroups = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
@@ -513,10 +515,10 @@ export default function Home() {
     const buffer = canvasData.data.buffer
     const width = canvas.width
     const height = canvas.height
-    if (workerRef.current) workerRef.current.terminate()
-    workerRef.current = new Worker('/filterWorker.js')
+    if (colorWorkerRef.current) colorWorkerRef.current.terminate()
+    colorWorkerRef.current = new Worker('/filterWorker.js')
     const soften = colorSoften
-    workerRef.current.onmessage = (e) => {
+    colorWorkerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
       ctx.putImageData(new ImageData(out, width, height), 0, 0)
       if (soften > 0) {
@@ -529,37 +531,23 @@ export default function Home() {
       }
       const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
-      setShowColorDecreased(true)
+      setColorActive(true)
       setColorClusters(e.data.clusters || [])
-      workerRef.current = null
+      colorWorkerRef.current = null
     }
-    workerRef.current.postMessage(
+    colorWorkerRef.current.postMessage(
       { filter: 'kmeans', strength: colorSteps, buffer, width, height },
       [buffer]
     )
   }, [colorSteps, colorSoften])
 
-  const resetColorDecreaser = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.putImageData(originalImageDataRef.current, 0, 0)
-    setShowColorDecreased(false)
-    setColorRating(null)
-    setColorClusters([])
-    setDevelop(DEVELOP_DEFAULTS)
-  }, [])
-
-  const applyOriginalColor = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.putImageData(originalImageDataRef.current, 0, 0)
-    setShowColorDecreased(true)
-    setColorRating(null)
-    setColorClusters([])
-    setDevelop(DEVELOP_DEFAULTS)
-  }, [])
+  // Real-time color groups: re-run k-means when sliders change
+  useEffect(() => {
+    if (!image) return
+    clearTimeout(colorDebounceRef.current)
+    colorDebounceRef.current = setTimeout(() => applyColorGroups(), 150)
+    return () => clearTimeout(colorDebounceRef.current)
+  }, [colorSteps, colorSoften, applyColorGroups, image])
 
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
@@ -604,7 +592,7 @@ export default function Home() {
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
     const gl = glStateRef.current
     // When Color Groups are active, use colorGroupsTex as pipeline source
-    const sourceTex = showColorDecreased && gl ? gl.colorGroupsTex : null
+    const sourceTex = colorActive && gl ? gl.colorGroupsTex : null
     if (gl && gl.w > 1) {
       // GPU path — near-instantaneous, minimal debounce
       const t1 = setTimeout(() => {
@@ -622,7 +610,7 @@ export default function Home() {
       const t2 = hasExpensive ? setTimeout(() => applyDevelop(develop, lutData, lutSize, lutIntensity), 600) : null
       return () => { clearTimeout(t1); if (t2) clearTimeout(t2) }
     }
-  }, [develop, applyDevelop, lutData, lutSize, lutIntensity, showColorDecreased])
+  }, [develop, applyDevelop, lutData, lutSize, lutIntensity, colorActive])
 
   const applyFilter = useCallback((filter, strength) => {
     const canvas = canvasRef.current
@@ -857,19 +845,6 @@ export default function Home() {
                   onChange={e => setColorSoften(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSoften === 0 ? 'off' : colorSoften}</span>
-              </div>
-              <div className={styles.btnRow}>
-                <button className={styles.btnPrimary} onClick={applyColorDecreaser} disabled={!image}>
-                  Analyze
-                </button>
-                <button className={styles.btnSecondary} onClick={applyOriginalColor} disabled={!image}>
-                  Original
-                </button>
-                {showColorDecreased && (
-                  <button className={styles.btnSecondary} onClick={resetColorDecreaser}>
-                    Reset
-                  </button>
-                )}
               </div>
             </div>
             <div className={styles.drawerResult}>
