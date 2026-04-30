@@ -508,18 +508,19 @@ export default function Home() {
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
-    const src = originalImageDataRef.current
-    const buffer = new Uint8ClampedArray(src.data).buffer
+    // Analyze from current canvas state (with develop effects applied if any)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const buffer = canvasData.data.buffer
     if (workerRef.current) workerRef.current.terminate()
     workerRef.current = new Worker('/filterWorker.js')
     const soften = colorSoften
     workerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })
-      ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
+      ctx.putImageData(new ImageData(out, canvas.width, canvas.height), 0, 0)
       if (soften > 0) {
         const tmp = document.createElement('canvas')
-        tmp.width = src.width; tmp.height = src.height
+        tmp.width = canvas.width; tmp.height = canvas.height
         tmp.getContext('2d').drawImage(canvas, 0, 0)
         ctx.filter = `blur(${soften}px)`
         ctx.drawImage(tmp, 0, 0)
@@ -527,13 +528,13 @@ export default function Home() {
       }
       // Upload analyzed result to GL texture for pipeline
       const gl = glStateRef.current
-      if (gl) glUploadColorGroups(gl, out, src.width, src.height)
+      if (gl) glUploadColorGroups(gl, out, canvas.width, canvas.height)
       setShowColorDecreased(true)
       setColorClusters(e.data.clusters || [])
       workerRef.current = null
     }
     workerRef.current.postMessage(
-      { filter: 'kmeans', strength: colorSteps, buffer, width: src.width, height: src.height },
+      { filter: 'kmeans', strength: colorSteps, buffer, width: canvas.width, height: canvas.height },
       [buffer]
     )
   }, [colorSteps, colorSoften])
