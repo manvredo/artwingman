@@ -508,9 +508,8 @@ export default function Home() {
   }, [])
 
   const applyColorGroups = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !originalImageDataRef.current) return
-    // Always analyze from ORIGINAL image (not the canvas which may be reduced)
+    if (!originalImageDataRef.current) return
+    // Always analyze from ORIGINAL image
     const src = originalImageDataRef.current
     const buffer = new Uint8ClampedArray(src.data).buffer
     const width = src.width
@@ -519,10 +518,7 @@ export default function Home() {
     colorWorkerRef.current = new Worker('/filterWorker.js')
     colorWorkerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      // Write reduced result to canvas
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })
-      ctx.putImageData(new ImageData(out, width, height), 0, 0)
-      // Upload to GL for pipeline
+      // Upload to GL only — glRunDevelop will combine with develop params and draw to canvas
       const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
       setColorActive(true)
