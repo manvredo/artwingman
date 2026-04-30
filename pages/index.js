@@ -508,27 +508,16 @@ export default function Home() {
   const applyColorDecreaser = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
-    // Read from current develop state via GL, or fallback to canvas
-    let buffer, width, height
-    const gl = glStateRef.current
-    if (gl && gl.w > 1) {
-      // Read from GL pipeline output (current develop state before k-means)
-      width = gl.w; height = gl.h
-      const pixels = new Uint8ClampedArray(width * height * 4)
-      gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
-      buffer = pixels.buffer
-    } else {
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })
-      const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      width = canvas.width; height = canvas.height
-      buffer = canvasData.data.buffer
-    }
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const buffer = canvasData.data.buffer
+    const width = canvas.width
+    const height = canvas.height
     if (workerRef.current) workerRef.current.terminate()
     workerRef.current = new Worker('/filterWorker.js')
     const soften = colorSoften
     workerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })
       ctx.putImageData(new ImageData(out, width, height), 0, 0)
       if (soften > 0) {
         const tmp = document.createElement('canvas')
@@ -538,6 +527,7 @@ export default function Home() {
         ctx.drawImage(tmp, 0, 0)
         ctx.filter = 'none'
       }
+      const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
       setShowColorDecreased(true)
       setColorClusters(e.data.clusters || [])
