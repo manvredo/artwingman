@@ -27,7 +27,9 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(sed -n '1,5p' C:/artwingman/public/filterWorker.js)",
-      "Bash(git -C C:/artwingman log --oneline -3)"
+      "Bash(git -C C:/artwingman log --oneline -3)",
+      "Bash(grep -n \"emboss\" C:/artwingman/.next/static/chunks/pages/**/*.js)",
+      "Bash(git ls-tree:*)"
     ]
   }
 }
