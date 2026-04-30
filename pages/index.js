@@ -510,17 +510,19 @@ export default function Home() {
   const applyColorGroups = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const buffer = canvasData.data.buffer
-    const width = canvas.width
-    const height = canvas.height
+    // Always analyze from ORIGINAL image (not the canvas which may be reduced)
+    const src = originalImageDataRef.current
+    const buffer = new Uint8ClampedArray(src.data).buffer
+    const width = src.width
+    const height = src.height
     if (colorWorkerRef.current) colorWorkerRef.current.terminate()
     colorWorkerRef.current = new Worker('/filterWorker.js')
-    const soften = colorSoften
     colorWorkerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
+      // Write reduced result to canvas
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
       ctx.putImageData(new ImageData(out, width, height), 0, 0)
+      // Upload to GL for pipeline
       const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
       setColorActive(true)
@@ -531,7 +533,7 @@ export default function Home() {
       { filter: 'kmeans', strength: colorSteps, buffer, width, height },
       [buffer]
     )
-  }, [colorSteps, colorSoften])
+  }, [colorSteps])
 
   // Real-time color groups: re-run k-means when sliders change
   useEffect(() => {
