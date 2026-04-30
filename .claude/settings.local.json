@@ -22,7 +22,12 @@
       "Bash(cp -r node_modules/munsell/dist/src/* lib/munsell-lib/)",
       "Bash(cp node_modules/munsell/dist/src/index.js lib/munsell-lib/)",
       "Bash(cp -r node_modules/munsell/dist/src/MRD.js lib/munsell-lib/)",
-      "Bash(cp -r node_modules/munsell/dist/src/*.js lib/munsell-lib/)"
+      "Bash(cp -r node_modules/munsell/dist/src/*.js lib/munsell-lib/)",
+      "Bash(git reset:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(sed -n '1,5p' C:/artwingman/public/filterWorker.js)",
+      "Bash(git -C C:/artwingman log --oneline -3)"
     ]
   }
 }

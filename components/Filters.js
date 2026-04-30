@@ -1,11 +1,6 @@
 const FILTERS = [
-  { id: 'grayscale',    label: 'Grayscale' },
-  { id: 'contour',      label: 'Contour' },
-  { id: 'posterize',    label: 'Posterize',     min: 2,  max: 10, unit: 'lvl', sliderLabel: 'Levels',   def: 5 },
-  { id: 'soften',       label: 'Soften',         min: 1,  max: 20, unit: 'px',  sliderLabel: 'Radius',   def: 5 },
-  { id: 'highcontrast', label: 'High Contrast',  min: 1,  max: 20, unit: '',    sliderLabel: 'Strength', def: 5 },
-  { id: 'warm',         label: 'Warm',            min: 1,  max: 20, unit: '',    sliderLabel: 'Strength', def: 5 },
-  { id: 'cool',         label: 'Cool',            min: 1,  max: 20, unit: '',    sliderLabel: 'Strength', def: 5 },
+  { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
+  { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
 ]
 
 export { FILTERS }
