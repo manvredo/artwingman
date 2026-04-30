@@ -521,14 +521,6 @@ export default function Home() {
     colorWorkerRef.current.onmessage = (e) => {
       const out = new Uint8ClampedArray(e.data.out)
       ctx.putImageData(new ImageData(out, width, height), 0, 0)
-      if (soften > 0) {
-        const tmp = document.createElement('canvas')
-        tmp.width = width; tmp.height = height
-        tmp.getContext('2d').drawImage(canvas, 0, 0)
-        ctx.filter = `blur(${soften}px)`
-        ctx.drawImage(tmp, 0, 0)
-        ctx.filter = 'none'
-      }
       const gl = glStateRef.current
       if (gl) glUploadColorGroups(gl, out, width, height)
       setColorActive(true)
