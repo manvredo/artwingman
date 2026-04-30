@@ -572,6 +572,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    const gl = glStateRef.current
+    // When Color Groups are active, always run develop pipeline (even if all sliders are 0)
+    if (colorActive && gl && gl.w > 1) {
+      const sourceTex = gl.colorGroupsTex
+      const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
+      if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx, sourceTex)
+      return
+    }
     const allZero = Object.values(develop).every(v => v === 0) && !lutData
     if (allZero) {
       const canvas = canvasRef.current
@@ -580,11 +588,9 @@ export default function Home() {
       return
     }
     const hasExpensive = develop.clarity !== 0 || develop.texture !== 0
-    const gl = glStateRef.current
-    // When Color Groups are active, use colorGroupsTex as pipeline source
-    const sourceTex = colorActive && gl ? gl.colorGroupsTex : null
     if (gl && gl.w > 1) {
       // GPU path — near-instantaneous, minimal debounce
+      const sourceTex = gl.colorGroupsTex
       const t1 = setTimeout(() => {
         const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true })
         if (ctx) glRunDevelop(gl, { ...develop, clarity: 0, texture: 0, lutIntensity }, ctx, sourceTex)
