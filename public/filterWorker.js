@@ -58,13 +58,17 @@ self.addEventListener('message', function (e) {
       gray[i >> 2] = Math.round(0.2126 * src[i] + 0.7152 * src[i+1] + 0.0722 * src[i+2])
     }
     const g = (x, y) => gray[Math.max(0, Math.min(h-1, y)) * w + Math.max(0, Math.min(w-1, x))]
+    const scale = strength / 5
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const gx = -g(x-1,y-1) - 2*g(x-1,y) - g(x-1,y+1) + g(x+1,y-1) + 2*g(x+1,y) + g(x+1,y+1)
-        const gy = -g(x-1,y-1) - 2*g(x,y-1) - g(x+1,y-1) + g(x-1,y+1) + 2*g(x,y+1) + g(x+1,y+1)
-        const mag = Math.min(255, Math.round(Math.sqrt(gx*gx + gy*gy)))
+        const gy = -g(x-1,y-1) - 2*g(x,y-1) + g(x+1,y-1) + g(x-1,y+1) + 2*g(x,y+1) + g(x+1,y+1)
+        const mag = Math.min(255, Math.round(Math.sqrt(gx*gx + gy*gy) * scale))
         const i = (y * w + x) * 4
-        out[i] = out[i+1] = out[i+2] = mag
+        const mix = mag / 255
+        out[i]   = Math.round(src[i]   * (1 - mix) + 128 * mix)
+        out[i+1] = Math.round(src[i+1] * (1 - mix) + 128 * mix)
+        out[i+2] = Math.round(src[i+2] * (1 - mix) + 128 * mix)
         out[i+3] = src[i+3]
       }
     }

@@ -1,3 +1,5 @@
+import styles from '../styles/Home.module.css'
+
 const FILTERS = [
   { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
   { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
@@ -55,9 +57,11 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 max={f.max}
                 value={Math.min(f.max, Math.max(f.min, filterStrength))}
                 onChange={e => onStrengthChange(Number(e.target.value))}
+                className={styles.filterSlider}
                 style={{ flex: 1 }}
               />
-              <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
+              <span
+                style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
                 {Math.min(f.max, Math.max(f.min, filterStrength))}{f.unit}
               </span>
             </div>
