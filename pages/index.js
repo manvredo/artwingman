@@ -548,6 +548,7 @@ export default function Home() {
     setShowColorDecreased(false)
     setColorRating(null)
     setColorClusters([])
+    setDevelop(DEVELOP_DEFAULTS)
   }, [])
 
   const applyOriginalColor = useCallback(() => {
@@ -558,6 +559,7 @@ export default function Home() {
     setShowColorDecreased(true)
     setColorRating(null)
     setColorClusters([])
+    setDevelop(DEVELOP_DEFAULTS)
   }, [])
 
   const resetCanvas = useCallback(() => {
