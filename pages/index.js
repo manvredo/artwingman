@@ -531,10 +531,10 @@ export default function Home() {
       colorWorkerRef.current = null
     }
     colorWorkerRef.current.postMessage(
-      { filter: 'kmeans', strength: colorSteps, buffer, width, height },
+      { filter: 'kmeans', strength: colorSteps, soften: colorSoften, buffer, width, height },
       [buffer]
     )
-  }, [colorSteps, develop, lutIntensity])
+  }, [colorSteps, colorSoften, develop, lutIntensity])
 
   // Real-time color groups: re-run k-means when slider changes — only after user touched
   useEffect(() => {

@@ -99,6 +99,42 @@ self.addEventListener('message', function (e) {
 
   } else if (filter === 'kmeans' || filter === 'kmeans-analyze') {
     const k = Math.max(2, Math.min(24, strength))
+
+    // Apply box blur (soften) before k-means if soften > 0
+    let srcForKmeans = src
+    if (soften > 0) {
+      const r = Math.max(1, Math.min(20, soften))
+      const tmp = new Uint8ClampedArray(src.length)
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let rS = 0, gS = 0, bS = 0, cnt = 0
+          for (let dx = -r; dx <= r; dx++) {
+            const nx = x + dx
+            if (nx < 0 || nx >= w) continue
+            const i = (y * w + nx) * 4
+            rS += src[i]; gS += src[i+1]; bS += src[i+2]; cnt++
+          }
+          const i = (y * w + x) * 4
+          tmp[i] = rS / cnt; tmp[i+1] = gS / cnt; tmp[i+2] = bS / cnt; tmp[i+3] = src[i+3]
+        }
+      }
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let rS = 0, gS = 0, bS = 0, cnt = 0
+          for (let dy = -r; dy <= r; dy++) {
+            const ny = y + dy
+            if (ny < 0 || ny >= h) continue
+            const i = (ny * w + x) * 4
+            rS += tmp[i]; gS += tmp[i+1]; bS += tmp[i+2]; cnt++
+          }
+          const i = (y * w + x) * 4
+          srcForKmeans[i]   = Math.round(rS / cnt)
+          srcForKmeans[i+1] = Math.round(gS / cnt)
+          srcForKmeans[i+2] = Math.round(bS / cnt)
+          srcForKmeans[i+3] = src[i+3]
+        }
+      }
+    }
     const pixelCount = w * h
 
     // Sample up to 8000 pixels for training
@@ -106,7 +142,7 @@ self.addEventListener('message', function (e) {
     const samples = []
     for (let i = 0; i < pixelCount; i += sampleStep) {
       const idx = i * 4
-      samples.push([src[idx], src[idx+1], src[idx+2]])
+      samples.push([srcForKmeans[idx], srcForKmeans[idx+1], srcForKmeans[idx+2]])
     }
     const sampleCount = samples.length
 
@@ -158,7 +194,7 @@ self.addEventListener('message', function (e) {
     const clusterCounts = new Int32Array(k)
     for (let i = 0; i < pixelCount; i++) {
       const idx = i * 4
-      const r = src[idx], g = src[idx+1], b = src[idx+2]
+      const r = srcForKmeans[idx], g = srcForKmeans[idx+1], b = srcForKmeans[idx+2]
       let minD = Infinity, minC = 0
       for (let c = 0; c < k; c++) {
         const d = (r-centers[c][0])**2 + (g-centers[c][1])**2 + (b-centers[c][2])**2
