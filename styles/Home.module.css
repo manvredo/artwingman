@@ -652,12 +652,6 @@
   width: 200px;
 }
 
-.infoPanelHueWheel {
-  width: 220px;
-  padding: 8px 10px;
-  overflow: hidden;
-}
-
 .infoPanelChart {
   flex: 1;
   min-width: 0;

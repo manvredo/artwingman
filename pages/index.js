@@ -4,7 +4,6 @@ import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, s
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups } from '../lib/developGL'
 import { FILTERS } from '../components/Filters'
 import styles from '../styles/Home.module.css'
-import HueWheel from '../components/HueWheel'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
 import Filters from '../components/Filters'
@@ -667,13 +666,6 @@ export default function Home() {
   const removeFromPalette = useCallback((index) => {
     setPalette(prev => prev.filter((_, i) => i !== index))
     setSelectedSwatch(null)
-  }, [])
-
-  const handleHueWheelClick = useCallback((deg) => {
-    const rad = deg * Math.PI / 180
-    const { r, g, b } = labToRgb(55, 40 * Math.cos(rad), 40 * Math.sin(rad))
-    setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) })
-    setClickPos(null)
   }, [])
 
   const parseCube = useCallback((text, name) => {
@@ -1665,17 +1657,6 @@ export default function Home() {
                 >Set</button>
               </div>
             </div>
-          </div>
-
-          {/* Panel 3: Hue Wheel */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelHueWheel}`}>
-            <HueWheel
-              hueAngle={color.hueAngle}
-              hueName={color.hueName}
-              color={hasColor ? `rgb(${color.r},${color.g},${color.b})` : null}
-              active={hasColor}
-              onHueClick={handleHueWheelClick}
-            />
           </div>
 
           {/* Panel 5: Palette */}
