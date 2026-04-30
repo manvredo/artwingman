@@ -130,7 +130,7 @@ export default function Home() {
   const [colorOverlayView, setColorOverlayView] = useState('munsell') // 'munsell' | 'rgb'
   const [compGray, setCompGray] = useState(3)
   const [valueSoften, setValueSoften] = useState(0)
-  const [colorSteps, setColorSteps] = useState(10)
+  const [colorSteps, setColorSteps] = useState(30)
   const [colorSoften, setColorSoften] = useState(0)
   const [colorActive, setColorActive] = useState(false) // color groups on/off
   const [colorRating, setColorRating] = useState(null)
@@ -832,7 +832,7 @@ export default function Home() {
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div className={styles.sliderRow}>
-                <input type="range" min="1" max="20" step="1" value={colorSteps}
+                <input type="range" min="1" max="64" step="1" value={colorSteps}
                   onChange={e => setColorSteps(Number(e.target.value))}
                   className={styles.slider} />
                 <span className={styles.sliderVal}>{colorSteps}</span>
