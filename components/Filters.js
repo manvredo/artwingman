@@ -2,21 +2,24 @@ import styles from '../styles/Home.module.css'
 import { CurvesEditor } from './Curves'
 
 const FILTERS = [
-  { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
-  { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
-  { id: 'emboss',    label: 'Emboss',     min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'sharpen',   label: 'Sharpen',   min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'curves',    label: 'Curves',     min: undefined, max: undefined },
+  { id: 'contour',   label: 'Contour',      min: 1, max: 20, unit: '',  sliderLabel: 'Strength',  def: 5 },
+  { id: 'posterize', label: 'Posterize',    min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels',   def: 5 },
+  { id: 'emboss',    label: 'Emboss',        min: 1, max: 10, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'sharpen',   label: 'Sharpen',       min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'vignette',  label: 'Vignette',      min: -20, max: 20, unit: '', sliderLabel: 'Amount',   def: 5 },
+  { id: 'noise',     label: 'Noise',         min: 1, max: 50, unit: '',  sliderLabel: 'Amount',    def: 10 },
+  { id: 'bleach',    label: 'Bleach Bypass', min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'sobel',     label: 'Sobel/Edge',    min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'curves',    label: 'Curves',        min: undefined, max: undefined },
 ]
 
 export { FILTERS }
 
-export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, curves, onCurvesChange }) {
+export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, curves, onCurvesChange, duotoneColors, onDuotoneColorsChange }) {
   const activeCfg = FILTERS.find(f => f.id === activeFilter)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {/* None button */}
       <button
         onClick={() => onFilterChange(null)}
         style={{
@@ -64,8 +67,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 className={styles.filterSlider}
                 style={{ flex: 1 }}
               />
-              <span
-                style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
+              <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
                 {Math.min(f.max, Math.max(f.min, filterStrength))}{f.unit}
               </span>
             </div>
@@ -74,6 +76,31 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
           {activeFilter === f.id && f.id === 'curves' && curves && (
             <div style={{ marginTop: 8, paddingLeft: 2 }}>
               <CurvesEditor curves={curves} onChange={onCurvesChange} />
+            </div>
+          )}
+
+          {activeFilter === f.id && f.id === 'duotone' && duotoneColors && (
+            <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 10, color: '#8a8680', width: 40 }}>Dark</div>
+                <input
+                  type="color"
+                  value={duotoneColors.colorA}
+                  onChange={e => onDuotoneColorsChange(e.target.value, null)}
+                  style={{ width: 40, height: 24, border: 'none', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{duotoneColors.colorA}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 10, color: '#8a8680', width: 40 }}>Light</div>
+                <input
+                  type="color"
+                  value={duotoneColors.colorB}
+                  onChange={e => onDuotoneColorsChange(null, e.target.value)}
+                  style={{ width: 40, height: 24, border: 'none', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{duotoneColors.colorB}</span>
+              </div>
             </div>
           )}
         </div>

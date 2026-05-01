@@ -133,7 +133,6 @@ self.addEventListener('message', function (e) {
     }
 
   } else if (filter === 'curves') {
-    // curves: { R, G, B, Luminosity } — each a 256-element lookup table
     const { curves: curveTables } = e.data
     if (!curveTables) {
       out.set(src)
@@ -142,10 +141,8 @@ self.addEventListener('message', function (e) {
       const gLUT = curveTables.G  || null
       const bLUT = curveTables.B   || null
       const lumLUT = curveTables.Luminosity || null
-
       for (let i = 0; i < src.length; i += 4) {
         let r = src[i], g = src[i+1], b = src[i+2]
-
         if (rLUT)   r = rLUT[r]
         if (gLUT)   g = gLUT[g]
         if (bLUT)   b = bLUT[b]
@@ -156,12 +153,90 @@ self.addEventListener('message', function (e) {
           g = Math.round(g + (mapped - lum) * 0.8)
           b = Math.round(b + (mapped - lum) * 0.8)
         }
-
         out[i]   = Math.min(255, Math.max(0, r))
         out[i+1] = Math.min(255, Math.max(0, g))
         out[i+2] = Math.min(255, Math.max(0, b))
         out[i+3] = src[i+3]
       }
+    }
+
+  } else if (filter === 'vignette') {
+    const cx = w / 2, cy = h / 2
+    const maxR = Math.sqrt(cx*cx + cy*cy)
+    const amount = strength / 10
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const dist = Math.sqrt((x - cx)**2 + (y - cy)**2)
+        const t = Math.min(1, dist / maxR)
+        const fade = Math.pow(t, 1.5) * Math.abs(amount)
+        const i = (y * w + x) * 4
+        if (amount >= 0) {
+          out[i]   = Math.round(src[i]   * (1 - fade))
+          out[i+1] = Math.round(src[i+1] * (1 - fade))
+          out[i+2] = Math.round(src[i+2] * (1 - fade))
+        } else {
+          out[i]   = Math.round(src[i]   + (255 - src[i])   * fade)
+          out[i+1] = Math.round(src[i+1] + (255 - src[i+1]) * fade)
+          out[i+2] = Math.round(src[i+2] + (255 - src[i+2]) * fade)
+        }
+        out[i+3] = src[i+3]
+      }
+    }
+
+  } else if (filter === 'noise') {
+    const amount = Math.max(0, Math.min(50, strength))
+    for (let i = 0; i < src.length; i += 4) {
+      const n = (Math.random() - 0.5) * 2 * amount
+      out[i]   = Math.min(255, Math.max(0, src[i]   + n))
+      out[i+1] = Math.min(255, Math.max(0, src[i+1] + n))
+      out[i+2] = Math.min(255, Math.max(0, src[i+2] + n))
+      out[i+3] = src[i+3]
+    }
+
+  } else if (filter === 'bleach') {
+    const amount = Math.max(0, Math.min(20, strength)) / 20
+    for (let i = 0; i < src.length; i += 4) {
+      const gray = (src[i] + src[i+1] + src[i+2]) / 3
+      out[i]   = Math.min(255, Math.max(0, Math.round(src[i]   * (1 - amount) + gray * amount)))
+      out[i+1] = Math.min(255, Math.max(0, Math.round(src[i+1] * (1 - amount) + gray * amount)))
+      out[i+2] = Math.min(255, Math.max(0, Math.round(src[i+2] * (1 - amount) + gray * amount)))
+      out[i+3] = src[i+3]
+    }
+
+  } else if (filter === 'sobel') {
+    const scale = strength / 5
+    const gray = new Uint8ClampedArray(w * h)
+    for (let i = 0; i < src.length; i += 4) {
+      gray[i >> 2] = Math.round(0.2126 * src[i] + 0.7152 * src[i+1] + 0.0722 * src[i+2])
+    }
+    const g = (x, y) => gray[Math.max(0, Math.min(h-1, y)) * w + Math.max(0, Math.min(w-1, x))]
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const gx = -g(x-1,y-1) - 2*g(x-1,y) - g(x-1,y+1) + g(x+1,y-1) + 2*g(x+1,y) + g(x+1,y+1)
+        const gy = -g(x-1,y-1) - 2*g(x,y-1) + g(x+1,y-1) + g(x-1,y+1) + 2*g(x,y+1) + g(x+1,y+1)
+        const mag = Math.min(255, Math.round(Math.sqrt(gx*gx + gy*gy) * scale))
+        const i = (y * w + x) * 4
+        const mix = mag / 255
+        out[i]   = Math.round(src[i]   * (1 - mix) + 255 * mix)
+        out[i+1] = Math.round(src[i+1] * (1 - mix) + 255 * mix)
+        out[i+2] = Math.round(src[i+2] * (1 - mix) + 255 * mix)
+        out[i+3] = src[i+3]
+      }
+    }
+
+  } else if (filter === 'duotone') {
+    const hexToRgb = h => {
+      const n = parseInt(h.slice(1), 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+    const colorA = e.data.colorA ? hexToRgb(e.data.colorA) : [255, 107, 53]
+    const colorB = e.data.colorB ? hexToRgb(e.data.colorB) : [45, 27, 105]
+    for (let i = 0; i < src.length; i += 4) {
+      const gray = (src[i] + src[i+1] + src[i+2]) / 3 / 255
+      out[i]   = Math.round(colorA[0] * (1 - gray) + colorB[0] * gray)
+      out[i+1] = Math.round(colorA[1] * (1 - gray) + colorB[1] * gray)
+      out[i+2] = Math.round(colorA[2] * (1 - gray) + colorB[2] * gray)
+      out[i+3] = src[i+3]
     }
 
   } else if (filter === 'warm') {

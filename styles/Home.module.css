@@ -665,7 +665,7 @@
 /* ── Info Bar ───────────────────────────────────────────── */
 .infoBar {
   flex-shrink: 0;
-  height: 360px;
+  height: 430px;
   background: #1a1a1a;
   border-top: 1px solid rgba(255,255,255,0.08);
   display: flex;
@@ -697,8 +697,8 @@
 
 .infoPanelChart {
   flex: 1;
-  min-width: 0;
-  flex-shrink: 1;
+  min-width: 700px;
+  flex-shrink: 0;
   overflow: hidden;
 }
 

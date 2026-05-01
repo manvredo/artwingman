@@ -125,6 +125,7 @@ export default function Home() {
     Luminosity: makeIdentityCurve(),
     activeChannel: 'Luminosity',
   })
+  const [duotoneColors, setDuotoneColors] = useState({ colorA: '#ff6b35', colorB: '#2d1b69' })
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
@@ -638,23 +639,52 @@ export default function Home() {
       workerRef.current = null
     }
     const msg = { filter, strength, buffer, width: src.width, height: src.height }
+    if (filter === 'duotone') {
+      msg.colorA = duotoneColors.colorA
+      msg.colorB = duotoneColors.colorB
+    }
     if (filter === 'curves' && curvesData) {
       msg.curves = curvesData
     }
     workerRef.current.postMessage(msg, [buffer])
-  }, [])
+  }, [duotoneColors])
 
   const handleFilterChange = useCallback((filter) => {
     setActiveFilter(filter)
     const cfg = FILTERS.find(f => f.id === filter)
     const strength = cfg?.def ?? filterStrength
     if (cfg?.def !== undefined) setFilterStrength(cfg.def)
-    if (filter === 'curves') {
+    if (filter === 'duotone') {
+      applyFilter(filter, 1)
+    } else if (filter === 'curves') {
       applyFilter(filter, 0, channelCurves)
     } else {
       applyFilter(filter, strength)
     }
   }, [applyFilter, filterStrength, channelCurves])
+
+  const handleDuotoneColorsChange = useCallback((colorA, colorB) => {
+    const updated = {
+      colorA: colorA !== null ? colorA : duotoneColors.colorA,
+      colorB: colorB !== null ? colorB : duotoneColors.colorB,
+    }
+    setDuotoneColors(updated)
+    if (activeFilter === 'duotone') {
+      const canvas = canvasRef.current
+      if (!canvas || !originalImageDataRef.current) return
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const src = originalImageDataRef.current
+      const buffer = new Uint8ClampedArray(src.data).buffer
+      if (workerRef.current) workerRef.current.terminate()
+      workerRef.current = new Worker('/filterWorker.js')
+      workerRef.current.onmessage = (e) => {
+        const out = new Uint8ClampedArray(e.data.out)
+        ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
+        workerRef.current = null
+      }
+      workerRef.current.postMessage({ filter: 'duotone', strength: 1, colorA: updated.colorA, colorB: updated.colorB, buffer, width: src.width, height: src.height }, [buffer])
+    }
+  }, [activeFilter, duotoneColors])
 
   const handleStrengthChange = useCallback((strength) => {
     setFilterStrength(strength)
@@ -1043,6 +1073,8 @@ export default function Home() {
                 onFilterChange={handleFilterChange}
                 filterStrength={filterStrength}
                 onStrengthChange={handleStrengthChange}
+                onDuotoneColorsChange={handleDuotoneColorsChange}
+                duotoneColors={duotoneColors}
                 curves={channelCurves}
                 onCurvesChange={handleCurvesChange}
               />
