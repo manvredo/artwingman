@@ -289,6 +289,13 @@ export default function Home() {
     }
   }, [findMatchingPixels, sampleRadius])
 
+  // Called from the match-mode button — analyzes the last-clicked pixel
+  const triggerPixelMatch = useCallback(() => {
+    const last = lastImgPosRef.current
+    if (!last || !image) return
+    handlePixelMatch(last.px, last.py)
+  }, [image])
+
   const handleMunsellInput = useCallback((str) => {
     try {
       const parsed = parseMunsell(str)
@@ -315,7 +322,6 @@ export default function Home() {
     if (px < 0 || py < 0 || px >= imgDims.w || py >= imgDims.h) return
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
-    handlePixelMatch(px, py)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
     const wrap = canvasWrapRef.current
     if (wrap) {
@@ -324,7 +330,7 @@ export default function Home() {
       const sy = e.clientY - wr.top - wr.height / 2
       setClickImagePos({ x: (sx - viewport.panX) / viewport.zoom, y: (sy - viewport.panY) / viewport.zoom })
     }
-  }, [imgDims, sampleRadius, sampleAt, handlePixelMatch, viewport.zoom, viewport.panX, viewport.panY])
+  }, [imgDims, sampleRadius, sampleAt, viewport.zoom, viewport.panX, viewport.panY])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
@@ -1605,7 +1611,7 @@ export default function Home() {
               <rect x="5" y="5" width="6" height="6" rx="0.5" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1"/>
             </svg>
           </button>
-          <button className={styles.viewBtn} onClick={() => { if (matchMode) { setMatchMode(false) } else { setMatchMode(true); setLoupeMode(false); setShowMunsellValues(false) } }} title="Gleiche Munsell-Farbe anzeigen" disabled={!image} style={{ color: matchMode && image ? '#c84e4e' : '#555250' }}>
+          <button className={styles.viewBtn} onClick={() => { if (matchMode) { setMatchMode(false) } else { setMatchMode(true); setLoupeMode(false); setShowMunsellValues(false); triggerPixelMatch() } }} title="Gleiche Munsell-Farbe anzeigen" disabled={!image} style={{ color: matchMode && image ? '#c84e4e' : '#555250' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.5"/>
               <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1" strokeDasharray="2 1"/>
