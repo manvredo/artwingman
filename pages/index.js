@@ -1415,7 +1415,7 @@ export default function Home() {
                   const dotR = Math.max(1, 2 / viewport.zoom)
                   return (
                     <svg viewBox={`0 0 ${imgDims.w} ${imgDims.h}`} width={imgDims.w} height={imgDims.h} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 2 }}>
-                      {matchPixels.map((p, i) => (
+                      {matchPixels.slice(0, 5000).map((p, i) => (
                         <circle key={i} cx={p.x} cy={p.y} r={dotR}
                           fill="rgba(255,60,60,0.45)" stroke="rgba(255,60,60,0.75)" strokeWidth="0.5" />
                       ))}
