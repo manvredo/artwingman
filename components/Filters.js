@@ -76,21 +76,21 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
           )}
 
           {activeFilter === f.id && f.id === 'duotone' && (
-            <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, color: '#8a8680', minWidth: 40 }}>Dark</span>
+                <span style={{ fontSize: 14, color: '#8a8680', minWidth: 44 }>Dark</span>
                 <HexColorPicker
                   color={f.colorA}
                   onChange={c => onDuotoneColorsChange(c, null)}
-                  style={{ width: 180, height: 130 }}
+                  style={{ width: 144, height: 104, '--react-colorful-border-radius': '10px' }}
                 />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, color: '#8a8680', minWidth: 40 }}>Light</span>
+                <span style={{ fontSize: 14, color: '#8a8680', minWidth: 44 }>Light</span>
                 <HexColorPicker
                   color={f.colorB}
                   onChange={c => onDuotoneColorsChange(null, c)}
-                  style={{ width: 180, height: 130 }}
+                  style={{ width: 144, height: 104, '--react-colorful-border-radius': '10px' }}
                 />
               </div>
             </div>
