@@ -168,7 +168,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
                   >
                     <rect
                       x={gx} y={gy} width={gw} height={gh}
-                      fill={inRange ? cellColor(v, c) : 'rgb(50,50,50)'}
+                      fill={inRange ? cellColor(v, c) : 'rgb(60,60,60)'}
                       rx={2}
                     />
                     {isActive && (
