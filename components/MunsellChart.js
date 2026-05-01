@@ -40,13 +40,13 @@ const FAMILY_MAX_CHROMA = {
 function getChromasForHue(hueNum) {
   const family = hueToFamily(hueNum || 0)
   const maxC = FAMILY_MAX_CHROMA[family]?.[3] ?? 12  // use value 3 as reference for chroma columns
-  const chromas = []
+  const chromaList = []
   for (let c = 0; c <= 30; c += 2) {
-    if (c <= maxC) chromas.push(c)
-    else if (c > maxC && c <= maxC + 6) chromas.push(c)  // include up to 6 above max for transition
+    if (c <= maxC) chromaList.push(c)
+    else if (c > maxC && c <= maxC + 6) chromaList.push(c)  // include up to 6 above max for transition
     else if (c > maxC + 6) break
   }
-  return chromas
+  return chromaList
 }
 
 function getMaxChroma(hueNum, value) {
@@ -80,14 +80,24 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   }, [])
 
   const effectiveHue = hueAngle || 0
-  const chromas = getChromasForHue(effectiveHue)
   const activeChroma = chroma !== null ? Math.round(chroma / 2) * 2 : null
   const activeValue = value !== null ? Math.round(value) : null
   const hasColor = value !== null && chroma !== null
 
+  // Build chroma list centered around active chroma if available, otherwise full range
+  const family = hueToFamily(effectiveHue)
+  const familyMaxC = FAMILY_MAX_CHROMA[family]?.[3] ?? 12
+  const centerC = activeChroma !== null ? activeChroma : Math.min(familyMaxC, 10)
+  const window = 10  // how far from center in each direction
+  const chromaList = []
+  for (let c = Math.max(0, centerC - window); c <= 30; c += 2) {
+    if (c > familyMaxC + 6) break
+    chromaList.push(c)
+  }
+
   const cellW = CELL
   const cellH = CELL
-  const svgW = PAD_L + chromas.length * cellW
+  const svgW = PAD_L + chromaList.length * cellW
   const svgH = PAD_T + VALUES.length * cellH
 
   const hueLabel = hue && hue !== '—' ? hue : '—'
@@ -114,7 +124,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
 
             {/* Chroma axis label */}
             <text
-              x={PAD_L + (chromas.length * cellW) / 2} y={11}
+              x={PAD_L + (chromaList.length * cellW) / 2} y={11}
               textAnchor="middle" fontSize={12} fontFamily="monospace" fill="#a8a4a0"
             >CHROMA</text>
 
@@ -126,7 +136,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
             >VALUE</text>
 
             {/* X-axis numbers */}
-            {chromas.map((c, col) => (
+            {chromaList.map((c, col) => (
               <text key={`x${c}`}
                 x={PAD_L + col * cellW + cellW / 2} y={PAD_T - 5}
                 textAnchor="middle" fontSize={10} fontFamily="monospace" fill="#555250"
@@ -142,11 +152,11 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
             ))}
 
             {/* Grid background */}
-            <rect x={PAD_L} y={PAD_T} width={chromas.length * cellW} height={VALUES.length * cellH} fill="rgb(70,70,70)" />
+            <rect x={PAD_L} y={PAD_T} width={chromaList.length * cellW} height={VALUES.length * cellH} fill="rgb(70,70,70)" />
 
             {/* Cells */}
             {VALUES.map((v, row) =>
-              chromas.map((c, col) => {
+              chromaList.map((c, col) => {
                 const x = PAD_L + col * cellW
                 const y = PAD_T + row * cellH
                 const maxC = getMaxChroma(effectiveHue, v)
