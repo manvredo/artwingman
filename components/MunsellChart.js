@@ -32,7 +32,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
     if (!el) return
     const ro = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect
-      setSz({ w: Math.floor(width), h: Math.floor(height) })
+      setSz({ w: Math.max(1, Math.floor(width)), h: Math.max(1, Math.floor(height)) })
     })
     ro.observe(el)
     return () => ro.disconnect()
