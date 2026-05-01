@@ -5,7 +5,7 @@ const FILTERS = [
   { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
   { id: 'emboss',    label: 'Emboss',     min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
   { id: 'sharpen',   label: 'Sharpen',   min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'vignette',  label: 'Vignette',  min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
+  { id: 'vignette',  label: 'Vignette',  min: -20, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
 ]
 
 export { FILTERS }
