@@ -83,7 +83,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                     type="color"
                     value={f.colorA}
                     onChange={e => onDuotoneColorsChange(e.target.value, null)}
-                    style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
+                    style={{ width: 36, height: 30, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
                   />
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                     type="color"
                     value={f.colorB}
                     onChange={e => onDuotoneColorsChange(null, e.target.value)}
-                    style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
+                    style={{ width: 36, height: 30, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
                   />
                 </div>
               </div>
