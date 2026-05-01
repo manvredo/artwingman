@@ -1412,9 +1412,7 @@ export default function Home() {
                   )
                 })()}
                 {matchMode && matchPixels.length > 0 && (() => {
-                  const displayW = canvasRef.current?.offsetWidth || 1
-                  const scale = displayW / (imgDims.w || 1)
-                  const dotR = Math.max(2, sampleRadius * scale)
+                  const dotR = Math.max(1, 2 / viewport.zoom)
                   return (
                     <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 2 }}>
                       {matchPixels.map((p, i) => (
