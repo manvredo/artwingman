@@ -91,7 +91,6 @@ const PRESETS = {
   },
   'Black & White': () => {
     // True film-like grayscale: soft shadow roll-off, bright but not clipped highlights.
-    // lumLUT: y = x^0.85 — subtly compresses shadows, lifts midtones.
     const bwPts = [
       { in: 0, out: 0 },
       { in: 40, out: 26 },
@@ -101,7 +100,8 @@ const PRESETS = {
       { in: 224, out: 215 },
       { in: 255, out: 255 },
     ]
-    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+    const bwCurve = buildCurveFromPoints(bwPts)
+    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: bwCurve,
       Rpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Gpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }],
       Bpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Luminositypts: bwPts,
       activeChannel: 'Luminosity' }
