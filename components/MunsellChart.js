@@ -5,8 +5,8 @@ const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
 const VALUES  = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 const MAX_CHROMA = {
-  1: 6, 2: 8, 3: 12, 4: 16, 5: 20,
-  6: 22, 7: 18, 8: 12, 9: 8,
+  1: 14, 2: 18, 3: 22, 4: 24, 5: 26,
+  6: 28, 7: 26, 8: 20, 9: 12,
 }
 
 const PAD_L = 44   // "Value" rotated label + number labels
