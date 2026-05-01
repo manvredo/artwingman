@@ -105,8 +105,8 @@ export function DuotonePicker({ color, onChange, label }) {
   }, [onChange])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span style={{ fontSize: 15, color: '#8a8680' }}>{label}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+      <span style={{ fontSize: 15, color: '#8a8680', textAlign: 'center' }}>{label}</span>
       <canvas
         ref={canvasRef}
         width={180}
@@ -115,7 +115,7 @@ export function DuotonePicker({ color, onChange, label }) {
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp}
-        style={{ borderRadius: 8, cursor: 'crosshair', display: 'block', width: 180, height: 130 }}
+        style={{ borderRadius: 8, cursor: 'crosshair', display: 'block', width: 180, height: 130, margin: '0 auto' }}
       />
       <div style={{ position: 'relative', height: 16, marginTop: 4 }}>
         <div
