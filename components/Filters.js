@@ -1,15 +1,17 @@
 import styles from '../styles/Home.module.css'
+import { CurvesEditor } from './Curves'
 
 const FILTERS = [
   { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
   { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
   { id: 'emboss',    label: 'Emboss',     min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
   { id: 'sharpen',   label: 'Sharpen',   min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
+  { id: 'curves',    label: 'Curves',     min: undefined, max: undefined },
 ]
 
 export { FILTERS }
 
-export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange }) {
+export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, curves, onCurvesChange }) {
   const activeCfg = FILTERS.find(f => f.id === activeFilter)
 
   return (
@@ -66,6 +68,12 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
                 {Math.min(f.max, Math.max(f.min, filterStrength))}{f.unit}
               </span>
+            </div>
+          )}
+
+          {activeFilter === f.id && f.id === 'curves' && curves && (
+            <div style={{ marginTop: 8, paddingLeft: 2 }}>
+              <CurvesEditor curves={curves} onChange={onCurvesChange} />
             </div>
           )}
         </div>

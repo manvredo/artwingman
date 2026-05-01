@@ -2,12 +2,11 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups } from '../lib/developGL'
-import { FILTERS } from '../components/Filters'
-import styles from '../styles/Home.module.css'
+import Filters, { FILTERS } from '../components/Filters'
 import Palette from '../components/Palette'
-import GridOverlay from '../components/GridOverlay'
-import Filters from '../components/Filters'
 import MunsellChart from '../components/MunsellChart'
+import { CurvesEditor, makeIdentityCurve } from '../components/Curves'
+import styles from '../styles/Home.module.css'
 
 const DEFAULT_COLOR = {
   r: null, g: null, b: null,
@@ -119,6 +118,13 @@ export default function Home() {
   const [gridOpacity, setGridOpacity] = useState(90)
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
+  const [channelCurves, setChannelCurves] = useState({
+    R: makeIdentityCurve(),
+    G: makeIdentityCurve(),
+    B: makeIdentityCurve(),
+    Luminosity: makeIdentityCurve(),
+    activeChannel: 'Luminosity',
+  })
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const [canvasBg, setCanvasBg] = useState('#222222')
   const [wrapSz, setWrapSz] = useState({ w: 0, h: 0 })
@@ -614,7 +620,7 @@ export default function Home() {
     }
   }, [develop, applyDevelop, lutData, lutSize, lutIntensity, colorActive])
 
-  const applyFilter = useCallback((filter, strength) => {
+  const applyFilter = useCallback((filter, strength, curvesData) => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
@@ -631,7 +637,11 @@ export default function Home() {
       ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
       workerRef.current = null
     }
-    workerRef.current.postMessage({ filter, strength, buffer, width: src.width, height: src.height }, [buffer])
+    const msg = { filter, strength, buffer, width: src.width, height: src.height }
+    if (filter === 'curves' && curvesData) {
+      msg.curves = curvesData
+    }
+    workerRef.current.postMessage(msg, [buffer])
   }, [])
 
   const handleFilterChange = useCallback((filter) => {
@@ -639,8 +649,12 @@ export default function Home() {
     const cfg = FILTERS.find(f => f.id === filter)
     const strength = cfg?.def ?? filterStrength
     if (cfg?.def !== undefined) setFilterStrength(cfg.def)
-    applyFilter(filter, strength)
-  }, [applyFilter, filterStrength])
+    if (filter === 'curves') {
+      applyFilter(filter, 0, channelCurves)
+    } else {
+      applyFilter(filter, strength)
+    }
+  }, [applyFilter, filterStrength, channelCurves])
 
   const handleStrengthChange = useCallback((strength) => {
     setFilterStrength(strength)
@@ -648,8 +662,23 @@ export default function Home() {
     const cfg = FILTERS.find(f => f.id === activeFilter)
     if (!cfg?.min) return
     clearTimeout(filterDebounceRef.current)
-    filterDebounceRef.current = setTimeout(() => applyFilter(activeFilter, strength), 300)
-  }, [applyFilter, activeFilter])
+    filterDebounceRef.current = setTimeout(() => {
+      if (activeFilter === 'curves') {
+        applyFilter(activeFilter, 0, channelCurves)
+      } else {
+        applyFilter(activeFilter, strength)
+      }
+    }, 300)
+  }, [applyFilter, activeFilter, channelCurves])
+
+  const handleCurvesChange = useCallback((newCurves) => {
+    setChannelCurves(newCurves)
+    if (!activeFilter || activeFilter !== 'curves') return
+    clearTimeout(filterDebounceRef.current)
+    filterDebounceRef.current = setTimeout(() => {
+      applyFilter('curves', 0, newCurves)
+    }, 100)
+  }, [activeFilter, applyFilter])
 
   const addToPalette = useCallback(() => {
     if (!color || color.r === null) return
@@ -1014,6 +1043,8 @@ export default function Home() {
                 onFilterChange={handleFilterChange}
                 filterStrength={filterStrength}
                 onStrengthChange={handleStrengthChange}
+                curves={channelCurves}
+                onCurvesChange={handleCurvesChange}
               />
             </div>
           </AccordionDrawer>

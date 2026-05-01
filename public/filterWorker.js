@@ -132,6 +132,38 @@ self.addEventListener('message', function (e) {
       out[i+3] = src[i+3]
     }
 
+  } else if (filter === 'curves') {
+    // curves: { R, G, B, Luminosity } — each a 256-element lookup table
+    const { curves: curveTables } = e.data
+    if (!curveTables) {
+      out.set(src)
+    } else {
+      const rLUT = curveTables.R   || null
+      const gLUT = curveTables.G  || null
+      const bLUT = curveTables.B   || null
+      const lumLUT = curveTables.Luminosity || null
+
+      for (let i = 0; i < src.length; i += 4) {
+        let r = src[i], g = src[i+1], b = src[i+2]
+
+        if (rLUT)   r = rLUT[r]
+        if (gLUT)   g = gLUT[g]
+        if (bLUT)   b = bLUT[b]
+        if (lumLUT) {
+          const lum = Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)
+          const mapped = lumLUT[lum]
+          r = Math.round(r + (mapped - lum) * 0.8)
+          g = Math.round(g + (mapped - lum) * 0.8)
+          b = Math.round(b + (mapped - lum) * 0.8)
+        }
+
+        out[i]   = Math.min(255, Math.max(0, r))
+        out[i+1] = Math.min(255, Math.max(0, g))
+        out[i+2] = Math.min(255, Math.max(0, b))
+        out[i+3] = src[i+3]
+      }
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {
