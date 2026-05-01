@@ -111,7 +111,7 @@ export function DuotonePicker({ color, onChange, label }) {
         onMouseLeave={handleCanvasMouseUp}
         style={{ borderRadius: 8, cursor: 'crosshair', display: 'block', width: 180, height: 130, margin: '0 auto' }}
       />
-      <div style={{ position: 'relative', height: 16, marginTop: 4 }}>
+      <div style={{ position: 'relative', height: 16, width: 180 }}>
         <div
           style={{
             position: 'absolute',
