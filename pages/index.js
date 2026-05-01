@@ -310,7 +310,7 @@ export default function Home() {
     setMatchPixels(positions)
     console.warn('triggerPixelMatch:', positions.length, 'positions, first:', JSON.stringify(positions[0]))
     // Diagnostic: draw mask directly on canvas to see if WebGL positions are correct
-    glDrawMatchOverlay(gl, r, g, b, 4.0)
+    glDrawMatchOverlay(gl, r, g, b, 10.0)
   }, [image, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
