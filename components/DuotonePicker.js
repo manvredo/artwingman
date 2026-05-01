@@ -30,34 +30,26 @@ export function DuotonePicker({ color, onChange, label }) {
   const [hsv, setHsv] = useState(() => hexToHsv(color))
   const isDraggingRef = useRef(false)
 
+  // Always redraw canvas when color changes
   useEffect(() => {
     setHsv(hexToHsv(color))
-  }, [color])
-
-  useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     const w = canvas.width, h = canvas.height
-
     ctx.clearRect(0, 0, w, h)
-
-    const { h: hue, s, v } = hsv
-    const sat100 = s / 100
-    const val100 = v / 100
-
+    const { h: hue, s, v } = hexToHsv(color)
     const gradH = ctx.createLinearGradient(0, 0, w, 0)
     gradH.addColorStop(0, `hsl(${hue},100%,100%)`)
     gradH.addColorStop(1, `hsl(${hue},100%,50%)`)
     ctx.fillStyle = gradH
     ctx.fillRect(0, 0, w, h)
-
     const gradV = ctx.createLinearGradient(0, 0, 0, h)
     gradV.addColorStop(0, 'rgba(0,0,0,0)')
     gradV.addColorStop(1, 'rgba(0,0,0,1)')
     ctx.fillStyle = gradV
     ctx.fillRect(0, 0, w, h)
-  }, [hsv])
+  }, [color])
 
   const handleCanvasMouseDown = useCallback((e) => {
     isDraggingRef.current = true
