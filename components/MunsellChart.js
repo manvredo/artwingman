@@ -43,8 +43,8 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   const hasColor = value !== null && chroma !== null
 
   const cellWFromH = sz.h > 0 ? (sz.h - PAD_T) / VALUES.length * 2 : 1
-  const cellWFromW = sz.w > 0 ? (sz.w - PAD_L) / CHROMAS.length : 1
-  const cellW = Math.max(1, Math.min(cellWFromH, cellWFromW))
+  const cellWFromW = sz.w > 0 ? (sz.w - PAD_L) / CHROMAS.length : 80
+  const cellW = Math.max(40, Math.min(cellWFromH, cellWFromW))
   const cellH = cellW / 2
 
   const svgW = PAD_L + CHROMAS.length * cellW
@@ -66,7 +66,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
       {/* Chart */}
       <div
         ref={containerRef}
-        style={{ flex: 1, minWidth: 0, minHeight: 0, overflowX: 'auto', overflowY: 'hidden', lineHeight: 0 }}
+        style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden', lineHeight: 0 }}
         onMouseLeave={() => setHovered(null)}
       >
         {sz.w > 0 && sz.h > 0 && (
