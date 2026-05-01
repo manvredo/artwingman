@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
-import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups } from '../lib/developGL'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups, runMatchMask as glRunMatchMask } from '../lib/developGL'
 import Filters, { FILTERS } from '../components/Filters'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
@@ -289,7 +289,7 @@ export default function Home() {
     }
   }, [findMatchingPixels, sampleRadius])
 
-  // Called from the match-mode button — analyzes the last-clicked pixel
+  // Called from the match-mode button — runs GPU search on originalImageDataRef
   const triggerPixelMatch = useCallback(() => {
     const last = lastImgPosRef.current
     if (!last || !image) return
@@ -303,35 +303,11 @@ export default function Home() {
     const { r, g, b } = samplePixels(imageData, last.px, last.py, sampleRadius, imgData.width, imgData.height)
     const m = rgbToMunsell(r, g, b)
     setMatchColor({ ...m, r, g, b })
-    // Run expensive search in parts, yielding to browser between batches
-    const batchSize = 5000
-    const sampleRate = 4
-    const { width, height, data } = imgData
-    const allPositions = []
-    let count = 0
-    let y = 0, x = 0
-    const search = () => {
-      const endY = Math.min(y + batchSize, height)
-      for (; y < endY; y++) {
-        for (x = 0; x < width; x += sampleRate) {
-          const i = (y * width + x) * 4
-          const pm = rgbToMunsell(data[i], data[i+1], data[i+2])
-          if (
-            Math.abs(pm.hueAngle - m.hueAngle) <= 1 &&
-            Math.abs(pm.value - m.value) <= 0.15 &&
-            Math.abs(pm.chroma - m.chroma) <= 0.8
-          ) {
-            allPositions.push({ x, y })
-          }
-        }
-      }
-      if (y < height) {
-        requestAnimationFrame(search)
-      } else {
-        setMatchPixels(allPositions)
-      }
-    }
-    requestAnimationFrame(search)
+    const gl = glStateRef.current
+    if (!gl) return
+    setMatchPixels([]) // clear while searching
+    const positions = glRunMatchMask(gl, m.hueAngle, m.value, m.chroma)
+    setMatchPixels(positions)
   }, [image, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
