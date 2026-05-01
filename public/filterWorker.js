@@ -132,6 +132,23 @@ self.addEventListener('message', function (e) {
       out[i+3] = src[i+3]
     }
 
+  } else if (filter === 'vignette') {
+    const cx = w / 2, cy = h / 2
+    const maxR = Math.sqrt(cx*cx + cy*cy)
+    const amount = Math.max(0, Math.min(20, strength)) / 10
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const dist = Math.sqrt((x - cx)**2 + (y - cy)**2)
+        const t = Math.min(1, dist / maxR)
+        const fade = Math.pow(t, 1.5) * amount
+        const i = (y * w + x) * 4
+        out[i]   = Math.round(src[i]   * (1 - fade))
+        out[i+1] = Math.round(src[i+1] * (1 - fade))
+        out[i+2] = Math.round(src[i+2] * (1 - fade))
+        out[i+3] = src[i+3]
+      }
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {
