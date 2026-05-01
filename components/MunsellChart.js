@@ -8,6 +8,21 @@ const GAP = 1
 const DETAIL_W = 120
 const CELL = 36
 
+// Hue number (0-100 system) to family
+function hueToFamily(hueNum) {
+  if (hueNum === null || hueNum === undefined || hueNum === 0) return 'N'
+  if (hueNum < 10) return 'R'
+  if (hueNum < 20) return 'YR'
+  if (hueNum < 30) return 'Y'
+  if (hueNum < 40) return 'GY'
+  if (hueNum < 50) return 'G'
+  if (hueNum < 60) return 'BG'
+  if (hueNum < 70) return 'B'
+  if (hueNum < 80) return 'PB'
+  if (hueNum < 90) return 'P'
+  return 'RP'
+}
+
 const FAMILY_MAX_CHROMA = {
   N:  { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 },
   R:  { 1:16, 2:20, 3:26, 4:28, 5:28, 6:26, 7:22, 8:14, 9:10 },
@@ -22,25 +37,22 @@ const FAMILY_MAX_CHROMA = {
   RP: { 1:14, 2:18, 3:22, 4:26, 5:26, 6:24, 7:20, 8:12, 9:8 },
 }
 
-// Per-cell validation: check exact hue+value+chroma tuple
-function isValidCell(hueAngle, v, c) {
-  if (c === 0) return true  // neutral always valid
-  const rgb = munsellHvcToRgb(hueAngle, v, c)
-  return rgb !== null
-}
-
-function getChromasForHue(hueAngle) {
+function getChromasForHue(hueNum) {
+  const family = hueToFamily(hueNum || 0)
+  const maxC = FAMILY_MAX_CHROMA[family]?.[3] ?? 12  // use value 3 as reference for chroma columns
   const chromas = []
   for (let c = 0; c <= 30; c += 2) {
-    // find at least one valid cell for this chroma at any value
-    let valid = false
-    for (const v of VALUES) {
-      if (isValidCell(hueAngle, v, c)) { valid = true; break }
-    }
-    if (valid) chromas.push(c)
-    else if (c > 20) break
+    if (c <= maxC) chromas.push(c)
+    else if (c > maxC && c <= maxC + 6) chromas.push(c)  // include up to 6 above max for transition
+    else if (c > maxC + 6) break
   }
   return chromas
+}
+
+function getMaxChroma(hueNum, value) {
+  if (value === null || value === undefined) return 0
+  const family = hueToFamily(hueNum || 0)
+  return FAMILY_MAX_CHROMA[family]?.[value] ?? 0
 }
 
 export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, color, compact, onCellOpen }) {
@@ -67,8 +79,8 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
     return () => ro.disconnect()
   }, [])
 
-  const effectiveHueAngle = hueAngle || 0
-  const chromas = getChromasForHue(effectiveHueAngle)
+  const effectiveHue = hueAngle || 0
+  const chromas = getChromasForHue(effectiveHue)
   const activeChroma = chroma !== null ? Math.round(chroma / 2) * 2 : null
   const activeValue = value !== null ? Math.round(value) : null
   const hasColor = value !== null && chroma !== null
@@ -81,7 +93,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   const hueLabel = hue && hue !== '—' ? hue : '—'
 
   const cellColor = (v, c) => {
-    const rgb = munsellHvcToRgb(effectiveHueAngle, v, c)
+    const rgb = munsellHvcToRgb(effectiveHue, v, c)
     if (!rgb) return '#1a1a1a'
     return `rgb(${rgb.r},${rgb.g},${rgb.b})`
   }
@@ -137,7 +149,8 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
               chromas.map((c, col) => {
                 const x = PAD_L + col * cellW
                 const y = PAD_T + row * cellH
-                const inRange = isValidCell(effectiveHueAngle, v, c)
+                const maxC = getMaxChroma(effectiveHue, v)
+                const inRange = c <= maxC
                 const isActive = hasColor && v === activeValue && c === activeChroma && inRange
                 const gx = x + GAP / 2, gy = y + GAP / 2
                 const gw = cellW - GAP, gh = cellH - GAP
@@ -222,7 +235,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
           onMouseDown={e => e.stopPropagation()}
           onClick={() => {
             if (onCellOpen) {
-              const rgb = munsellHvcToRgb(effectiveHueAngle, popup.v, popup.c)
+              const rgb = munsellHvcToRgb(effectiveHue, popup.v, popup.c)
               if (rgb) onCellOpen({ r: rgb.r, g: rgb.g, b: rgb.b, hue: hueLabel, hueName, value: popup.v, chroma: popup.c })
             }
             setPopup(null)
