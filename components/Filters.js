@@ -9,12 +9,12 @@ const FILTERS = [
   { id: 'noise',     label: 'Noise',         min: 1, max: 50, unit: '',  sliderLabel: 'Amount',    def: 10 },
   { id: 'bleach',    label: 'Bleach Bypass', min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
   { id: 'sobel',     label: 'Sobel/Edge',    min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
-  { id: 'duotone',   label: 'Duotone',       min: undefined, max: undefined, colorA: '#ff6b35', colorB: '#2d1b69' },
+  { id: 'duotone',   label: 'Duotone',       colorA: '#ff6b35', colorB: '#2d1b69' },
 ]
 
 export { FILTERS }
 
-export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange }) {
+export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, onDuotoneColorsChange }) {
   const activeCfg = FILTERS.find(f => f.id === activeFilter)
 
   return (
@@ -78,21 +78,25 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
             <div style={{ display: 'flex', gap: 8, marginTop: 6, paddingLeft: 2, alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 10, color: '#8a8680' }}>Dark</span>
-                <input
-                  type="color"
-                  value={filterStrength === 0 ? f.colorA : (filterStrength > 0 ? f.colorA : f.colorB)}
-                  onChange={e => onStrengthChange(1)}
-                  style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none' }}
-                />
+                <div style={{ background: '#1a1a1a', borderRadius: 4, padding: 2, border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <input
+                    type="color"
+                    value={f.colorA}
+                    onChange={e => onDuotoneColorsChange(e.target.value, null)}
+                    style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
+                  />
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 10, color: '#8a8680' }}>Light</span>
-                <input
-                  type="color"
-                  value={filterStrength === 0 ? f.colorB : (filterStrength < 0 ? f.colorA : f.colorB)}
-                  onChange={e => onStrengthChange(1)}
-                  style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none' }}
-                />
+                <div style={{ background: '#1a1a1a', borderRadius: 4, padding: 2, border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <input
+                    type="color"
+                    value={f.colorB}
+                    onChange={e => onDuotoneColorsChange(null, e.target.value)}
+                    style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
+                  />
+                </div>
               </div>
             </div>
           )}
