@@ -165,6 +165,16 @@ self.addEventListener('message', function (e) {
       out[i+3] = src[i+3]
     }
 
+  } else if (filter === 'bleach') {
+    const amount = Math.max(0, Math.min(20, strength)) / 20
+    for (let i = 0; i < src.length; i += 4) {
+      const gray = (src[i] + src[i+1] + src[i+2]) / 3
+      out[i]   = Math.min(255, Math.max(0, Math.round(src[i]   * (1 - amount) + gray * amount)))
+      out[i+1] = Math.min(255, Math.max(0, Math.round(src[i+1] * (1 - amount) + gray * amount)))
+      out[i+2] = Math.min(255, Math.max(0, Math.round(src[i+2] * (1 - amount) + gray * amount)))
+      out[i+3] = src[i+3]
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {
