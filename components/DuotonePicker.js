@@ -28,11 +28,13 @@ function hsvToHex(h, s, v) {
 export function DuotonePicker({ color, onChange, label }) {
   const canvasRef = useRef(null)
   const [hsv, setHsv] = useState(() => hexToHsv(color))
+  const [hexInput, setHexInput] = useState(color)
   const isDraggingRef = useRef(false)
 
   // Always redraw canvas when color changes
   useEffect(() => {
     setHsv(hexToHsv(color))
+    setHexInput(color)
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -151,8 +153,16 @@ export function DuotonePicker({ color, onChange, label }) {
       </div>
       <input
         type="text"
-        value={color}
-        onChange={handleHexInput}
+        value={hexInput}
+        onChange={e => {
+          const val = e.target.value
+          setHexInput(val)
+          if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            setHsv(hexToHsv(val))
+            onChange(val)
+          }
+        }}
+        onBlur={() => setHexInput(color)}
         maxLength={7}
         style={{
           background: 'rgba(255,255,255,0.06)',
