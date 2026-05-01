@@ -306,7 +306,7 @@ export default function Home() {
     const gl = glStateRef.current
     if (!gl) { console.warn('triggerPixelMatch: no gl'); return }
     setMatchPixels([])
-    const positions = glRunMatchMask(gl, r, g, b, 1.0, 4)
+    const positions = glRunMatchMask(gl, r, g, b, 1.0, 0.5)
     setMatchPixels(positions)
   }, [image, sampleRadius])
 
