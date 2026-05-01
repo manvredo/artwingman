@@ -107,25 +107,29 @@ self.addEventListener('message', function (e) {
     }
 
   } else if (filter === 'sharpen') {
-    const amount = Math.max(0, Math.min(20, strength)) / 20
+    const amount = Math.max(0, Math.min(20, strength)) / 10
+    // Unsharp mask: out = src + amount * (src - blur)
+    const blur = new Uint8ClampedArray(src.length)
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
-        let r = 0, g = 0, b = 0
+        let rS = 0, gS = 0, bS = 0, cnt = 0
         for (let dy = -1; dy <= 1; dy++) {
           for (let dx = -1; dx <= 1; dx++) {
             const ny = Math.max(0, Math.min(h-1, y+dy))
             const nx = Math.max(0, Math.min(w-1, x+dx))
             const i = (ny * w + nx) * 4
-            const k = dy === 0 && dx === 0 ? 1 + 4 * amount : -amount
-            r += src[i] * k; g += src[i+1] * k; b += src[i+2] * k
+            rS += src[i]; gS += src[i+1]; bS += src[i+2]; cnt++
           }
         }
         const i = (y * w + x) * 4
-        out[i]   = Math.min(255, Math.max(0, Math.round(r)))
-        out[i+1] = Math.min(255, Math.max(0, Math.round(g)))
-        out[i+2] = Math.min(255, Math.max(0, Math.round(b)))
-        out[i+3] = src[i+3]
+        blur[i] = rS / cnt; blur[i+1] = gS / cnt; blur[i+2] = bS / cnt; blur[i+3] = src[i+3]
       }
+    }
+    for (let i = 0; i < src.length; i += 4) {
+      out[i]   = Math.min(255, Math.max(0, src[i]   + Math.round((src[i]   - blur[i])   * amount)))
+      out[i+1] = Math.min(255, Math.max(0, src[i+1] + Math.round((src[i+1] - blur[i+1]) * amount)))
+      out[i+2] = Math.min(255, Math.max(0, src[i+2] + Math.round((src[i+2] - blur[i+2]) * amount)))
+      out[i+3] = src[i+3]
     }
 
   } else if (filter === 'warm') {
