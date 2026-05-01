@@ -1,3 +1,4 @@
+import { HexColorPicker } from 'react-colorful'
 import styles from '../styles/Home.module.css'
 
 const FILTERS = [
@@ -75,23 +76,27 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
           )}
 
           {activeFilter === f.id && f.id === 'duotone' && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 6, paddingLeft: 2, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#8a8680' }}>Dark</span>
-                <input
-                  type="color"
-                  value={f.colorA}
-                  onChange={e => onDuotoneColorsChange(e.target.value, null)}
-                  style={{ width: 36, height: 30, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', background: 'none', display: 'block', borderRadius: 4 }}
+            <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 10, color: '#8a8680', minWidth: 36 }}>Dark</span>
+                  <div style={{ width: 36, height: 30, borderRadius: 4, background: f.colorA, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', flexShrink: 0 }} />
+                </div>
+                <HexColorPicker
+                  color={f.colorA}
+                  onChange={c => onDuotoneColorsChange(c, null)}
+                  style={{ width: 160, height: 120 }}
                 />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#8a8680' }}>Light</span>
-                <input
-                  type="color"
-                  value={f.colorB}
-                  onChange={e => onDuotoneColorsChange(null, e.target.value)}
-                  style={{ width: 36, height: 30, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', background: 'none', display: 'block', borderRadius: 4 }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 10, color: '#8a8680', minWidth: 36 }}>Light</span>
+                  <div style={{ width: 36, height: 30, borderRadius: 4, background: f.colorB, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', flexShrink: 0 }} />
+                </div>
+                <HexColorPicker
+                  color={f.colorB}
+                  onChange={c => onDuotoneColorsChange(null, c)}
+                  style={{ width: 160, height: 120 }}
                 />
               </div>
             </div>
