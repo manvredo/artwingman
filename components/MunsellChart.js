@@ -6,7 +6,7 @@ const PAD_L = 40
 const PAD_T = 36
 const GAP = 1
 const DETAIL_W = 120
-const CELL = 44
+const CELL = 36
 
 // Hue angle to hue family: 0=R, 36=YR, 72=Y, 108=GY, 144=G, 180=BG, 216=B, 252=PB, 288=P, 324=RP
 function hueAngleToFamily(hueAngle) {
