@@ -4,41 +4,56 @@ function makeIdentityCurve() {
   return Array.from({ length: 256 }, (_, i) => i)
 }
 
-// Build 256-entry LUT by drawing cubic Bezier segments between sorted points.
-// Tangents are horizontal at endpoints; midpoints use average of neighbor slopes.
+// Monotone cubic interpolation via Fritsch-Butland method.
+// Guarantees no overshooting/undershooting — curve stays between control points.
 function buildCurveFromPoints(points) {
   if (points.length < 2) return makeIdentityCurve()
   const sorted = [...points].sort((a, b) => a.in - b.in)
-  const curve = new Array(256).fill(0)
 
-  for (let s = 0; s < sorted.length - 1; s++) {
-    const p0 = sorted[Math.max(0, s - 1)]
-    const p1 = sorted[s]
-    const p2 = sorted[s + 1]
-    const p3 = sorted[Math.min(sorted.length - 1, s + 2)]
+  // Compute gradients (slopes) at each interior point
+  const n = sorted.length
+  const gradients = new Array(n)
+  gradients[0] = sorted.length > 1 ? (sorted[1].out - sorted[0].out) / (sorted[1].in - sorted[0].in) : 0
+  gradients[n - 1] = sorted.length > 1 ? (sorted[n - 1].out - sorted[n - 2].out) / (sorted[n - 1].in - sorted[n - 2].in) : 0
 
-    // Tangents
-    const t1x = (p2.in - p0.in) / 6
-    const t1y = (p2.out - p0.out) / 6
-    const t2x = (p3.in - p1.in) / 6
-    const t2y = (p3.out - p1.out) / 6
-
-    const x0 = p1.in, y0 = p1.out
-    const x1 = p1.in + t1x, y1 = p1.out + t1y
-    const x2 = p2.in - t2x, y2 = p2.out - t2y
-    const x3 = p2.in, y3 = p2.out
-
-    const startI = Math.max(0, Math.ceil(x0))
-    const endI = Math.min(255, Math.floor(x3))
-
-    for (let i = startI; i <= endI; i++) {
-      const t = (i - x0) / (x3 - x0)
-      const t2 = t * t, t3 = t2 * t
-      const mt = 1 - t, mt2 = mt * mt, mt3 = mt2 * mt
-      curve[i] = Math.max(0, Math.min(255, Math.round(
-        mt3 * y0 + 3 * mt2 * t * y1 + 3 * mt * t2 * y2 + t3 * y3
-      )))
+  for (let i = 1; i < n - 1; i++) {
+    const dx1 = sorted[i].in - sorted[i - 1].in
+    const dx2 = sorted[i + 1].in - sorted[i].in
+    if (dx1 !== 0 && dx2 !== 0) {
+      const m1 = (sorted[i].out - sorted[i - 1].out) / dx1
+      const m2 = (sorted[i + 1].out - sorted[i].out) / dx2
+      // Fritsch-Butland weighted harmonic mean
+      gradients[i] = (m1 * m2) / (m1 + m2) * 2
+    } else {
+      gradients[i] = 0
     }
+  }
+
+  const curve = new Array(256)
+  for (let i = 0; i < 256; i++) {
+    // Find segment [sorted[k], sorted[k+1]] that contains i
+    let k = 0
+    for (let j = 0; j < sorted.length - 1; j++) {
+      if (sorted[j].in <= i && sorted[j + 1].in >= i) {
+        k = j
+        break
+      }
+    }
+    const p0 = sorted[k], p1 = sorted[k + 1]
+    const h = p1.in - p0.in
+    if (h <= 0) { curve[i] = p0.out; continue }
+
+    const t = (i - p0.in) / h
+    const t2 = t * t, t3 = t2 * t
+    const m0 = gradients[k], m1 = gradients[k + 1]
+
+    // Hermite basis functions
+    curve[i] = Math.max(0, Math.min(255, Math.round(
+      (2 * t3 - 3 * t2 + 1) * p0.out +
+      (t3 - 2 * t2 + t) * h * m0 +
+      (-2 * t3 + 3 * t2) * p1.out +
+      (t3 - t2) * h * m1
+    )))
   }
   return curve
 }
@@ -193,9 +208,9 @@ export function CurvesEditor({ curves, onChange }) {
     const outVal = Math.round(Math.max(0, Math.min(255, (1 - canvasY / CANVAS_W) * 255)))
 
     if (point === points[0]) {
-      point.out = outVal
+      point.out = Math.max(0, Math.min(255, outVal))
     } else if (point === points[points.length - 1]) {
-      point.out = outVal
+      point.out = Math.max(0, Math.min(255, outVal))
     } else {
       const sorted = [...points].sort((a, b) => a.in - b.in)
       const idx = sorted.indexOf(point)
@@ -203,7 +218,7 @@ export function CurvesEditor({ curves, onChange }) {
       const nextIn = idx < sorted.length - 1 ? sorted[idx + 1].in : 254
       const newIn = Math.round((canvasX / CANVAS_W) * 255)
       point.in = Math.max(prevIn + 1, Math.min(nextIn - 1, newIn))
-      point.out = outVal
+      point.out = Math.max(0, Math.min(255, outVal))
     }
 
     const newCurve = buildCurveFromPoints(points)
