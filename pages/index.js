@@ -304,9 +304,10 @@ export default function Home() {
     const m = rgbToMunsell(r, g, b)
     setMatchColor({ ...m, r, g, b })
     const gl = glStateRef.current
-    if (!gl) return
+    if (!gl) { console.warn('triggerPixelMatch: no gl'); return }
     setMatchPixels([]) // clear while searching
-    const positions = glRunMatchMask(gl, m.hueAngle, m.value, m.chroma)
+    const positions = glRunMatchMask(gl, r, g, b, 4.0)
+    console.warn('triggerPixelMatch: got', positions.length, 'positions')
     setMatchPixels(positions)
   }, [image, sampleRadius])
 
