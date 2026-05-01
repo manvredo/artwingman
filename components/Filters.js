@@ -15,7 +15,7 @@ const FILTERS = [
 
 export { FILTERS }
 
-export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, onDuotoneColorsChange }) {
+export default function Filters({ activeFilter, onFilterChange, filterStrength, onStrengthChange, onDuotoneColorsChange, duotoneColors }) {
   const activeCfg = FILTERS.find(f => f.id === activeFilter)
 
   return (
@@ -77,12 +77,12 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
             <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <DuotonePicker
                 label="Dark"
-                color={f.colorA}
+                color={duotoneColors.colorA}
                 onChange={c => onDuotoneColorsChange(c, null)}
               />
               <DuotonePicker
                 label="Light"
-                color={f.colorB}
+                color={duotoneColors.colorB}
                 onChange={c => onDuotoneColorsChange(null, c)}
               />
             </div>

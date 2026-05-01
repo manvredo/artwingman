@@ -1049,6 +1049,7 @@ export default function Home() {
                 filterStrength={filterStrength}
                 onStrengthChange={handleStrengthChange}
                 onDuotoneColorsChange={handleDuotoneColorsChange}
+                duotoneColors={duotoneColors}
               />
             </div>
           </AccordionDrawer>
