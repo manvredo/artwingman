@@ -1,14 +1,15 @@
 import styles from '../styles/Home.module.css'
 
 const FILTERS = [
-  { id: 'contour',   label: 'Contour',   min: 1, max: 20, unit: '',  sliderLabel: 'Strength', def: 5 },
-  { id: 'posterize', label: 'Posterize', min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels', def: 5 },
-  { id: 'emboss',    label: 'Emboss',     min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'sharpen',   label: 'Sharpen',   min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'vignette',  label: 'Vignette',  min: -20, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
-  { id: 'noise',     label: 'Noise',     min: 1, max: 50, unit: '',  sliderLabel: 'Amount',  def: 10 },
-  { id: 'bleach',   label: 'Bleach Bypass', min: 1, max: 20, unit: '', sliderLabel: 'Amount', def: 5 },
-  { id: 'sobel',    label: 'Sobel/Edge',  min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
+  { id: 'contour',   label: 'Contour',      min: 1, max: 20, unit: '',  sliderLabel: 'Strength',  def: 5 },
+  { id: 'posterize', label: 'Posterize',    min: 2, max: 10, unit: 'lvl', sliderLabel: 'Levels',   def: 5 },
+  { id: 'emboss',    label: 'Emboss',        min: 1, max: 10, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'sharpen',   label: 'Sharpen',       min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'vignette',  label: 'Vignette',      min: -20, max: 20, unit: '', sliderLabel: 'Amount',   def: 5 },
+  { id: 'noise',     label: 'Noise',         min: 1, max: 50, unit: '',  sliderLabel: 'Amount',    def: 10 },
+  { id: 'bleach',    label: 'Bleach Bypass', min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'sobel',     label: 'Sobel/Edge',    min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'duotone',   label: 'Duotone',       min: undefined, max: undefined, colorA: '#ff6b35', colorB: '#2d1b69' },
 ]
 
 export { FILTERS }
@@ -70,6 +71,29 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
                 {Math.min(f.max, Math.max(f.min, filterStrength))}{f.unit}
               </span>
+            </div>
+          )}
+
+          {activeFilter === f.id && f.id === 'duotone' && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 6, paddingLeft: 2, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 10, color: '#8a8680' }}>Dark</span>
+                <input
+                  type="color"
+                  value={filterStrength === 0 ? f.colorA : (filterStrength > 0 ? f.colorA : f.colorB)}
+                  onChange={e => onStrengthChange(1)}
+                  style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 10, color: '#8a8680' }}>Light</span>
+                <input
+                  type="color"
+                  value={filterStrength === 0 ? f.colorB : (filterStrength < 0 ? f.colorA : f.colorB)}
+                  onChange={e => onStrengthChange(1)}
+                  style={{ width: 28, height: 22, border: 'none', cursor: 'pointer', background: 'none' }}
+                />
+              </div>
             </div>
           )}
         </div>

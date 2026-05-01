@@ -631,7 +631,13 @@ export default function Home() {
       ctx.putImageData(new ImageData(out, src.width, src.height), 0, 0)
       workerRef.current = null
     }
-    workerRef.current.postMessage({ filter, strength, buffer, width: src.width, height: src.height }, [buffer])
+    const cfg = FILTERS.find(f => f.id === filter)
+    const msg = { filter, strength, buffer, width: src.width, height: src.height }
+    if (filter === 'duotone' && cfg) {
+      msg.colorA = cfg.colorA
+      msg.colorB = cfg.colorB
+    }
+    workerRef.current.postMessage(msg, [buffer])
   }, [])
 
   const handleFilterChange = useCallback((filter) => {

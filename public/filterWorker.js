@@ -196,6 +196,21 @@ self.addEventListener('message', function (e) {
       }
     }
 
+  } else if (filter === 'duotone') {
+    const hexToRgb = h => {
+      const n = parseInt(h.slice(1), 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+    const colorA = e.data.colorA ? hexToRgb(e.data.colorA) : [255, 107, 53]
+    const colorB = e.data.colorB ? hexToRgb(e.data.colorB) : [45, 27, 105]
+    for (let i = 0; i < src.length; i += 4) {
+      const gray = (src[i] + src[i+1] + src[i+2]) / 3 / 255
+      out[i]   = Math.round(colorA[0] * (1 - gray) + colorB[0] * gray)
+      out[i+1] = Math.round(colorA[1] * (1 - gray) + colorB[1] * gray)
+      out[i+2] = Math.round(colorA[2] * (1 - gray) + colorB[2] * gray)
+      out[i+3] = src[i+3]
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {
