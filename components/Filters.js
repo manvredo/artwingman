@@ -6,6 +6,7 @@ const FILTERS = [
   { id: 'emboss',    label: 'Emboss',     min: 1, max: 10, unit: '',  sliderLabel: 'Amount',  def: 5 },
   { id: 'sharpen',   label: 'Sharpen',   min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
   { id: 'vignette',  label: 'Vignette',  min: -20, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
+  { id: 'noise',     label: 'Noise',     min: 1, max: 50, unit: '',  sliderLabel: 'Amount',  def: 10 },
 ]
 
 export { FILTERS }

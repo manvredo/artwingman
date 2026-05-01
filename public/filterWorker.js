@@ -155,6 +155,16 @@ self.addEventListener('message', function (e) {
       }
     }
 
+  } else if (filter === 'noise') {
+    const amount = Math.max(0, Math.min(50, strength))
+    for (let i = 0; i < src.length; i += 4) {
+      const n = (Math.random() - 0.5) * 2 * amount
+      out[i]   = Math.min(255, Math.max(0, src[i]   + n))
+      out[i+1] = Math.min(255, Math.max(0, src[i+1] + n))
+      out[i+2] = Math.min(255, Math.max(0, src[i+2] + n))
+      out[i+3] = src[i+3]
+    }
+
   } else if (filter === 'warm') {
     const s = strength * 3
     for (let i = 0; i < src.length; i += 4) {
