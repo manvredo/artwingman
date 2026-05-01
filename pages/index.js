@@ -271,16 +271,23 @@ export default function Home() {
   }, [])
 
   const handlePixelMatch = useCallback((px, py) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
-    const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
-    const m = rgbToMunsell(r, g, b)
-    setMatchColor({ ...m, r, g, b })
-    const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, originalImageDataRef.current)
-    setMatchPixels(matches)
-  }, [findMatchingPixels, sampleRadius, imgDims])
+    try {
+      const imgData = originalImageDataRef.current
+      if (!imgData) return
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      if (!ctx) return
+      const imageData = ctx.getImageData(0, 0, imgData.width, imgData.height)
+      const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgData.width, imgData.height)
+      const m = rgbToMunsell(r, g, b)
+      setMatchColor({ ...m, r, g, b })
+      const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, imgData)
+      setMatchPixels(matches)
+    } catch (err) {
+      console.warn('handlePixelMatch error:', err)
+    }
+  }, [findMatchingPixels, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
     try {
@@ -308,7 +315,6 @@ export default function Home() {
     if (px < 0 || py < 0 || px >= imgDims.w || py >= imgDims.h) return
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
-    handlePixelMatch(px, py)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
     const wrap = canvasWrapRef.current
     if (wrap) {
@@ -317,7 +323,7 @@ export default function Home() {
       const sy = e.clientY - wr.top - wr.height / 2
       setClickImagePos({ x: (sx - viewport.panX) / viewport.zoom, y: (sy - viewport.panY) / viewport.zoom })
     }
-  }, [imgDims, sampleRadius, sampleAt, handlePixelMatch, viewport.zoom, viewport.panX, viewport.panY])
+  }, [imgDims, sampleRadius, sampleAt, viewport.zoom, viewport.panX, viewport.panY])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
