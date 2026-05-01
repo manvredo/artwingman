@@ -1,5 +1,5 @@
-import { HexColorPicker } from 'react-colorful'
 import styles from '../styles/Home.module.css'
+import { DuotonePicker } from './DuotonePicker'
 
 const FILTERS = [
   { id: 'contour',   label: 'Contour',      min: 1, max: 20, unit: '',  sliderLabel: 'Strength',  def: 5 },
@@ -75,22 +75,16 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
 
           {activeFilter === f.id && f.id === 'duotone' && (
             <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, color: '#8a8680', minWidth: 44 }}>Dark</span>
-                <HexColorPicker
-                  color={f.colorA}
-                  onChange={c => onDuotoneColorsChange(c, null)}
-                  style={{ width: 86, height: 86 }}
-                />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, color: '#8a8680', minWidth: 44 }}>Light</span>
-                <HexColorPicker
-                  color={f.colorB}
-                  onChange={c => onDuotoneColorsChange(null, c)}
-                  style={{ width: 86, height: 86 }}
-                />
-              </div>
+              <DuotonePicker
+                label="Dark"
+                color={f.colorA}
+                onChange={c => onDuotoneColorsChange(c, null)}
+              />
+              <DuotonePicker
+                label="Light"
+                color={f.colorB}
+                onChange={c => onDuotoneColorsChange(null, c)}
+              />
             </div>
           )}
         </div>
