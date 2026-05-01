@@ -4,6 +4,7 @@ import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, s
 import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups } from '../lib/developGL'
 import Filters, { FILTERS } from '../components/Filters'
 import Palette from '../components/Palette'
+import GridOverlay from '../components/GridOverlay'
 import MunsellChart from '../components/MunsellChart'
 import { CurvesEditor, makeIdentityCurve } from '../components/Curves'
 import styles from '../styles/Home.module.css'
