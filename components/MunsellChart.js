@@ -66,7 +66,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
       {/* Chart */}
       <div
         ref={containerRef}
-        style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden', lineHeight: 0 }}
+        style={{ flex: 1, minWidth: 0, minHeight: 0, overflowX: 'auto', overflowY: 'hidden', lineHeight: 0 }}
         onMouseLeave={() => setHovered(null)}
       >
         {sz.w > 0 && sz.h > 0 && (
