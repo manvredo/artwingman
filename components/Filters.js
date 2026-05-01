@@ -78,25 +78,21 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
             <div style={{ display: 'flex', gap: 8, marginTop: 6, paddingLeft: 2, alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 10, color: '#8a8680' }}>Dark</span>
-                <div style={{ background: '#1a1a1a', borderRadius: 4, padding: 2, border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <input
-                    type="color"
-                    value={f.colorA}
-                    onChange={e => onDuotoneColorsChange(e.target.value, null)}
-                    style={{ width: 36, height: 30, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
-                  />
-                </div>
+                <input
+                  type="color"
+                  value={f.colorA}
+                  onChange={e => onDuotoneColorsChange(e.target.value, null)}
+                  style={{ width: 36, height: 30, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', background: 'none', display: 'block', borderRadius: 4 }}
+                />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 10, color: '#8a8680' }}>Light</span>
-                <div style={{ background: '#1a1a1a', borderRadius: 4, padding: 2, border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <input
-                    type="color"
-                    value={f.colorB}
-                    onChange={e => onDuotoneColorsChange(null, e.target.value)}
-                    style={{ width: 36, height: 30, border: 'none', cursor: 'pointer', background: 'none', display: 'block' }}
-                  />
-                </div>
+                <input
+                  type="color"
+                  value={f.colorB}
+                  onChange={e => onDuotoneColorsChange(null, e.target.value)}
+                  style={{ width: 36, height: 30, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', background: 'none', display: 'block', borderRadius: 4 }}
+                />
               </div>
             </div>
           )}
