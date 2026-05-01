@@ -315,6 +315,7 @@ export default function Home() {
     if (px < 0 || py < 0 || px >= imgDims.w || py >= imgDims.h) return
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
+    handlePixelMatch(px, py)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
     const wrap = canvasWrapRef.current
     if (wrap) {
@@ -323,7 +324,7 @@ export default function Home() {
       const sy = e.clientY - wr.top - wr.height / 2
       setClickImagePos({ x: (sx - viewport.panX) / viewport.zoom, y: (sy - viewport.panY) / viewport.zoom })
     }
-  }, [imgDims, sampleRadius, sampleAt, viewport.zoom, viewport.panX, viewport.panY])
+  }, [imgDims, sampleRadius, sampleAt, handlePixelMatch, viewport.zoom, viewport.panX, viewport.panY])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
