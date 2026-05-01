@@ -271,17 +271,16 @@ export default function Home() {
   }, [])
 
   const handlePixelMatch = useCallback((px, py) => {
-    const imgData = originalImageDataRef.current
-    if (!imgData) return
-    const i = (py * imgData.width + px) * 4
-    const r = imgData.data[i]
-    const g = imgData.data[i+1]
-    const b = imgData.data[i+2]
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const imageData = ctx.getImageData(0, 0, imgDims.w, imgDims.h)
+    const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgDims.w, imgDims.h)
     const m = rgbToMunsell(r, g, b)
     setMatchColor({ ...m, r, g, b })
-    const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, imgData)
+    const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, originalImageDataRef.current)
     setMatchPixels(matches)
-  }, [findMatchingPixels])
+  }, [findMatchingPixels, sampleRadius, imgDims])
 
   const handleMunsellInput = useCallback((str) => {
     try {
@@ -318,7 +317,7 @@ export default function Home() {
       const sy = e.clientY - wr.top - wr.height / 2
       setClickImagePos({ x: (sx - viewport.panX) / viewport.zoom, y: (sy - viewport.panY) / viewport.zoom })
     }
-  }, [imgDims, sampleRadius, sampleAt, viewport.zoom, viewport.panX, viewport.panY])
+  }, [imgDims, sampleRadius, sampleAt, handlePixelMatch, viewport.zoom, viewport.panX, viewport.panY])
 
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return
@@ -360,7 +359,15 @@ export default function Home() {
     if (!touch || touch.moved) return
     const t = e.changedTouches[0]
     sampleColor({ clientX: t.clientX, clientY: t.clientY })
-  }, [sampleColor])
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (rect) {
+      const scaleX = imgDims.w / rect.width
+      const scaleY = imgDims.h / rect.height
+      const px = Math.floor((t.clientX - rect.left) * scaleX)
+      const py = Math.floor((t.clientY - rect.top) * scaleY)
+      if (px >= 0 && py >= 0 && px < imgDims.w && py < imgDims.h) handlePixelMatch(px, py)
+    }
+  }, [sampleColor, handlePixelMatch, imgDims])
 
   const handleMouseMove = useCallback((e) => {
     const drag = dragRef.current
