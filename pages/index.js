@@ -308,6 +308,7 @@ export default function Home() {
     setMatchPixels([])
     const positions = glRunMatchMask(gl, r, g, b, 1.0, 0.5)
     setMatchPixels(positions)
+    console.warn('triggerPixelMatch:', positions.length, 'positions, first:', JSON.stringify(positions[0]))
   }, [image, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
