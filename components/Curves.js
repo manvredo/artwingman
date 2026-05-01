@@ -1,16 +1,14 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 
 function makeIdentityCurve() {
   return Array.from({ length: 256 }, (_, i) => i)
 }
 
-// Catmull-Rom spline interpolation through control points
 function buildCurveFromPoints(points) {
   if (points.length < 2) return makeIdentityCurve()
   const sorted = [...points].sort((a, b) => a.in - b.in)
   const curve = new Array(256)
   for (let i = 0; i < 256; i++) {
-    // Find surrounding control points
     let p0 = sorted[0], p1 = sorted[0], p2 = sorted[1] || sorted[0], p3 = sorted[1] || sorted[0]
     for (let j = 0; j < sorted.length - 1; j++) {
       if (sorted[j].in <= i && sorted[j + 1].in >= i) {
@@ -22,11 +20,9 @@ function buildCurveFromPoints(points) {
       }
     }
     const t = p1.in === p2.in ? 0 : (i - p1.in) / (p2.in - p1.in)
-    // Catmull-Rom
     const t2 = t * t, t3 = t2 * t
     const val = 0.5 * (
-      (2 * p1.out) +
-      (-p0.out + p2.out) * t +
+      (2 * p1.out) + (-p0.out + p2.out) * t +
       (2*p0.out - 5*p1.out + 4*p2.out - p3.out) * t2 +
       (-p0.out + 3*p1.out - 3*p2.out + p3.out) * t3
     )
@@ -35,47 +31,32 @@ function buildCurveFromPoints(points) {
   return curve
 }
 
-// Default control points (diagonal)
 function makeDefaultPoints() {
-  return [
-    { in: 0, out: 0 },
-    { in: 255, out: 255 },
-  ]
+  return [{ in: 0, out: 0 }, { in: 255, out: 255 }]
 }
 
 const PRESETS = {
   'Identity': () => ({
-    R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(),
-    Luminosity: makeIdentityCurve(),
-    Rpts: makeDefaultPoints(), Gpts: makeDefaultPoints(), Bpts: makeDefaultPoints(),
-    Luminositypts: makeDefaultPoints(),
+    R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+    Rpts: makeDefaultPoints(), Gpts: makeDefaultPoints(), Bpts: makeDefaultPoints(), Luminositypts: makeDefaultPoints(),
   }),
   'S-Curve': () => {
-    const makeSCurvePoints = () => [
-      { in: 0, out: 0 }, { in: 64, out: 48 }, { in: 192, out: 208 }, { in: 255, out: 255 }
-    ]
-    return {
-      R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(),
-      Luminosity: makeIdentityCurve(),
-      Rpts: makeSCurvePoints(), Gpts: makeSCurvePoints(), Bpts: makeSCurvePoints(),
-      Luminositypts: makeSCurvePoints(),
-    }
+    const sp = [{ in: 0, out: 0 }, { in: 64, out: 48 }, { in: 192, out: 208 }, { in: 255, out: 255 }]
+    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+      Rpts: [...sp], Gpts: [...sp], Bpts: [...sp], Luminositypts: [...sp] }
   },
   'Black & White': () => {
-    const bw = new Array(256)
-    for (let i = 0; i < 256; i++) bw[i] = i < 128 ? 0 : 255
+    const bw = new Array(256); for (let i = 0; i < 256; i++) bw[i] = i < 128 ? 0 : 255
     const pts = [{ in: 0, out: 0 }, { in: 127, out: 0 }, { in: 128, out: 255 }, { in: 255, out: 255 }]
     return { R: bw, G: bw, B: bw, Luminosity: bw, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
   },
   'Negative': () => {
-    const neg = new Array(256)
-    for (let i = 0; i < 256; i++) neg[i] = 255 - i
+    const neg = new Array(256); for (let i = 0; i < 256; i++) neg[i] = 255 - i
     const pts = [{ in: 0, out: 255 }, { in: 255, out: 0 }]
     return { R: neg, G: neg, B: neg, Luminosity: neg, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
   },
   'Threshold': () => {
-    const th = new Array(256)
-    for (let i = 0; i < 256; i++) th[i] = i < 128 ? 0 : 255
+    const th = new Array(256); for (let i = 0; i < 256; i++) th[i] = i < 128 ? 0 : 255
     const pts = [{ in: 0, out: 0 }, { in: 127, out: 0 }, { in: 128, out: 255 }, { in: 255, out: 255 }]
     return { R: th, G: th, B: th, Luminosity: th, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
   },
@@ -87,7 +68,6 @@ const CANVAS_W = 240
 function drawCurve(canvas, curve, points, channelColor, activeChannel) {
   const ctx = canvas.getContext('2d')
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_W)
-
   ctx.fillStyle = '#1a1a1a'
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_W)
 
@@ -115,15 +95,18 @@ function drawCurve(canvas, curve, points, channelColor, activeChannel) {
   }
   ctx.stroke()
 
-  // Control points
   ctx.fillStyle = activeChannel === 'Luminosity' ? '#cccccc' : channelColor
   for (const pt of points) {
     const x = (pt.in / 255) * CANVAS_W
     const y = CANVAS_W - (pt.out / 255) * CANVAS_W
-    ctx.beginPath()
-    ctx.arc(x, y, 5, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill()
   }
+}
+
+// Distance from canvas click (canvasPx, canvasPy) to the curve at input value inVal
+function curveDistance(canvasPx, canvasPy, inVal, curve) {
+  const curveY = CANVAS_W - (curve[inVal] / 255) * CANVAS_W
+  return Math.sqrt((canvasPx - (inVal / 255) * CANVAS_W) ** 2 + (canvasPy - curveY) ** 2)
 }
 
 export function CurvesEditor({ curves, onChange }) {
@@ -141,77 +124,109 @@ export function CurvesEditor({ curves, onChange }) {
 
   useEffect(() => { redraw() }, [redraw])
 
-  const getCanvasPoint = (e) => {
+  // Returns { canvasX, canvasY } in canvas pixels from mouse event
+  const getCanvasPx = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()
     const scaleX = CANVAS_W / rect.width
     const scaleY = CANVAS_W / rect.height
-    const x = (e.clientX - rect.left) * scaleX
-    const y = (e.clientY - rect.top) * scaleY
     return {
-      inVal: Math.round(Math.max(0, Math.min(255, (x / CANVAS_W) * 255))),
-      outVal: Math.round(Math.max(0, Math.min(255, (1 - y / CANVAS_W) * 255))),
+      canvasX: (e.clientX - rect.left) * scaleX,
+      canvasY: (e.clientY - rect.top) * scaleY,
     }
   }
 
-  const hitTest = (e) => {
-    const { inVal, outVal } = getCanvasPoint(e)
+  // Find closest point handle (canvas-pixel distance, threshold ~10px)
+  const hitTestPoints = (canvasX, canvasY) => {
     for (const pt of points) {
-      if (Math.abs(pt.in - inVal) <= 10 && Math.abs(pt.out - outVal) <= 10) return pt
+      const px = (pt.in / 255) * CANVAS_W
+      const py = CANVAS_W - (pt.out / 255) * CANVAS_W
+      if (Math.hypot(canvasX - px, canvasY - py) <= 12) return pt
     }
     return null
   }
 
+  // Find closest point on the curve (canvas-pixel distance, threshold ~8px)
+  // Returns the input value (0-255) if hit, else null
+  const hitTestCurve = (canvasX, canvasY) => {
+    let bestDist = Infinity, bestIn = null
+    // Sample every 2 input steps for performance
+    for (let inVal = 0; inVal < 256; inVal += 2) {
+      const dist = curveDistance(canvasX, canvasY, inVal, activeCurve)
+      if (dist < bestDist) { bestDist = dist; bestIn = inVal }
+    }
+    // Refine around best
+    if (bestIn !== null && bestIn > 0) {
+      for (let inVal = Math.max(0, bestIn - 1); inVal <= Math.min(255, bestIn + 1); inVal++) {
+        const dist = curveDistance(canvasX, canvasY, inVal, activeCurve)
+        if (dist < bestDist) { bestDist = dist; bestIn = inVal }
+      }
+    }
+    return bestDist <= 8 ? bestIn : null
+  }
+
   const handleMouseDown = (e) => {
     e.preventDefault()
-    const hit = hitTest(e)
-    if (hit) {
-      dragRef.current = { point: hit, type: 'move' }
-    } else {
-      const { inVal, outVal } = getCanvasPoint(e)
-      const newPoints = [...points, { in: inVal, out: outVal }]
+    const { canvasX, canvasY } = getCanvasPx(e)
+
+    const hitPt = hitTestPoints(canvasX, canvasY)
+    if (hitPt) {
+      // Start dragging existing point
+      dragRef.current = { point: hitPt }
+      return
+    }
+
+    // Click near the curve → insert new point
+    const nearIn = hitTestCurve(canvasX, canvasY)
+    if (nearIn !== null) {
+      const outVal = Math.round((1 - canvasY / CANVAS_W) * 255)
+      const newPt = { in: nearIn, out: Math.max(0, Math.min(255, outVal)) }
+      const newPoints = [...points, newPt].sort((a, b) => a.in - b.in)
       const newCurve = buildCurveFromPoints(newPoints)
-      const newCurves = { ...curves, [activeChannel]: newCurve, [activeChannel + 'pts']: newPoints }
-      onChange(newCurves)
-      dragRef.current = { point: newPoints[newPoints.length - 1], type: 'new', newPoints }
+      onChange({ ...curves, [activeChannel]: newCurve, [activeChannel + 'pts']: newPoints })
+      dragRef.current = { point: newPt }
     }
   }
 
   const handleMouseMove = (e) => {
     if (!dragRef.current) return
-    const { inVal, outVal } = getCanvasPoint(e)
+    const { canvasX, canvasY } = getCanvasPx(e)
     const { point } = dragRef.current
+    const outVal = Math.round(Math.max(0, Math.min(255, (1 - canvasY / CANVAS_W) * 255)))
 
-    // Check if endpoint constraint applies
     if (point === points[0]) {
+      // Left endpoint: x is pinned to 0
       point.out = outVal
-      point.in = 0
     } else if (point === points[points.length - 1]) {
+      // Right endpoint: x is pinned to 255
       point.out = outVal
-      point.in = 255
     } else {
-      point.in = Math.max(1, Math.min(254, inVal))
+      // Middle point: x follows mouse within [prev_in+1, next_in-1]
+      const sorted = [...points].sort((a, b) => a.in - b.in)
+      const idx = sorted.indexOf(point)
+      const prevIn = idx > 0 ? sorted[idx - 1].in : 1
+      const nextIn = idx < sorted.length - 1 ? sorted[idx + 1].in : 254
+
+      const newIn = Math.round((canvasX / CANVAS_W) * 255)
+      point.in = Math.max(prevIn + 1, Math.min(nextIn - 1, newIn))
       point.out = outVal
     }
 
     const newCurve = buildCurveFromPoints(points)
-    const newCurves = { ...curves, [activeChannel]: newCurve }
-    onChange(newCurves)
+    onChange({ ...curves, [activeChannel]: newCurve })
     redraw()
   }
 
-  const handleMouseUp = () => {
-    dragRef.current = null
-  }
+  const handleMouseUp = () => { dragRef.current = null }
 
   const handleDoubleClick = (e) => {
-    const hit = hitTest(e)
-    if (!hit) return
+    const { canvasX, canvasY } = getCanvasPx(e)
+    const hitPt = hitTestPoints(canvasX, canvasY)
+    if (!hitPt) return
     // Don't delete endpoints
-    if (hit === points[0] || hit === points[points.length - 1]) return
-    const newPoints = points.filter(p => p !== hit)
+    if (hitPt === points[0] || hitPt === points[points.length - 1]) return
+    const newPoints = points.filter(p => p !== hitPt)
     const newCurve = buildCurveFromPoints(newPoints)
-    const newCurves = { ...curves, [activeChannel]: newCurve, [activeChannel + 'pts']: newPoints }
-    onChange(newCurves)
+    onChange({ ...curves, [activeChannel]: newCurve, [activeChannel + 'pts']: newPoints })
   }
 
   const handleReset = (channel) => {
@@ -234,8 +249,7 @@ export function CurvesEditor({ curves, onChange }) {
     if (!factory) return
     if (presetName === 'Identity') { handleReset('all'); return }
     const result = factory()
-    const newCurves = { ...curves, ...result, activeChannel }
-    onChange(newCurves)
+    onChange({ ...curves, ...result, activeChannel })
   }
 
   const setActiveChannel = (ch) => {
@@ -278,7 +292,7 @@ export function CurvesEditor({ curves, onChange }) {
       />
 
       <div style={{ fontSize: 9, color: '#555' }}>
-        Click to add point · Drag to move · Double-click to delete
+        Click on line to add point · Drag to move · Double-click to delete
       </div>
 
       <button onClick={() => handleReset('all')} style={{
