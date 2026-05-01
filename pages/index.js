@@ -250,12 +250,12 @@ export default function Home() {
     setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) })
   }, [imgDims])
 
-  const findMatchingPixels = useCallback((refH, refV, refC, refImg) => {
-    if (!refImg) return []
+  const findMatchingPixels = useCallback((refH, refV, refC, refImg, sampleRate = 4) => {
+    if (!refImg) return { count: 0, positions: [] }
     const { width, height, data } = refImg
-    const matches = []
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
+    const positions = []
+    for (let y = 0; y < height; y += sampleRate) {
+      for (let x = 0; x < width; x += sampleRate) {
         const i = (y * width + x) * 4
         const m = rgbToMunsell(data[i], data[i+1], data[i+2])
         if (
@@ -263,11 +263,11 @@ export default function Home() {
           Math.abs(m.value - refV) <= 0.15 &&
           Math.abs(m.chroma - refC) <= 0.8
         ) {
-          matches.push({ x, y })
+          positions.push({ x, y })
         }
       }
     }
-    return matches
+    return { count: positions.length * sampleRate * sampleRate, positions }
   }, [])
 
   const handlePixelMatch = useCallback((px, py) => {
@@ -282,8 +282,8 @@ export default function Home() {
       const { r, g, b } = samplePixels(imageData, px, py, sampleRadius, imgData.width, imgData.height)
       const m = rgbToMunsell(r, g, b)
       setMatchColor({ ...m, r, g, b })
-      const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, imgData)
-      setMatchPixels(matches)
+      const result = findMatchingPixels(m.hueAngle, m.value, m.chroma, imgData)
+      setMatchPixels(result.positions)
     } catch (err) {
       console.warn('handlePixelMatch error:', err)
     }
@@ -293,8 +293,46 @@ export default function Home() {
   const triggerPixelMatch = useCallback(() => {
     const last = lastImgPosRef.current
     if (!last || !image) return
-    handlePixelMatch(last.px, last.py)
-  }, [image])
+    const imgData = originalImageDataRef.current
+    if (!imgData) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!ctx) return
+    const imageData = ctx.getImageData(0, 0, imgData.width, imgData.height)
+    const { r, g, b } = samplePixels(imageData, last.px, last.py, sampleRadius, imgData.width, imgData.height)
+    const m = rgbToMunsell(r, g, b)
+    setMatchColor({ ...m, r, g, b })
+    // Run expensive search in parts, yielding to browser between batches
+    const batchSize = 5000
+    const sampleRate = 4
+    const { width, height, data } = imgData
+    const allPositions = []
+    let count = 0
+    let y = 0, x = 0
+    const search = () => {
+      const endY = Math.min(y + batchSize, height)
+      for (; y < endY; y++) {
+        for (x = 0; x < width; x += sampleRate) {
+          const i = (y * width + x) * 4
+          const pm = rgbToMunsell(data[i], data[i+1], data[i+2])
+          if (
+            Math.abs(pm.hueAngle - m.hueAngle) <= 1 &&
+            Math.abs(pm.value - m.value) <= 0.15 &&
+            Math.abs(pm.chroma - m.chroma) <= 0.8
+          ) {
+            allPositions.push({ x, y })
+          }
+        }
+      }
+      if (y < height) {
+        requestAnimationFrame(search)
+      } else {
+        setMatchPixels(allPositions)
+      }
+    }
+    requestAnimationFrame(search)
+  }, [image, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
     try {
@@ -1634,7 +1672,7 @@ export default function Home() {
             zIndex: 150,
             pointerEvents: 'none',
           }}>
-            {matchColor.hue} {matchColor.value.toFixed(1)}/{matchColor.chroma.toFixed(1)} — {matchPixels.length.toLocaleString()} gleiche Pixel
+            {matchColor.hue} {matchColor.value.toFixed(1)}/{matchColor.chroma.toFixed(1)} — {matchPixels.length > 0 ? matchPixels.length.toLocaleString() : '…'} gleiche Pixel
           </div>
         )}
 
