@@ -1414,7 +1414,7 @@ export default function Home() {
                 {matchMode && matchPixels.length > 0 && (() => {
                   const dotR = Math.max(1, 2 / viewport.zoom)
                   return (
-                    <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 2 }}>
+                    <svg width={imgDims.w} height={imgDims.h} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 2 }}>
                       {matchPixels.map((p, i) => (
                         <circle key={i} cx={p.x} cy={p.y} r={dotR}
                           fill="rgba(255,60,60,0.45)" stroke="rgba(255,60,60,0.75)" strokeWidth="0.5" />
