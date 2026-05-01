@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { munsellHvcToRgb } from '../lib/munsell'
 
-const VALUES = [9, 7, 5, 3, 1]
+const VALUES = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 const PAD_L = 40
 const PAD_T = 36
 const GAP = 1
