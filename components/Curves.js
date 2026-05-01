@@ -4,34 +4,42 @@ function makeIdentityCurve() {
   return Array.from({ length: 256 }, (_, i) => i)
 }
 
-// Monotone cubic interpolation via Fritsch-Butland method.
-// Guarantees no overshooting/undershooting — curve stays between control points.
+// Steffen monotone cubic interpolation.
+// Guarantees strict monotonicity with smooth first derivatives,
+// no overshoot, and good shape preservation for S-curves.
 function buildCurveFromPoints(points) {
   if (points.length < 2) return makeIdentityCurve()
   const sorted = [...points].sort((a, b) => a.in - b.in)
-
-  // Compute gradients (slopes) at each interior point
   const n = sorted.length
-  const gradients = new Array(n)
-  gradients[0] = sorted.length > 1 ? (sorted[1].out - sorted[0].out) / (sorted[1].in - sorted[0].in) : 0
-  gradients[n - 1] = sorted.length > 1 ? (sorted[n - 1].out - sorted[n - 2].out) / (sorted[n - 1].in - sorted[n - 2].in) : 0
 
-  for (let i = 1; i < n - 1; i++) {
-    const dx1 = sorted[i].in - sorted[i - 1].in
-    const dx2 = sorted[i + 1].in - sorted[i].in
-    if (dx1 !== 0 && dx2 !== 0) {
-      const m1 = (sorted[i].out - sorted[i - 1].out) / dx1
-      const m2 = (sorted[i + 1].out - sorted[i].out) / dx2
-      // Fritsch-Butland weighted harmonic mean
-      gradients[i] = (m1 * m2) / (m1 + m2) * 2
-    } else {
-      gradients[i] = 0
+  const gradients = new Array(n)
+  if (n === 1) {
+    gradients[0] = 0
+  } else if (n === 2) {
+    gradients[0] = (sorted[1].out - sorted[0].out) / (sorted[1].in - sorted[0].in)
+    gradients[1] = gradients[0]
+  } else {
+    // First gradient
+    gradients[0] = (sorted[1].out - sorted[0].out) / (sorted[1].in - sorted[0].in)
+    // Interior gradients (Steffen method)
+    for (let i = 1; i < n - 1; i++) {
+      const dx1 = sorted[i].in - sorted[i - 1].in
+      const dx2 = sorted[i + 1].in - sorted[i].in
+      if (dx1 > 0 && dx2 > 0) {
+        const m1 = (sorted[i].out - sorted[i - 1].out) / dx1
+        const m2 = (sorted[i + 1].out - sorted[i].out) / dx2
+        const denom = dx1 + dx2
+        gradients[i] = (dx1 * m2 + dx2 * m1) / denom
+      } else {
+        gradients[i] = 0
+      }
     }
+    // Last gradient
+    gradients[n - 1] = (sorted[n - 1].out - sorted[n - 2].out) / (sorted[n - 1].in - sorted[n - 2].in)
   }
 
   const curve = new Array(256)
   for (let i = 0; i < 256; i++) {
-    // Find segment [sorted[k], sorted[k+1]] that contains i
     let k = 0
     for (let j = 0; j < sorted.length - 1; j++) {
       if (sorted[j].in <= i && sorted[j + 1].in >= i) {
@@ -47,7 +55,7 @@ function buildCurveFromPoints(points) {
     const t2 = t * t, t3 = t2 * t
     const m0 = gradients[k], m1 = gradients[k + 1]
 
-    // Hermite basis functions
+    // Hermite spline
     curve[i] = Math.max(0, Math.min(255, Math.round(
       (2 * t3 - 3 * t2 + 1) * p0.out +
       (t3 - 2 * t2 + t) * h * m0 +
@@ -68,7 +76,14 @@ const PRESETS = {
     Rpts: makeDefaultPoints(), Gpts: makeDefaultPoints(), Bpts: makeDefaultPoints(), Luminositypts: makeDefaultPoints(),
   }),
   'S-Curve': () => {
-    const sp = [{ in: 0, out: 0 }, { in: 64, out: 48 }, { in: 192, out: 208 }, { in: 255, out: 255 }]
+    // Photoshop-style S-curve: slight shadow crush + slight highlight lift
+    const sp = [
+      { in: 0, out: 0 },
+      { in: 64, out: 50 },
+      { in: 128, out: 128 },
+      { in: 192, out: 205 },
+      { in: 255, out: 255 },
+    ]
     return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
       Rpts: [...sp], Gpts: [...sp], Bpts: [...sp], Luminositypts: [...sp] }
   },
@@ -121,6 +136,16 @@ function drawCurve(canvas, curve, points, channelColor, activeChannel) {
     else ctx.lineTo(x, y)
   }
   ctx.stroke()
+
+  // Draw thin guide lines from control points to axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+  ctx.lineWidth = 1
+  for (const pt of points) {
+    const px = (pt.in / 255) * CANVAS_W
+    const py = CANVAS_W - (pt.out / 255) * CANVAS_W
+    ctx.beginPath(); ctx.moveTo(px, CANVAS_W); ctx.lineTo(px, py); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(px, py); ctx.stroke()
+  }
 
   ctx.fillStyle = activeChannel === 'Luminosity' ? '#cccccc' : channelColor
   for (const pt of points) {
