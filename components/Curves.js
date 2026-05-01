@@ -74,6 +74,7 @@ const PRESETS = {
   'Identity': () => ({
     R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
     Rpts: makeDefaultPoints(), Gpts: makeDefaultPoints(), Bpts: makeDefaultPoints(), Luminositypts: makeDefaultPoints(),
+    activeChannel: 'Luminosity',
   }),
   'S-Curve': () => {
     // Photoshop-style S-curve: slight shadow crush + slight highlight lift
@@ -85,7 +86,8 @@ const PRESETS = {
       { in: 255, out: 255 },
     ]
     return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
-      Rpts: [...sp], Gpts: [...sp], Bpts: [...sp], Luminositypts: [...sp] }
+      Rpts: [...sp], Gpts: [...sp], Bpts: [...sp], Luminositypts: [...sp],
+      activeChannel: 'Luminosity' }
   },
   'Black & White': () => {
     // True film-like grayscale: soft shadow roll-off, bright but not clipped highlights.
@@ -101,17 +103,20 @@ const PRESETS = {
     ]
     return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
       Rpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Gpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }],
-      Bpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Luminositypts: bwPts }
+      Bpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Luminositypts: bwPts,
+      activeChannel: 'Luminosity' }
   },
   'Negative': () => {
-    const neg = new Array(256); for (let i = 0; i < 256; i++) neg[i] = 255 - i
     const pts = [{ in: 0, out: 255 }, { in: 255, out: 0 }]
-    return { R: neg, G: neg, B: neg, Luminosity: neg, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
+    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+      Rpts: [...pts], Gpts: [...pts], Bpts: [...pts], Luminositypts: [...pts],
+      activeChannel: 'Luminosity' }
   },
   'Threshold': () => {
-    const th = new Array(256); for (let i = 0; i < 256; i++) th[i] = i < 128 ? 0 : 255
     const pts = [{ in: 0, out: 0 }, { in: 127, out: 0 }, { in: 128, out: 255 }, { in: 255, out: 255 }]
-    return { R: th, G: th, B: th, Luminosity: th, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
+    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+      Rpts: [...pts], Gpts: [...pts], Bpts: [...pts], Luminositypts: [...pts],
+      activeChannel: 'Luminosity' }
   },
 }
 
