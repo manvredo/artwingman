@@ -148,6 +148,9 @@ export default function Home() {
   const [loupeMode, setLoupeMode] = useState(true)
   const [showMunsellValues, setShowMunsellValues] = useState(true)
   const [showMinimap, setShowMinimap] = useState(true)
+  const [matchColor, setMatchColor] = useState(null)
+  const [matchPixels, setMatchPixels] = useState([])
+  const [matchMode, setMatchMode] = useState(false)
   const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
   const [lutData, setLutData] = useState(null)   // Float32Array | null
@@ -194,6 +197,9 @@ export default function Home() {
         setPaletteClusters([])
         setLoupeMode(false)
         setShowMunsellValues(false)
+        setMatchColor(null)
+        setMatchPixels([])
+        setMatchMode(false)
         setColorSteps(30)
         setColorSoften(0)
         colorTouchedRef.current = false
@@ -244,6 +250,39 @@ export default function Home() {
     setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) })
   }, [imgDims])
 
+  const findMatchingPixels = useCallback((refH, refV, refC, refImg) => {
+    if (!refImg) return []
+    const { width, height, data } = refImg
+    const matches = []
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4
+        const m = rgbToMunsell(data[i], data[i+1], data[i+2])
+        if (
+          Math.abs(m.hueAngle - refH) <= 1 &&
+          Math.abs(m.value - refV) <= 0.15 &&
+          Math.abs(m.chroma - refC) <= 0.8
+        ) {
+          matches.push({ x, y })
+        }
+      }
+    }
+    return matches
+  }, [])
+
+  const handlePixelMatch = useCallback((px, py) => {
+    const imgData = originalImageDataRef.current
+    if (!imgData) return
+    const i = (py * imgData.width + px) * 4
+    const r = imgData.data[i]
+    const g = imgData.data[i+1]
+    const b = imgData.data[i+2]
+    const m = rgbToMunsell(r, g, b)
+    setMatchColor({ ...m, r, g, b })
+    const matches = findMatchingPixels(m.hueAngle, m.value, m.chroma, imgData)
+    setMatchPixels(matches)
+  }, [findMatchingPixels])
+
   const handleMunsellInput = useCallback((str) => {
     try {
       const parsed = parseMunsell(str)
@@ -270,6 +309,7 @@ export default function Home() {
     if (px < 0 || py < 0 || px >= imgDims.w || py >= imgDims.h) return
     lastImgPosRef.current = { px, py }
     sampleAt(px, py, sampleRadius)
+    handlePixelMatch(px, py)
     setClickPos({ x: (e.clientX - rect.left) / viewport.zoom, y: (e.clientY - rect.top) / viewport.zoom })
     const wrap = canvasWrapRef.current
     if (wrap) {
@@ -1337,6 +1377,19 @@ export default function Home() {
                     </div>
                   )
                 })()}
+                {matchMode && matchPixels.length > 0 && (() => {
+                  const displayW = canvasRef.current?.offsetWidth || 1
+                  const scale = displayW / (imgDims.w || 1)
+                  const dotR = Math.max(2, sampleRadius * scale)
+                  return (
+                    <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 2 }}>
+                      {matchPixels.map((p, i) => (
+                        <circle key={i} cx={p.x} cy={p.y} r={dotR}
+                          fill="rgba(255,60,60,0.45)" stroke="rgba(255,60,60,0.75)" strokeWidth="0.5" />
+                      ))}
+                    </svg>
+                  )
+                })()}
               </div>
             </div>
           </div>
@@ -1538,8 +1591,32 @@ export default function Home() {
               <rect x="5" y="5" width="6" height="6" rx="0.5" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1"/>
             </svg>
           </button>
+          <button className={styles.viewBtn} onClick={() => { if (matchMode) { setMatchMode(false) } else { setMatchMode(true); setLoupeMode(false); setShowMunsellValues(false) } }} title="Gleiche Munsell-Farbe anzeigen" disabled={!image} style={{ color: matchMode && image ? '#c84e4e' : '#555250' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1" strokeDasharray="2 1"/>
+            </svg>
+          </button>
         </div>
         </div>
+
+        {matchMode && matchColor && (
+          <div style={{
+            position: 'fixed',
+            bottom: 16, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(14,14,14,0.85)',
+            border: '1px solid rgba(200,80,80,0.3)',
+            borderRadius: 8,
+            padding: '6px 14px',
+            color: '#c8a96e',
+            fontFamily: 'monospace',
+            fontSize: 13,
+            zIndex: 150,
+            pointerEvents: 'none',
+          }}>
+            {matchColor.hue} {matchColor.value.toFixed(1)}/{matchColor.chroma.toFixed(1)} — {matchPixels.length.toLocaleString()} gleiche Pixel
+          </div>
+        )}
 
         {isMobile && !infoBarOpen && (
           <div style={{ height: 56, flexShrink: 0, background: '#1a1a1a', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10 }}>
