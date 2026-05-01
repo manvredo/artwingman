@@ -20,7 +20,6 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {/* None button */}
       <button
         onClick={() => onFilterChange(null)}
         style={{
@@ -68,8 +67,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 className={styles.filterSlider}
                 style={{ flex: 1 }}
               />
-              <span
-                style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
+              <span style={{ fontSize: 11, color: '#8a8680', fontFamily: 'monospace', minWidth: 36, textAlign: 'right' }}>
                 {Math.min(f.max, Math.max(f.min, filterStrength))}{f.unit}
               </span>
             </div>
@@ -82,15 +80,15 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 <HexColorPicker
                   color={f.colorA}
                   onChange={c => onDuotoneColorsChange(c, null)}
-                  style={{ width: 86, height: 62, '--react-colorful-border-radius': '10px' }}
+                  style={{ width: 86, height: 62 }}
                 />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, color: '#8a8680', minWidth: 44 }>Light</span>
+                <span style={{ fontSize: 15, color: '#8a8680', minWidth: 44 }}>Light</span>
                 <HexColorPicker
                   color={f.colorB}
                   onChange={c => onDuotoneColorsChange(null, c)}
-                  style={{ width: 86, height: 62, '--react-colorful-border-radius': '10px' }}
+                  style={{ width: 86, height: 62 }}
                 />
               </div>
             </div>
