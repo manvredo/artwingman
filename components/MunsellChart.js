@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { munsellHvcToRgb } from '../lib/munsell'
 
-const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+const CHROMAS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
 const VALUES  = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 const MAX_CHROMA = {
-  1: 14, 2: 18, 3: 22, 4: 24, 5: 26,
-  6: 28, 7: 26, 8: 20, 9: 12,
+  1: 18, 2: 22, 3: 28, 4: 30, 5: 32,
+  6: 32, 7: 28, 8: 24, 9: 16,
 }
 
 const PAD_L = 44   // "Value" rotated label + number labels
