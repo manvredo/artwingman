@@ -80,7 +80,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 <HexColorPicker
                   color={f.colorA}
                   onChange={c => onDuotoneColorsChange(c, null)}
-                  style={{ width: 86, height: 62 }}
+                  style={{ width: 60, height: 45 }}
                 />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -88,7 +88,7 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
                 <HexColorPicker
                   color={f.colorB}
                   onChange={c => onDuotoneColorsChange(null, c)}
-                  style={{ width: 86, height: 62 }}
+                  style={{ width: 60, height: 45 }}
                 />
               </div>
             </div>
