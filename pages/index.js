@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
-import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups, runMatchMask as glRunMatchMask } from '../lib/developGL'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups, runMatchMask as glRunMatchMask, drawMatchOverlay as glDrawMatchOverlay } from '../lib/developGL'
 import Filters, { FILTERS } from '../components/Filters'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
@@ -309,6 +309,8 @@ export default function Home() {
     const positions = glRunMatchMask(gl, r, g, b, 1.0, 0.5)
     setMatchPixels(positions)
     console.warn('triggerPixelMatch:', positions.length, 'positions, first:', JSON.stringify(positions[0]))
+    // Diagnostic: draw mask directly on canvas to see if WebGL positions are correct
+    glDrawMatchOverlay(gl, r, g, b, 4.0)
   }, [image, sampleRadius])
 
   const handleMunsellInput = useCallback((str) => {
