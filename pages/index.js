@@ -120,10 +120,9 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState(null)
   const [filterStrength, setFilterStrength] = useState(5)
   const [channelCurves, setChannelCurves] = useState({
-    R: makeIdentityCurve(),
-    G: makeIdentityCurve(),
-    B: makeIdentityCurve(),
-    Luminosity: makeIdentityCurve(),
+    R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+    Rpts: [{in:0,out:0},{in:255,out:255}], Gpts: [{in:0,out:0},{in:255,out:255}],
+    Bpts: [{in:0,out:0},{in:255,out:255}], Luminositypts: [{in:0,out:0},{in:255,out:255}],
     activeChannel: 'Luminosity',
   })
   const [duotoneColors, setDuotoneColors] = useState({ colorA: '#ff6b35', colorB: '#2d1b69' })
