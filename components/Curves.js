@@ -4,29 +4,41 @@ function makeIdentityCurve() {
   return Array.from({ length: 256 }, (_, i) => i)
 }
 
+// Build 256-entry LUT by drawing cubic Bezier segments between sorted points.
+// Tangents are horizontal at endpoints; midpoints use average of neighbor slopes.
 function buildCurveFromPoints(points) {
   if (points.length < 2) return makeIdentityCurve()
   const sorted = [...points].sort((a, b) => a.in - b.in)
-  const curve = new Array(256)
-  for (let i = 0; i < 256; i++) {
-    let p0 = sorted[0], p1 = sorted[0], p2 = sorted[1] || sorted[0], p3 = sorted[1] || sorted[0]
-    for (let j = 0; j < sorted.length - 1; j++) {
-      if (sorted[j].in <= i && sorted[j + 1].in >= i) {
-        p0 = sorted[Math.max(0, j - 1)]
-        p1 = sorted[j]
-        p2 = sorted[j + 1]
-        p3 = sorted[Math.min(sorted.length - 1, j + 2)]
-        break
-      }
+  const curve = new Array(256).fill(0)
+
+  for (let s = 0; s < sorted.length - 1; s++) {
+    const p0 = sorted[Math.max(0, s - 1)]
+    const p1 = sorted[s]
+    const p2 = sorted[s + 1]
+    const p3 = sorted[Math.min(sorted.length - 1, s + 2)]
+
+    // Tangents
+    const t1x = (p2.in - p0.in) / 6
+    const t1y = (p2.out - p0.out) / 6
+    const t2x = (p3.in - p1.in) / 6
+    const t2y = (p3.out - p1.out) / 6
+
+    const x0 = p1.in, y0 = p1.out
+    const x1 = p1.in + t1x, y1 = p1.out + t1y
+    const x2 = p2.in - t2x, y2 = p2.out - t2y
+    const x3 = p2.in, y3 = p2.out
+
+    const startI = Math.max(0, Math.ceil(x0))
+    const endI = Math.min(255, Math.floor(x3))
+
+    for (let i = startI; i <= endI; i++) {
+      const t = (i - x0) / (x3 - x0)
+      const t2 = t * t, t3 = t2 * t
+      const mt = 1 - t, mt2 = mt * mt, mt3 = mt2 * mt
+      curve[i] = Math.max(0, Math.min(255, Math.round(
+        mt3 * y0 + 3 * mt2 * t * y1 + 3 * mt * t2 * y2 + t3 * y3
+      )))
     }
-    const t = p1.in === p2.in ? 0 : (i - p1.in) / (p2.in - p1.in)
-    const t2 = t * t, t3 = t2 * t
-    const val = 0.5 * (
-      (2 * p1.out) + (-p0.out + p2.out) * t +
-      (2*p0.out - 5*p1.out + 4*p2.out - p3.out) * t2 +
-      (-p0.out + 3*p1.out - 3*p2.out + p3.out) * t3
-    )
-    curve[i] = Math.max(0, Math.min(255, Math.round(val)))
   }
   return curve
 }
@@ -103,10 +115,9 @@ function drawCurve(canvas, curve, points, channelColor, activeChannel) {
   }
 }
 
-// Distance from canvas click (canvasPx, canvasPy) to the curve at input value inVal
 function curveDistance(canvasPx, canvasPy, inVal, curve) {
   const curveY = CANVAS_W - (curve[inVal] / 255) * CANVAS_W
-  return Math.sqrt((canvasPx - (inVal / 255) * CANVAS_W) ** 2 + (canvasPy - curveY) ** 2)
+  return Math.hypot(canvasPx - (inVal / 255) * CANVAS_W, canvasPy - curveY)
 }
 
 export function CurvesEditor({ curves, onChange }) {
@@ -124,18 +135,14 @@ export function CurvesEditor({ curves, onChange }) {
 
   useEffect(() => { redraw() }, [redraw])
 
-  // Returns { canvasX, canvasY } in canvas pixels from mouse event
   const getCanvasPx = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()
-    const scaleX = CANVAS_W / rect.width
-    const scaleY = CANVAS_W / rect.height
     return {
-      canvasX: (e.clientX - rect.left) * scaleX,
-      canvasY: (e.clientY - rect.top) * scaleY,
+      canvasX: (e.clientX - rect.left) * (CANVAS_W / rect.width),
+      canvasY: (e.clientY - rect.top) * (CANVAS_W / rect.height),
     }
   }
 
-  // Find closest point handle (canvas-pixel distance, threshold ~10px)
   const hitTestPoints = (canvasX, canvasY) => {
     for (const pt of points) {
       const px = (pt.in / 255) * CANVAS_W
@@ -145,20 +152,16 @@ export function CurvesEditor({ curves, onChange }) {
     return null
   }
 
-  // Find closest point on the curve (canvas-pixel distance, threshold ~8px)
-  // Returns the input value (0-255) if hit, else null
   const hitTestCurve = (canvasX, canvasY) => {
     let bestDist = Infinity, bestIn = null
-    // Sample every 2 input steps for performance
     for (let inVal = 0; inVal < 256; inVal += 2) {
-      const dist = curveDistance(canvasX, canvasY, inVal, activeCurve)
-      if (dist < bestDist) { bestDist = dist; bestIn = inVal }
+      const d = curveDistance(canvasX, canvasY, inVal, activeCurve)
+      if (d < bestDist) { bestDist = d; bestIn = inVal }
     }
-    // Refine around best
-    if (bestIn !== null && bestIn > 0) {
+    if (bestIn !== null) {
       for (let inVal = Math.max(0, bestIn - 1); inVal <= Math.min(255, bestIn + 1); inVal++) {
-        const dist = curveDistance(canvasX, canvasY, inVal, activeCurve)
-        if (dist < bestDist) { bestDist = dist; bestIn = inVal }
+        const d = curveDistance(canvasX, canvasY, inVal, activeCurve)
+        if (d < bestDist) { bestDist = d; bestIn = inVal }
       }
     }
     return bestDist <= 8 ? bestIn : null
@@ -167,18 +170,14 @@ export function CurvesEditor({ curves, onChange }) {
   const handleMouseDown = (e) => {
     e.preventDefault()
     const { canvasX, canvasY } = getCanvasPx(e)
-
     const hitPt = hitTestPoints(canvasX, canvasY)
     if (hitPt) {
-      // Start dragging existing point
       dragRef.current = { point: hitPt }
       return
     }
-
-    // Click near the curve → insert new point
     const nearIn = hitTestCurve(canvasX, canvasY)
     if (nearIn !== null) {
-      const outVal = Math.round((1 - canvasY / CANVAS_W) * 255)
+      const outVal = Math.round(Math.max(0, Math.min(255, (1 - canvasY / CANVAS_W) * 255)))
       const newPt = { in: nearIn, out: Math.max(0, Math.min(255, outVal)) }
       const newPoints = [...points, newPt].sort((a, b) => a.in - b.in)
       const newCurve = buildCurveFromPoints(newPoints)
@@ -194,18 +193,14 @@ export function CurvesEditor({ curves, onChange }) {
     const outVal = Math.round(Math.max(0, Math.min(255, (1 - canvasY / CANVAS_W) * 255)))
 
     if (point === points[0]) {
-      // Left endpoint: x is pinned to 0
       point.out = outVal
     } else if (point === points[points.length - 1]) {
-      // Right endpoint: x is pinned to 255
       point.out = outVal
     } else {
-      // Middle point: x follows mouse within [prev_in+1, next_in-1]
       const sorted = [...points].sort((a, b) => a.in - b.in)
       const idx = sorted.indexOf(point)
       const prevIn = idx > 0 ? sorted[idx - 1].in : 1
       const nextIn = idx < sorted.length - 1 ? sorted[idx + 1].in : 254
-
       const newIn = Math.round((canvasX / CANVAS_W) * 255)
       point.in = Math.max(prevIn + 1, Math.min(nextIn - 1, newIn))
       point.out = outVal
@@ -222,7 +217,6 @@ export function CurvesEditor({ curves, onChange }) {
     const { canvasX, canvasY } = getCanvasPx(e)
     const hitPt = hitTestPoints(canvasX, canvasY)
     if (!hitPt) return
-    // Don't delete endpoints
     if (hitPt === points[0] || hitPt === points[points.length - 1]) return
     const newPoints = points.filter(p => p !== hitPt)
     const newCurve = buildCurveFromPoints(newPoints)
