@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { munsellHvcToRgb } from '../lib/munsell'
 
-const VALUES = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+const VALUES = [9, 7, 5, 3, 1]
 const PAD_L = 40
 const PAD_T = 36
 const GAP = 1
 const DETAIL_W = 120
-const CELL = 32
+const CELL = 44
 
 // Hue angle to hue family: 0=R, 36=YR, 72=Y, 108=GY, 144=G, 180=BG, 216=B, 252=PB, 288=P, 324=RP
 function hueAngleToFamily(hueAngle) {
