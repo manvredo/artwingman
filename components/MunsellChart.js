@@ -142,7 +142,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
             ))}
 
             {/* Grid background */}
-            <rect x={PAD_L} y={PAD_T} width={chromas.length * cellW} height={VALUES.length * cellH} fill="#2a2a2a" />
+            <rect x={PAD_L} y={PAD_T} width={chromas.length * cellW} height={VALUES.length * cellH} fill="rgb(70,70,70)" />
 
             {/* Cells */}
             {VALUES.map((v, row) =>
@@ -168,7 +168,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
                   >
                     <rect
                       x={gx} y={gy} width={gw} height={gh}
-                      fill={inRange ? cellColor(v, c) : '#1a1a1a'}
+                      fill={inRange ? cellColor(v, c) : 'rgb(50,50,50)'}
                       rx={2}
                     />
                     {isActive && (
