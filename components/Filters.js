@@ -8,6 +8,7 @@ const FILTERS = [
   { id: 'vignette',  label: 'Vignette',  min: -20, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
   { id: 'noise',     label: 'Noise',     min: 1, max: 50, unit: '',  sliderLabel: 'Amount',  def: 10 },
   { id: 'bleach',   label: 'Bleach Bypass', min: 1, max: 20, unit: '', sliderLabel: 'Amount', def: 5 },
+  { id: 'sobel',    label: 'Sobel/Edge',  min: 1, max: 20, unit: '',  sliderLabel: 'Amount',  def: 5 },
 ]
 
 export { FILTERS }
