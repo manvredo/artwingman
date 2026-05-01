@@ -88,9 +88,20 @@ const PRESETS = {
       Rpts: [...sp], Gpts: [...sp], Bpts: [...sp], Luminositypts: [...sp] }
   },
   'Black & White': () => {
-    const bw = new Array(256); for (let i = 0; i < 256; i++) bw[i] = i < 128 ? 0 : 255
-    const pts = [{ in: 0, out: 0 }, { in: 127, out: 0 }, { in: 128, out: 255 }, { in: 255, out: 255 }]
-    return { R: bw, G: bw, B: bw, Luminosity: bw, Rpts: pts, Gpts: pts, Bpts: pts, Luminositypts: pts }
+    // True film-like grayscale: soft shadow roll-off, bright but not clipped highlights.
+    // lumLUT: y = x^0.85 — subtly compresses shadows, lifts midtones.
+    const bwPts = [
+      { in: 0, out: 0 },
+      { in: 40, out: 26 },
+      { in: 80, out: 61 },
+      { in: 128, out: 106 },
+      { in: 180, out: 164 },
+      { in: 224, out: 215 },
+      { in: 255, out: 255 },
+    ]
+    return { R: makeIdentityCurve(), G: makeIdentityCurve(), B: makeIdentityCurve(), Luminosity: makeIdentityCurve(),
+      Rpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Gpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }],
+      Bpts: [{ in: 0, out: 0 }, { in: 255, out: 255 }], Luminositypts: bwPts }
   },
   'Negative': () => {
     const neg = new Array(256); for (let i = 0; i < 256; i++) neg[i] = 255 - i
