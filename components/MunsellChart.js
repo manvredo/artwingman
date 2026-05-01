@@ -8,42 +8,6 @@ const GAP = 1
 const DETAIL_W = 120
 const CELL = 36
 
-// Hue angle to hue family: 0=R, 36=YR, 72=Y, 108=GY, 144=G, 180=BG, 216=B, 252=PB, 288=P, 324=RP
-function hueAngleToFamily(hueAngle) {
-  if (hueAngle === 0 || hueAngle === 360) return 'N'  // neutral
-  const families = [
-    { family: 'R',  min: 0,   max: 18 },
-    { family: 'YR', min: 18,  max: 54 },
-    { family: 'Y',  min: 54,  max: 90 },
-    { family: 'GY', min: 90,  max: 126 },
-    { family: 'G',  min: 126, max: 162 },
-    { family: 'BG', min: 162, max: 198 },
-    { family: 'B',  min: 198, max: 234 },
-    { family: 'PB', min: 234, max: 270 },
-    { family: 'P',  min: 270, max: 306 },
-    { family: 'RP', min: 306, max: 360 },
-  ]
-  for (const f of families) {
-    if (hueAngle >= f.min && hueAngle < f.max) return f.family
-  }
-  return 'R'
-}
-
-// Get chroma list for current hue, dynamically computed
-function getChromasForHue(hueAngle) {
-  const chromas = []
-  for (let c = 0; c <= 30; c += 2) {
-    let valid = false
-    for (const v of VALUES) {
-      if (munsellHvcToRgb(hueAngle, v, c)) { valid = true; break }
-    }
-    if (valid) chromas.push(c)
-    else if (c > 22) break  // stop at first invalid above 22
-  }
-  return chromas
-}
-
-// Max chroma per value per hue family
 const FAMILY_MAX_CHROMA = {
   N:  { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 },
   R:  { 1:16, 2:20, 3:26, 4:28, 5:28, 6:26, 7:22, 8:14, 9:10 },
@@ -58,10 +22,25 @@ const FAMILY_MAX_CHROMA = {
   RP: { 1:14, 2:18, 3:22, 4:26, 5:26, 6:24, 7:20, 8:12, 9:8 },
 }
 
-function getMaxChroma(hueAngle, value) {
-  if (value === null || value === undefined) return 0
-  const family = hueAngleToFamily(hueAngle || 0)
-  return FAMILY_MAX_CHROMA[family]?.[value] ?? 0
+// Per-cell validation: check exact hue+value+chroma tuple
+function isValidCell(hueAngle, v, c) {
+  if (c === 0) return true  // neutral always valid
+  const rgb = munsellHvcToRgb(hueAngle, v, c)
+  return rgb !== null
+}
+
+function getChromasForHue(hueAngle) {
+  const chromas = []
+  for (let c = 0; c <= 30; c += 2) {
+    // find at least one valid cell for this chroma at any value
+    let valid = false
+    for (const v of VALUES) {
+      if (isValidCell(hueAngle, v, c)) { valid = true; break }
+    }
+    if (valid) chromas.push(c)
+    else if (c > 20) break
+  }
+  return chromas
 }
 
 export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, color, compact, onCellOpen }) {
@@ -158,8 +137,7 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
               chromas.map((c, col) => {
                 const x = PAD_L + col * cellW
                 const y = PAD_T + row * cellH
-                const maxC = getMaxChroma(effectiveHueAngle, v)
-                const inRange = c <= maxC
+                const inRange = isValidCell(effectiveHueAngle, v, c)
                 const isActive = hasColor && v === activeValue && c === activeChroma && inRange
                 const gx = x + GAP / 2, gy = y + GAP / 2
                 const gw = cellW - GAP, gh = cellH - GAP
