@@ -454,7 +454,7 @@ export default function Home() {
       const m = rgbToMunsell(r, g, b)
       const munsellStr = `${m.hue} ${m.value.toFixed(1)}/${m.chroma.toFixed(1)}`
       setHoverMunsell({ munsellStr, r, g, b })
-      setHoverPos({ x: innerX, y: innerY })
+      setHoverPos({ x: visualX, y: visualY })
 
       // Loupe: 20x20px crop in image space → 100x100 canvas on screen
       const loupeCtx = loupeCanvasRef.current?.getContext('2d')
@@ -1539,7 +1539,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'fixed',
-                      left: Math.min(hoverPos.x + 20, chartRight + 8),
+                      left: hoverPos.x + 20,
                       top: hoverPos.y - 32,
                       transition: 'left 0.05s ease-out, top 0.05s ease-out',
                       padding: '3px 8px',
