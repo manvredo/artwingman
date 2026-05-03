@@ -16,19 +16,26 @@ const DEFAULT_COLOR = {
 }
 
 function devTicks(min, max) {
-  const mid = (min + max) / 2
-  const q1 = (min + mid) / 2
-  const q3 = (mid + max) / 2
-  return [min, q1, mid, q3, max].map((v, i) => (
-    <div key={i} style={{
-      position: 'absolute',
-      left: `${(v - min) / (max - min) * 100}%`,
-      top: 0, width: 1,
-      height: v === mid ? 5 : 3,
-      background: v === mid ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)',
-      transform: 'translateX(-50%)',
-    }} />
-  ))
+  const ticks = []
+  const step = (max - min) / 100
+  for (let i = 0; i <= 100; i++) {
+    const v = min + i * step
+    const pct = i
+    const isMain = i % 25 === 0
+    const isMid = i === 50
+    ticks.push(
+      <div key={i} style={{
+        position: 'absolute',
+        left: `${pct}%`,
+        top: 0,
+        width: 1,
+        height: isMain ? 6 : isMid ? 4 : 2,
+        background: isMain ? 'rgba(255,255,255,0.5)' : isMid ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)',
+        transform: 'translateX(-50%)',
+      }} />
+    )
+  }
+  return ticks
 }
 
 function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
