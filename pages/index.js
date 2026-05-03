@@ -151,7 +151,7 @@ export default function Home() {
   const [matchColor, setMatchColor] = useState(null)
   const [matchPixels, setMatchPixels] = useState([])
   const [matchMode, setMatchMode] = useState(false)
-  const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
+  const DEVELOP_DEFAULTS = { temperature:0, tint:0, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, sharpen:0, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }
   const [develop, setDevelop] = useState(DEVELOP_DEFAULTS)
   const [lutData, setLutData] = useState(null)   // Float32Array | null
   const [lutSize, setLutSize] = useState(0)
@@ -1084,10 +1084,11 @@ export default function Home() {
                     <DevSlider k="shadows"    label="Shadows"    min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <DevSlider k="whites"     label="Whites"     min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <DevSlider k="blacks"     label="Blacks"     min={-100} max={100} develop={develop} setDevelop={setDevelop} />
+                    <DevSlider k="sharpen"    label="Sharpen"    min={-100} max={100} develop={develop} setDevelop={setDevelop} />
                     <div className={styles.btnRow} style={{ marginTop: 2 }}>
                       <button className={styles.btnSecondary}
-                        onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0 }))}
-                        disabled={['exposure','contrast','highlights','shadows','whites','blacks'].every(k => develop[k] === 0)}>Reset</button>
+                        onClick={() => setDevelop(d => ({ ...d, exposure:0, contrast:0, highlights:0, shadows:0, whites:0, blacks:0, sharpen:0 }))}
+                        disabled={['exposure','contrast','highlights','shadows','whites','blacks','sharpen'].every(k => develop[k] === 0)}>Reset</button>
                     </div>
                   </div>
                 </AccordionDrawer>
