@@ -62,11 +62,14 @@ function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
   )
 }
 
-function AccordionDrawer({ title, isOpen, onToggle, children, noToggle }) {
+function AccordionDrawer({ title, isOpen, onToggle, children, noToggle, goldWhenActive }) {
   return (
     <div className={styles.drawer}>
-      <button className={`${styles.drawerHeader} ${isOpen ? styles.drawerHeaderActive : ''}`} onClick={noToggle ? undefined : onToggle}
-        style={noToggle ? { cursor: 'default', pointerEvents: 'none' } : {}}>
+      <button
+        className={`${styles.drawerHeader} ${isOpen && goldWhenActive ? styles.drawerHeaderActive : ''}`}
+        onClick={noToggle ? undefined : onToggle}
+        style={noToggle ? { cursor: 'default', pointerEvents: 'none' } : {}}
+      >
         <span className={styles.drawerTitle}>{title}</span>
         {!noToggle && <span className={styles.drawerArrow}>{isOpen ? '▼' : '▶'}</span>}
       </button>
@@ -1046,7 +1049,7 @@ export default function Home() {
 
           <div style={{ fontSize: 12, color: '#c8a96e', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '10px 12px 4px', fontWeight: 500 }}>Analyze</div>
 
-          <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
+          <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')} goldWhenActive>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
