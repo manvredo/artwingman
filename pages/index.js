@@ -1049,52 +1049,6 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Chroma Groups" isOpen={openDrawer.includes('chroma')} onToggle={() => toggleDrawer('chroma')}>
-            <div className={styles.drawerControls}>
-              <div className={styles.sectionLabel}>Number of steps</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ flex: 1, position: 'relative', height: 8 }}>
-                  {devTicks(2, 12)}
-                  <input type="range" min="2" max="12" step="1" value={chromaSteps}
-                    onChange={e => { chromaTouchedRef.current = true; setChromaSteps(Number(e.target.value)) }}
-                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
-                </div>
-                <span className={styles.sliderVal}>{chromaSteps}</span>
-              </div>
-              <div className={styles.sectionLabel}>Soften</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ flex: 1, position: 'relative', height: 8 }}>
-                  {devTicks(0, 20)}
-                  <input type="range" min="0" max="20" step="1" value={chromaSoften}
-                    onChange={e => { chromaTouchedRef.current = true; setChromaSoften(Number(e.target.value)) }}
-                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
-                </div>
-                <span className={styles.sliderVal}>{chromaSoften === 0 ? 'off' : chromaSoften}</span>
-              </div>
-              <div className={styles.btnRow}>
-                <button className={styles.btnSecondary} onClick={applyChromaGroups} disabled={!image}>
-                  Analyze
-                </button>
-                {(showGray || chromaMode) && (
-                  <button className={styles.btnSecondary} onClick={resetCanvas}>
-                    Reset
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className={styles.drawerResult}>
-              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
-                {chromaSteps} chroma
-              </div>
-              <div className={styles.valueSteps}>
-                {Array.from({ length: chromaSteps }).map((_, i) => (
-                  <div key={i} className={styles.valueStep}
-                    style={{ background: `hsl(0,0%,${Math.round(2 + (i / (chromaSteps - 1)) * 98)}%)` }} />
-                ))}
-              </div>
-            </div>
-          </AccordionDrawer>
-
           <AccordionDrawer title="Color Groups" isOpen={openDrawer.includes('color')} onToggle={() => toggleDrawer('color')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
@@ -1147,6 +1101,52 @@ export default function Home() {
                         style={{ background: '#2a2a2a' }} />
                     ))
                 }
+              </div>
+            </div>
+          </AccordionDrawer>
+
+          <AccordionDrawer title="Chroma Groups" isOpen={openDrawer.includes('chroma')} onToggle={() => toggleDrawer('chroma')}>
+            <div className={styles.drawerControls}>
+              <div className={styles.sectionLabel}>Number of steps</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(2, 12)}
+                  <input type="range" min="2" max="12" step="1" value={chromaSteps}
+                    onChange={e => { chromaTouchedRef.current = true; setChromaSteps(Number(e.target.value)) }}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
+                <span className={styles.sliderVal}>{chromaSteps}</span>
+              </div>
+              <div className={styles.sectionLabel}>Soften</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(0, 20)}
+                  <input type="range" min="0" max="20" step="1" value={chromaSoften}
+                    onChange={e => { chromaTouchedRef.current = true; setChromaSoften(Number(e.target.value)) }}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
+                <span className={styles.sliderVal}>{chromaSoften === 0 ? 'off' : chromaSoften}</span>
+              </div>
+              <div className={styles.btnRow}>
+                <button className={styles.btnSecondary} onClick={applyChromaGroups} disabled={!image}>
+                  Analyze
+                </button>
+                {(showGray || chromaMode) && (
+                  <button className={styles.btnSecondary} onClick={resetCanvas}>
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className={styles.drawerResult}>
+              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
+                {chromaSteps} chroma
+              </div>
+              <div className={styles.valueSteps}>
+                {Array.from({ length: chromaSteps }).map((_, i) => (
+                  <div key={i} className={styles.valueStep}
+                    style={{ background: `hsl(0,0%,${Math.round(2 + (i / (chromaSteps - 1)) * 98)}%)` }} />
+                ))}
               </div>
             </div>
           </AccordionDrawer>
