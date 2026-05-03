@@ -1828,6 +1828,8 @@ export default function Home() {
           {isMobile && (
             <button onClick={() => setInfoBarOpen(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 28, cursor: 'pointer', fontSize: 10, zIndex: 1 }}>▼</button>
           )}
+          {/* Top row: compact panels */}
+          <div className={styles.infoBarRow}>
           {/* Panel 1: Munsell Color Swatch */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
             <div className={styles.infoLabel}>Munsell Color</div>
@@ -2004,19 +2006,53 @@ export default function Home() {
             />
           </div>
 
-          {/* Panel 6: Palette */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
-            <div className={styles.infoLabel}>Palette</div>
-            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-              <Palette
-                palette={palette}
-                selected={selectedSwatch}
-                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                onRemove={removeFromPalette}
-                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-                onAddToPalette={hasColor ? addToPalette : null}
-                hasColor={hasColor}
-              />
+          {/* Bottom row: Color Palette + Palette */}
+          <div className={styles.infoBarRowBottom}>
+            {/* Color Palette (dominant image colors) */}
+            <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 260, borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className={styles.infoLabel}>Color Palette</div>
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${paletteCount <= 8 ? 4 : paletteCount <= 12 ? 4 : 6}, 1fr)`, gap: 3, flex: 1 }}>
+                {(paletteClusters.length > 0
+                  ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
+                  : Array.from({ length: paletteCount }, () => null)
+                ).map((c, i) => {
+                  const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <div style={{
+                        width: '100%', height: paletteCount <= 8 ? 28 : paletteCount <= 12 ? 24 : 20,
+                        borderRadius: 3,
+                        background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        cursor: c ? 'pointer' : 'default',
+                      }}
+                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
+                      />
+                      {paletteCount <= 12 && (
+                        <span style={{ fontSize: 8, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
+                          {m ? `${m.hue}` : '—'}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Panel 6: Palette */}
+            <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 200 }}>
+              <div className={styles.infoLabel}>Palette</div>
+              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                <Palette
+                  palette={palette}
+                  selected={selectedSwatch}
+                  onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                  onRemove={removeFromPalette}
+                  onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+                  onAddToPalette={hasColor ? addToPalette : null}
+                  hasColor={hasColor}
+                />
+              </div>
             </div>
           </div>
 
