@@ -1537,7 +1537,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'fixed',
-                      left: clickPos.x - 160,
+                      left: clickPos.x - 80,
                       top: clickPos.y - 32,
                       transition: 'left 0.05s ease-out, top 0.05s ease-out',
                       padding: '3px 8px',
