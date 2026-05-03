@@ -1008,6 +1008,38 @@ export default function Home() {
 
   const paletteGridCols = paletteCount <= 8 ? 'repeat(4, 1fr)' : paletteCount <= 12 ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)'
 
+  const staticLoupe = loupeMode ? (
+    <div style={{
+      position: 'absolute',
+      top: 166, left: 10,
+      width: 100,
+      background: 'rgba(14,14,14,0.9)',
+      borderRadius: 8,
+      border: '1px solid rgba(255,255,255,0.2)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      zIndex: 10,
+    }}>
+      <canvas ref={loupeCanvasRef} width={100} height={100} style={{ display: 'block', width: 100, height: 100 }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
+        <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
+      </div>
+      {hoverMunsell ? (
+        <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+            <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
+            <div style={{ flex: 1, height: 10, background: loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#c8a96e' }}>
+            {hoverMunsell.munsellStr}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  ) : null
+
   return (
     <div className={styles.layout}>
       <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
@@ -1465,38 +1497,7 @@ export default function Home() {
                       }} />
                     )}
                   </div>
-                  {/* Static Loupe below Minimap */}
-                  {loupeMode ? (
-                    <div style={{
-                      position: 'absolute',
-                      top: 166, left: 10,
-                      width: 100,
-                      background: 'rgba(14,14,14,0.9)',
-                      borderRadius: 8,
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-                      overflow: 'hidden',
-                      pointerEvents: 'none',
-                      zIndex: 10,
-                    }}>
-                      <canvas ref={loupeCanvasRef} width={100} height={100} style={{ display: 'block', width: 100, height: 100 }} />
-                      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
-                        <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
-                        <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
-                      </div>
-                      {hoverMunsell ? (
-                        <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                          <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                            <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
-                            <div style={{ flex: 1, height: 10, background: loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
-                          </div>
-                          <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#c8a96e' }}>
-                            {hoverMunsell.munsellStr}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
+                  {staticLoupe}
                 )
               })()}
               <div
