@@ -115,6 +115,7 @@ export default function Home() {
   const [valueSteps, setValueSteps] = useState(10)
   const [showGray, setShowGray] = useState(false)
   const [chromaMode, setChromaMode] = useState(false)
+  const [minimapTrigger, setMinimapTrigger] = useState(0)
   const [valueRating, setValueRating] = useState(null)
   const [palette, setPalette] = useState([])
   const [paletteCount, setPaletteCount] = useState(6)
@@ -516,8 +517,11 @@ export default function Home() {
         ctx.drawImage(c, 0, 0, mc.width, mc.height)
       } catch (e) { /* canvas not ready */ }
     }
-    requestAnimationFrame(draw)
-  }, [image, colorActive, showGray, chromaMode, valueSteps, valueSoften])
+    let raf
+    const loop = () => { draw(); raf = requestAnimationFrame(loop) }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [image, minimapTrigger])
 
   // Sync LUT to GL state whenever it changes
   useEffect(() => {
@@ -619,6 +623,7 @@ export default function Home() {
     ctx.putImageData(imageData, 0, 0)
     setChromaMode(true)
     setShowGray(false)
+    setMinimapTrigger(t => t + 1)
     setValueRating(null)
   }, [])
 
@@ -661,6 +666,7 @@ export default function Home() {
     }
     setChromaMode(true)
     setShowGray(false)
+    setMinimapTrigger(t => t + 1)
     setValueRating(null)
   }, [chromaSteps, chromaSoften])
 
