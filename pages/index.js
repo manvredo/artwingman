@@ -507,11 +507,12 @@ export default function Home() {
 
   useEffect(() => {
     const mc = minimapCanvasRef.current
-    if (!mc || !image) return
+    const c = canvasRef.current
+    if (!mc || !c) return
     const ctx = mc.getContext('2d')
     ctx.clearRect(0, 0, mc.width, mc.height)
-    ctx.drawImage(image, 0, 0, mc.width, mc.height)
-  }, [image])
+    ctx.drawImage(c, 0, 0, mc.width, mc.height)
+  }, [image, colorActive, showGray, chromaMode])
 
   // Sync LUT to GL state whenever it changes
   useEffect(() => {
