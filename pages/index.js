@@ -1819,7 +1819,7 @@ export default function Home() {
           )}
           {/* Panel 1: Munsell Color Swatch */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Munsell Color</div>
+            <div className={styles.infoLabel}>Munsell Color</div>
             <div
               onClick={() => { if (!hasColor) return; setColorOverlayView('munsell'); setShowColorOverlay(true); }}
               title="Click to compare color"
@@ -1858,7 +1858,7 @@ export default function Home() {
 
           {/* Panel 1b: Image Color (RGB + CMYK) */}
           <div className={`${styles.infoPanel} ${styles.infoPanelSwatch}`}>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555250', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Image Color</div>
+            <div className={styles.infoLabel}>Image Color</div>
             <div
               onClick={() => { if (!hasColor) return; setColorOverlayView('rgb'); setShowColorOverlay(true); }}
               style={{
