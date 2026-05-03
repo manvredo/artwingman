@@ -1874,8 +1874,7 @@ export default function Home() {
             <button onClick={() => setInfoBarOpen(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, flexShrink: 0 }}>▲</button>
           </div>
         )}
-        {(!isMobile || infoBarOpen) && (
-        <div className={styles.infoBar} style={{ zIndex: 10 }}>
+        <div className={styles.infoBar} style={{ zIndex: 10, display: (!isMobile || infoBarOpen) ? 'flex' : 'none', flexDirection: 'column' }}>
           {isMobile && (
             <button onClick={() => setInfoBarOpen(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#8a8680', borderRadius: 5, width: 32, height: 28, cursor: 'pointer', fontSize: 10, zIndex: 1 }}>▼</button>
           )}
@@ -2061,7 +2060,6 @@ export default function Home() {
           {colorPaletteRow}
 
         </div>
-        )}
       </div>
       {/* Hidden WebGL canvas for GPU develop pipeline */}
       <canvas ref={glCanvasRef} style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }} />
