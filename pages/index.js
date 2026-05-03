@@ -1457,7 +1457,7 @@ export default function Home() {
                     overflow: 'hidden',
                     pointerEvents: 'none',
                   }}>
-                    <img src={image?.src} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                    <canvas ref={minimapCanvasRef} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                     {zoom > 1 && (
                       <div style={{
                         position: 'absolute',
