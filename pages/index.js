@@ -149,6 +149,7 @@ export default function Home() {
   const [colorOverlayView, setColorOverlayView] = useState('munsell') // 'munsell' | 'rgb'
   const [compGray, setCompGray] = useState(3)
   const [valueSoften, setValueSoften] = useState(0)
+  const valueTouchedRef = useRef(false)
   const [colorSteps, setColorSteps] = useState(30)
   const [colorSoften, setColorSoften] = useState(0)
   const colorTouchedRef = useRef(false) // true after user first drags the slider
@@ -175,6 +176,7 @@ export default function Home() {
   const developWorkerRef = useRef(null)
   const developGenRef = useRef(0)
   const colorDebounceRef = useRef(null)
+  const valueDebounceRef = useRef(null)
   const lutFileRef = useRef(null)
   const glCanvasRef = useRef(null)
   const glStateRef = useRef(null)
@@ -215,6 +217,7 @@ export default function Home() {
         setColorSteps(30)
         setColorSoften(0)
         colorTouchedRef.current = false
+        valueTouchedRef.current = false
         setDevelop(DEVELOP_DEFAULTS)
         setTimeout(() => {
           const canvas = canvasRef.current
@@ -640,6 +643,14 @@ export default function Home() {
     return () => clearTimeout(colorDebounceRef.current)
   }, [colorSteps, colorSoften, applyColorGroups, image])
 
+  // Real-time value groups: re-run when slider changes — only after user touched
+  useEffect(() => {
+    if (!image || !valueTouchedRef.current) return
+    clearTimeout(valueDebounceRef.current)
+    valueDebounceRef.current = setTimeout(() => applyValueGroups(), 150)
+    return () => clearTimeout(valueDebounceRef.current)
+  }, [valueSteps, valueSoften, applyValueGroups, image])
+
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !originalImageDataRef.current) return
@@ -941,7 +952,7 @@ export default function Home() {
                 <div style={{ flex: 1, position: 'relative', height: 8 }}>
                   {devTicks(2, 10)}
                   <input type="range" min="2" max="10" step="1" value={valueSteps}
-                    onChange={e => setValueSteps(Number(e.target.value))}
+                    onChange={e => { valueTouchedRef.current = true; setValueSteps(Number(e.target.value)) }}
                     className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
                 </div>
                 <span className={styles.sliderVal}>{valueSteps}</span>
@@ -951,15 +962,12 @@ export default function Home() {
                 <div style={{ flex: 1, position: 'relative', height: 8 }}>
                   {devTicks(0, 20)}
                   <input type="range" min="0" max="20" step="1" value={valueSoften}
-                    onChange={e => setValueSoften(Number(e.target.value))}
+                    onChange={e => { valueTouchedRef.current = true; setValueSoften(Number(e.target.value)) }}
                     className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
                 </div>
                 <span className={styles.sliderVal}>{valueSoften === 0 ? 'off' : valueSoften}</span>
               </div>
               <div className={styles.btnRow}>
-                <button className={styles.btnPrimary} onClick={applyValueGroups} disabled={!image}>
-                  Analyze
-                </button>
                 <button className={styles.btnSecondary} onClick={applyOriginalBW} disabled={!image}>
                   S/W
                 </button>
