@@ -93,6 +93,37 @@ function parseMunsell(str) {
   }
 }
 
+function ColorPaletteGrid({ paletteClusters, paletteCount, paletteGridCols, onColorClick }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: paletteGridCols, gap: 3 }}>
+      {(paletteClusters.length > 0
+        ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
+        : Array.from({ length: paletteCount }, () => null)
+      ).map((c, i) => {
+        const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <div style={{
+              width: '100%', height: paletteCount <= 8 ? 28 : paletteCount <= 12 ? 24 : 20,
+              borderRadius: 3,
+              background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
+              border: '1px solid rgba(255,255,255,0.08)',
+              cursor: c ? 'pointer' : 'default',
+            }}
+              onClick={() => { if (!c) return; onColorClick(c.r, c.g, c.b) }}
+            />
+            {paletteCount <= 12 && (
+              <span style={{ fontSize: 8, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
+                {m ? `${m.hue}` : '—'}
+              </span>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 const CROSSHAIR_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23000' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23000' stroke-width='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23fff' stroke-width='1'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 16 16, crosshair`
 
 export default function Home() {
@@ -974,6 +1005,8 @@ export default function Home() {
     { label: 'Flt', title: 'Filters', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="6" cy="4" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="10" cy="12" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/></svg> },
     { label: 'PM', title: 'Paint Match', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13 L10 6 L12 8 L5 15 Z" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/><path d="M10 6 L12 4 Q14 2 13 4 L12 8" stroke="currentColor" strokeWidth="1.2" fill="none"/></svg> },
   ]
+
+  const paletteGridCols = paletteCount <= 8 ? 'repeat(4, 1fr)' : paletteCount <= 12 ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)'
 
   return (
     <div className={styles.layout}>
@@ -2016,6 +2049,30 @@ export default function Home() {
                 onClear={() => { setPalette([]); setSelectedSwatch(null) }}
                 onAddToPalette={hasColor ? addToPalette : null}
                 hasColor={hasColor}
+              />
+            </div>
+          </div>
+
+          {/* Panel 7: Color Palette (dominant image colors) */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 260, borderRight: 'none' }}>
+            <div className={styles.infoLabel}>Color Palette</div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+              {[6, 8, 12, 24].map(n => (
+                <button key={n} onClick={() => setPaletteCount(n)} style={{
+                  flex: 1, padding: '2px 0', fontSize: 10, fontFamily: 'monospace',
+                  background: paletteCount === n ? 'rgba(200,169,110,0.2)' : 'transparent',
+                  border: paletteCount === n ? '1px solid rgba(200,169,110,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                  color: paletteCount === n ? '#c8a96e' : '#555250',
+                  borderRadius: 4, cursor: 'pointer',
+                }}>{n}</button>
+              ))}
+            </div>
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              <ColorPaletteGrid
+                paletteClusters={paletteClusters}
+                paletteCount={paletteCount}
+                paletteGridCols={paletteGridCols}
+                onColorClick={(r, g, b) => { setColor({ r, g, b, ...rgbToMunsellExact(r, g, b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
               />
             </div>
           </div>
