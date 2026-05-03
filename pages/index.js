@@ -1035,7 +1035,7 @@ export default function Home() {
           <img src="/logo.svg" width={32} height={32} style={{borderRadius: 6}} alt="ArtWingman" />
           <div style={{ flex: 1 }}>
             <div className={styles.logoName}>ArtWingman</div>
-            <div className={styles.logoSub}>v0.6 α</div>
+            <div className={styles.logoSub}>v0.6 β</div>
           </div>
           <button className={styles.sidebarToggle} onClick={() => setSidebarCollapsed(true)} title="Collapse sidebar">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="8,2 4,6 8,10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
