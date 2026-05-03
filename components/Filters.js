@@ -7,6 +7,7 @@ const FILTERS = [
   { id: 'emboss',    label: 'Emboss',        min: 1, max: 10, unit: '',  sliderLabel: 'Amount',    def: 5 },
   { id: 'bleach',    label: 'Bleach Bypass', min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
   { id: 'sobel',     label: 'Sobel/Edge',    min: 1, max: 20, unit: '',  sliderLabel: 'Amount',    def: 5 },
+  { id: 'duotone',   label: 'Duotone',       min: undefined, max: undefined },
   { id: 'curves',    label: 'Curves',        min: undefined, max: undefined },
 ]
 
