@@ -50,12 +50,14 @@ function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ width: 66, flexShrink: 0 }} />
-        <input type="range" min={min} max={max} step={step} value={v}
-          onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
-          className={styles.slider} style={{ flex: 1 }} />
+        <div style={{ flex: 1, position: 'relative', height: 8 }}>
+          {devTicks(min, max)}
+          <input type="range" min={min} max={max} step={step} value={v}
+            onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
+            className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+        </div>
         <span style={{ width: 44 }} />
       </div>
-      <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{devTicks(min, max)}</div>
     </div>
   )
 }
