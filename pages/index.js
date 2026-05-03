@@ -1247,42 +1247,38 @@ export default function Home() {
                         onClick={() => setDevelop(d => ({ ...d, texture:0, clarity:0, dehaze:0, vibrance:0, saturation:0 }))}
                         disabled={['texture','clarity','dehaze','vibrance','saturation'].every(k => develop[k] === 0)}>Reset</button>
                     </div>
-                  </div>
-                </AccordionDrawer>
-
-                <AccordionDrawer title="LUT" isOpen={openDrawer.includes('lut')} onToggle={() => toggleDrawer('lut')}>
-                  <div className={styles.drawerControls}>
-                    <input ref={lutFileRef} type="file" accept=".cube" style={{ display: 'none' }}
-                      onChange={e => {
-                        const f = e.target.files[0]
-                        if (!f) return
-                        const reader = new FileReader()
-                        reader.onload = (ev) => parseCube(ev.target.result, f.name.replace(/\.cube$/i, ''))
-                        reader.readAsText(f)
-                        e.target.value = ''
-                      }} />
-                    {lutData ? (
-                      <>
-                        <div style={{ fontSize: 11, color: '#c8a96e', fontFamily: 'monospace', marginBottom: 6, wordBreak: 'break-all' }}>{lutName}</div>
-                        <div style={{ marginBottom: 6 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 4 }}>
+                      <div style={{ fontSize: 10, color: '#8a8680', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Load .cube LUT</div>
+                      <input ref={lutFileRef} type="file" accept=".cube" style={{ display: 'none' }}
+                        onChange={e => {
+                          const f = e.target.files[0]
+                          if (!f) return
+                          const reader = new FileReader()
+                          reader.onload = (ev) => parseCube(ev.target.result, f.name.replace(/\.cube$/i, ''))
+                          reader.readAsText(f)
+                          e.target.value = ''
+                        }} />
+                      {lutData ? (
+                        <>
+                          <div style={{ fontSize: 11, color: '#c8a96e', fontFamily: 'monospace', marginBottom: 6, wordBreak: 'break-all' }}>{lutName}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                             <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>Intensity</span>
                             <input type="range" min={0} max={100} step={1} value={lutIntensity}
                               onChange={e => setLutIntensity(Number(e.target.value))}
                               className={styles.slider} style={{ flex: 1 }} />
                             <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: lutIntensity !== 100 ? '#c8a96e' : '#555250' }}>{lutIntensity}%</span>
                           </div>
-                        </div>
+                          <div className={styles.btnRow}>
+                            <button className={styles.btnSecondary} onClick={() => lutFileRef.current?.click()}>Replace</button>
+                            <button className={styles.btnSecondary} onClick={() => { setLutData(null); setLutSize(0); setLutName(''); setLutIntensity(100) }}>Remove</button>
+                          </div>
+                        </>
+                      ) : (
                         <div className={styles.btnRow}>
-                          <button className={styles.btnSecondary} onClick={() => lutFileRef.current?.click()}>Replace</button>
-                          <button className={styles.btnSecondary} onClick={() => { setLutData(null); setLutSize(0); setLutName(''); setLutIntensity(100) }}>Remove</button>
+                          <button className={styles.btnPrimary} onClick={() => lutFileRef.current?.click()}>Load .cube</button>
                         </div>
-                      </>
-                    ) : (
-                      <div className={styles.btnRow}>
-                        <button className={styles.btnPrimary} onClick={() => lutFileRef.current?.click()}>Load .cube LUT</button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </AccordionDrawer>
 
