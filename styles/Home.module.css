@@ -227,11 +227,11 @@
 
 .slider::-webkit-slider-thumb {
   appearance: none;
-  margin-top: -5px;      /* center 13px thumb on 3px track */
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #c8a96e;
+  margin-top: -1px;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: #e8e0d0;
   cursor: pointer;
 }
 
@@ -243,10 +243,10 @@
 
 .slider::-moz-range-thumb {
   appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #c8a96e;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: #e8e0d0;
   cursor: pointer;
   border: none;
 }
@@ -279,11 +279,11 @@
 
 .filterSlider::-webkit-slider-thumb {
   appearance: none;
-  margin-top: -5px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #c8a96e;
+  margin-top: -1px;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: #e8e0d0;
   cursor: pointer;
 }
 
@@ -295,10 +295,10 @@
 
 .filterSlider::-moz-range-thumb {
   appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #c8a96e;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: #e8e0d0;
   cursor: pointer;
   border: none;
 }

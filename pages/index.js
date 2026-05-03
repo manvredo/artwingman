@@ -41,7 +41,7 @@ function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
         <input type="range" min={min} max={max} step={step} value={v}
           onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
           className={styles.slider} style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#c8a96e' : '#555250' }}>
+        <span style={{ fontSize: 11, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#e8e0d0' : '#666260' }}>
           {display}
         </span>
       </div>
