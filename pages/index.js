@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { rgbToMunsell, rgbToMunsellExact, chromaDescription, valueDescription, samplePixels, labToRgb, munsellHvcToRgb } from '../lib/munsell'
-import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, uploadColorGroups as glUploadColorGroups, runMatchMask as glRunMatchMask, drawMatchOverlay as glDrawMatchOverlay } from '../lib/developGL'
+import { initGL, uploadImage as glUploadImage, updateLUT as glUpdateLUT, runDevelop as glRunDevelop, runValueGroups as glRunValueGroups, runChromaGroups as glRunChromaGroups, uploadColorGroups as glUploadColorGroups, runMatchMask as glRunMatchMask, drawMatchOverlay as glDrawMatchOverlay } from '../lib/developGL'
 import Filters, { FILTERS } from '../components/Filters'
 import Palette from '../components/Palette'
 import GridOverlay from '../components/GridOverlay'
@@ -1128,14 +1128,14 @@ export default function Home() {
                 <span className={styles.sliderVal}>{chromaSoften === 0 ? 'off' : chromaSoften}</span>
               </div>
               <div className={styles.btnRow}>
-                <button className={styles.btnSecondary} onClick={applyChromaGroups} disabled={!image}>
-                  Analyze
+                <button className={styles.btnSecondary} onClick={() => {
+                  setChromaMode(false)
+                  setChromaSteps(12)
+                  setChromaSoften(0)
+                  chromaTouchedRef.current = false
+                }} disabled={!image}>
+                  Reset
                 </button>
-                {(showGray || chromaMode) && (
-                  <button className={styles.btnSecondary} onClick={resetCanvas}>
-                    Reset
-                  </button>
-                )}
               </div>
             </div>
             <div className={styles.drawerResult}>
