@@ -35,15 +35,19 @@ function DevSlider({ k, label, min, max, step=0.5, fmt, develop, setDevelop }) {
   const v = develop[k]
   const display = fmt ? fmt(v) : `${v > 0 ? '+' : ''}${Number.isInteger(v) ? v : v.toFixed(1)}`
   return (
-    <div style={{ marginBottom: 6 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
         <span style={{ fontSize: 10, color: '#8a8680', fontFamily: 'monospace', width: 66, flexShrink: 0 }}>{label}</span>
+        <span style={{ fontSize: 12, fontFamily: 'monospace', minWidth: 44, textAlign: 'center', color: v !== 0 ? '#e8e0d0' : '#666260', lineHeight: 1 }}>
+          {display}
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 66, flexShrink: 0 }} />
         <input type="range" min={min} max={max} step={step} value={v}
           onChange={e => setDevelop(d => ({ ...d, [k]: Number(e.target.value) }))}
           className={styles.slider} style={{ flex: 1 }} />
-        <span style={{ fontSize: 11, fontFamily: 'monospace', minWidth: 44, textAlign: 'right', color: v !== 0 ? '#e8e0d0' : '#666260' }}>
-          {display}
-        </span>
+        <span style={{ width: 44 }} />
       </div>
       <div style={{ position: 'relative', height: 5, marginLeft: 72, marginRight: 50 }}>{devTicks(min, max)}</div>
     </div>
