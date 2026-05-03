@@ -1002,7 +1002,7 @@ export default function Home() {
     { label: 'VG', title: 'Value Groups', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2" fill="currentColor" opacity="0.9"/><rect x="1" y="7" width="14" height="2" fill="currentColor" opacity="0.6"/><rect x="1" y="11" width="14" height="2" fill="currentColor" opacity="0.3"/></svg> },
     { label: 'CG', title: 'Color Groups', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="#c87070"/><rect x="9" y="1" width="6" height="6" rx="1" fill="#70a0c8"/><rect x="1" y="9" width="6" height="6" rx="1" fill="#c8b470"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#70c89a"/></svg> },
     { label: 'CP', title: 'Color Palette', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2.5" fill="#c87070"/><circle cx="12" cy="4" r="2.5" fill="#70a0c8"/><circle cx="4" cy="12" r="2.5" fill="#c8b470"/><circle cx="12" cy="12" r="2.5" fill="#70c89a"/><circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.4"/></svg> },
-    { label: 'Flt', title: 'Filters', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="6" cy="4" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="10" cy="12" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/></svg> },
+    { label: 'Flt', title: 'Filter', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="6" cy="4" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="10" cy="12" r="2" fill="#1a1a1a" stroke="currentColor" strokeWidth="1.5"/></svg> },
     { label: 'PM', title: 'Paint Match', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13 L10 6 L12 8 L5 15 Z" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/><path d="M10 6 L12 4 Q14 2 13 4 L12 8" stroke="currentColor" strokeWidth="1.2" fill="none"/></svg> },
   ]
 
@@ -1282,7 +1282,7 @@ export default function Home() {
                   </div>
                 </AccordionDrawer>
 
-          <AccordionDrawer title="Filters" isOpen={openDrawer.includes('filters')} onToggle={() => toggleDrawer('filters')}>
+          <AccordionDrawer title="Filter" isOpen={openDrawer.includes('filter')} onToggle={() => toggleDrawer('filter')}>
             <div className={styles.drawerControls}>
               <Filters
                 activeFilter={activeFilter}
