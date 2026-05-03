@@ -1202,50 +1202,6 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <AccordionDrawer title="Color Palette" isOpen={openDrawer.includes('palette')} onToggle={() => toggleDrawer('palette')}>
-            <div className={styles.drawerResult}>
-              {/* Count buttons */}
-              <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-                {[6, 8, 12, 24].map(n => (
-                  <button key={n} onClick={() => setPaletteCount(n)} style={{
-                    flex: 1, padding: '3px 0', fontSize: 11, fontFamily: 'monospace',
-                    background: paletteCount === n ? 'rgba(200,169,110,0.2)' : 'transparent',
-                    border: paletteCount === n ? '1px solid rgba(200,169,110,0.5)' : '1px solid rgba(255,255,255,0.1)',
-                    color: paletteCount === n ? '#c8a96e' : '#555250',
-                    borderRadius: 4, cursor: 'pointer',
-                  }}>{n}</button>
-                ))}
-              </div>
-              {/* Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${paletteCount <= 8 ? 4 : paletteCount <= 12 ? 4 : 6}, 1fr)`, gap: 3 }}>
-                {(paletteClusters.length > 0
-                  ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
-                  : Array.from({ length: paletteCount }, () => null)
-                ).map((c, i) => {
-                  const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
-                  return (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <div style={{
-                        width: '100%', height: paletteCount <= 8 ? 32 : paletteCount <= 12 ? 28 : 22,
-                        borderRadius: 3,
-                        background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        cursor: c ? 'pointer' : 'default',
-                      }}
-                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
-                      />
-                      {paletteCount <= 12 && (
-                        <span style={{ fontSize: 9, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
-                          {m ? `${m.hue}` : '—'}
-                        </span>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </AccordionDrawer>
-
           <div className={styles.accordionSection}>Develop</div>
 
           <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
