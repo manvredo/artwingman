@@ -1,5 +1,6 @@
 import styles from '../styles/Home.module.css'
 import { CurvesEditor } from './Curves'
+import { DuotonePicker } from './DuotonePicker'
 
 const FILTERS = [
   { id: 'contour',   label: 'Contour',      min: 1, max: 20, unit: '',  sliderLabel: 'Strength',  def: 5 },
@@ -79,26 +80,16 @@ export default function Filters({ activeFilter, onFilterChange, filterStrength, 
 
           {activeFilter === f.id && f.id === 'duotone' && duotoneColors && (
             <div style={{ marginTop: 8, paddingLeft: 2, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 10, color: '#8a8680', width: 40 }}>Dark</div>
-                <input
-                  type="color"
-                  value={duotoneColors.colorA}
-                  onChange={e => onDuotoneColorsChange(e.target.value, null)}
-                  style={{ width: 40, height: 24, border: 'none', cursor: 'pointer' }}
-                />
-                <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{duotoneColors.colorA}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 10, color: '#8a8680', width: 40 }}>Light</div>
-                <input
-                  type="color"
-                  value={duotoneColors.colorB}
-                  onChange={e => onDuotoneColorsChange(null, e.target.value)}
-                  style={{ width: 40, height: 24, border: 'none', cursor: 'pointer' }}
-                />
-                <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{duotoneColors.colorB}</span>
-              </div>
+              <DuotonePicker
+                color={duotoneColors.colorA}
+                onChange={(hex) => onDuotoneColorsChange(hex, null)}
+                label="Dark"
+              />
+              <DuotonePicker
+                color={duotoneColors.colorB}
+                onChange={(hex) => onDuotoneColorsChange(null, hex)}
+                label="Light"
+              />
             </div>
           )}
         </div>
