@@ -153,6 +153,9 @@ export default function Home() {
   const [colorSteps, setColorSteps] = useState(30)
   const [colorSoften, setColorSoften] = useState(0)
   const colorTouchedRef = useRef(false) // true after user first drags the slider
+  const [chromaSteps, setChromaSteps] = useState(12)
+  const [chromaSoften, setChromaSoften] = useState(0)
+  const chromaTouchedRef = useRef(false)
   const [colorActive, setColorActive] = useState(false) // color groups on/off
   const [colorRating, setColorRating] = useState(null)
   const [colorClusters, setColorClusters] = useState([])
@@ -177,6 +180,7 @@ export default function Home() {
   const developGenRef = useRef(0)
   const colorDebounceRef = useRef(null)
   const valueDebounceRef = useRef(null)
+  const chromaDebounceRef = useRef(null)
   const lutFileRef = useRef(null)
   const glCanvasRef = useRef(null)
   const glStateRef = useRef(null)
@@ -218,6 +222,7 @@ export default function Home() {
         setColorSoften(0)
         colorTouchedRef.current = false
         valueTouchedRef.current = false
+        chromaTouchedRef.current = false
         setDevelop(DEVELOP_DEFAULTS)
         setTimeout(() => {
           const canvas = canvasRef.current
@@ -610,6 +615,48 @@ export default function Home() {
     setValueRating(null)
   }, [])
 
+  const applyChromaGroups = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !originalImageDataRef.current) return
+    const gl = glStateRef.current
+    if (gl && gl.w > 1) {
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      glRunChromaGroups(gl, chromaSteps, chromaSoften, ctx)
+    } else {
+      // CPU fallback
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const imageData = new ImageData(
+        new Uint8ClampedArray(originalImageDataRef.current.data),
+        originalImageDataRef.current.width,
+        originalImageDataRef.current.height
+      )
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i+1], b = data[i+2]
+        const R = r / 255, G = g / 255, B = b / 255
+        const rl = R > 0.04045 ? Math.pow((R + 0.055) / 1.055, 2.4) : R / 12.92
+        const gl2 = G > 0.04045 ? Math.pow((G + 0.055) / 1.055, 2.4) : G / 12.92
+        const bl = B > 0.04045 ? Math.pow((B + 0.055) / 1.055, 2.4) : B / 12.92
+        const x = rl * 0.4124564 + gl2 * 0.3575761 + bl * 0.1804375
+        const y = rl * 0.2126729 + gl2 * 0.7151522 + bl * 0.0721750
+        const z = rl * 0.0193339 + gl2 * 0.1191920 + bl * 0.9503041
+        const Xn = 0.95047, Yn = 1.0, Zn = 1.08883
+        const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116
+        const fy = f(y / Yn)
+        const a = 500 * (f(x / Xn) - fy)
+        const bv = 200 * (fy - f(z / Zn))
+        const chroma = Math.sqrt(a * a + bv * bv)
+        const group = Math.min(chromaSteps - 1, Math.floor((chroma / 60) * chromaSteps))
+        const grayVal = Math.round((0.02 + (group / (chromaSteps - 1)) * 0.98) * 255)
+        data[i] = data[i+1] = data[i+2] = grayVal
+      }
+      ctx.putImageData(imageData, 0, 0)
+    }
+    setChromaMode(true)
+    setShowGray(false)
+    setValueRating(null)
+  }, [chromaSteps, chromaSoften])
+
   const applyColorGroups = useCallback(() => {
     if (!originalImageDataRef.current) return
     const src = originalImageDataRef.current
@@ -650,6 +697,14 @@ export default function Home() {
     valueDebounceRef.current = setTimeout(() => applyValueGroups(), 150)
     return () => clearTimeout(valueDebounceRef.current)
   }, [valueSteps, valueSoften, applyValueGroups, image])
+
+  // Real-time chroma groups: re-run when slider changes — only after user touched
+  useEffect(() => {
+    if (!image || !chromaTouchedRef.current) return
+    clearTimeout(chromaDebounceRef.current)
+    chromaDebounceRef.current = setTimeout(() => applyChromaGroups(), 150)
+    return () => clearTimeout(chromaDebounceRef.current)
+  }, [chromaSteps, chromaSoften, applyChromaGroups, image])
 
   const resetCanvas = useCallback(() => {
     const canvas = canvasRef.current
@@ -989,6 +1044,58 @@ export default function Home() {
                 {Array.from({ length: valueSteps }).map((_, i) => (
                   <div key={i} className={styles.valueStep}
                     style={{ background: `hsl(0,0%,${Math.round(2 + (i / (valueSteps - 1)) * 98)}%)` }} />
+                ))}
+              </div>
+            </div>
+          </AccordionDrawer>
+
+          <AccordionDrawer title="Chroma Groups" isOpen={openDrawer.includes('chroma')} onToggle={() => toggleDrawer('chroma')}>
+            <div className={styles.drawerControls}>
+              <div className={styles.sectionLabel}>Number of steps</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(2, 12)}
+                  <input type="range" min="2" max="12" step="1" value={chromaSteps}
+                    onChange={e => { chromaTouchedRef.current = true; setChromaSteps(Number(e.target.value)) }}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
+                <span className={styles.sliderVal}>{chromaSteps}</span>
+              </div>
+              <div className={styles.sectionLabel}>Soften</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(0, 20)}
+                  <input type="range" min="0" max="20" step="1" value={chromaSoften}
+                    onChange={e => { chromaTouchedRef.current = true; setChromaSoften(Number(e.target.value)) }}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
+                <span className={styles.sliderVal}>{chromaSoften === 0 ? 'off' : chromaSoften}</span>
+              </div>
+              <div className={styles.btnRow}>
+                <button className={styles.btnSecondary} onClick={applyOriginalBW} disabled={!image}>
+                  S/W
+                </button>
+                <button className={styles.btnSecondary} onClick={applyChromaMode} disabled={!image}>
+                  Chroma
+                </button>
+                <button className={styles.btnSecondary} onClick={applyChromaGroups} disabled={!image}>
+                  Analyze
+                </button>
+                {(showGray || chromaMode) && (
+                  <button className={styles.btnSecondary} onClick={resetCanvas}>
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className={styles.drawerResult}>
+              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c8a96e' }}>
+                {chromaSteps} chroma
+              </div>
+              <div className={styles.valueSteps}>
+                {Array.from({ length: chromaSteps }).map((_, i) => (
+                  <div key={i} className={styles.valueStep}
+                    style={{ background: `hsl(0,0%,${Math.round(2 + (i / (chromaSteps - 1)) * 98)}%)` }} />
                 ))}
               </div>
             </div>
