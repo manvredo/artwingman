@@ -16,21 +16,20 @@ const DEFAULT_COLOR = {
 }
 
 function devTicks(min, max) {
+  const range = max - min
+  const count = 20
   const ticks = []
-  const step = (max - min) / 100
-  for (let i = 0; i <= 100; i++) {
-    const v = min + i * step
-    const pct = i
-    const isMain = i % 25 === 0
-    const isMid = i === 50
+  for (let i = 0; i <= count; i++) {
+    const pct = (i / count) * 100
+    const isMain = i % 5 === 0
     ticks.push(
       <div key={i} style={{
         position: 'absolute',
         left: `${pct}%`,
         top: 0,
         width: 1,
-        height: isMain ? 6 : isMid ? 4 : 2,
-        background: isMain ? 'rgba(255,255,255,0.5)' : isMid ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)',
+        height: isMain ? 6 : 2,
+        background: isMain ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)',
         transform: 'translateX(-50%)',
       }} />
     )
