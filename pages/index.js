@@ -1044,7 +1044,7 @@ export default function Home() {
 
         <div className={styles.accordion}>
 
-          <div className={styles.accordionSection}>Analyze</div>
+          <div style={{ fontSize: 12, color: '#c8a96e', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '10px 12px 4px', fontWeight: 500 }}>Analyze</div>
 
           <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
@@ -1202,7 +1202,7 @@ export default function Home() {
             </div>
           </AccordionDrawer>
 
-          <div className={styles.accordionSection}>Develop</div>
+          <div style={{ fontSize: 12, color: '#c8a96e', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '10px 12px 4px', fontWeight: 500 }}>Develop</div>
 
           <AccordionDrawer title="Temperature" isOpen={openDrawer.includes('temperature')} onToggle={() => toggleDrawer('temperature')}>
                   <div className={styles.drawerControls}>
