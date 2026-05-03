@@ -983,17 +983,23 @@ export default function Home() {
           <AccordionDrawer title="Color Groups" isOpen={openDrawer.includes('color')} onToggle={() => toggleDrawer('color')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="2" max="30" step="1" value={colorSteps}
-                  onChange={e => { colorTouchedRef.current = true; setColorSteps(Number(e.target.value)) }}
-                  className={styles.slider} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(2, 30)}
+                  <input type="range" min="2" max="30" step="1" value={colorSteps}
+                    onChange={e => { colorTouchedRef.current = true; setColorSteps(Number(e.target.value)) }}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
                 <span className={styles.sliderVal}>{colorSteps}</span>
               </div>
               <div className={styles.sectionLabel}>Soften</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="0" max="20" step="1" value={colorSoften}
-                  onChange={e => setColorSoften(Number(e.target.value))}
-                  className={styles.slider} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(0, 20)}
+                  <input type="range" min="0" max="20" step="1" value={colorSoften}
+                    onChange={e => setColorSoften(Number(e.target.value))}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
                 <span className={styles.sliderVal}>{colorSoften === 0 ? 'off' : colorSoften}</span>
               </div>
               <div className={styles.btnRow}>
