@@ -1072,12 +1072,6 @@ export default function Home() {
                 <span className={styles.sliderVal}>{chromaSoften === 0 ? 'off' : chromaSoften}</span>
               </div>
               <div className={styles.btnRow}>
-                <button className={styles.btnSecondary} onClick={applyOriginalBW} disabled={!image}>
-                  S/W
-                </button>
-                <button className={styles.btnSecondary} onClick={applyChromaMode} disabled={!image}>
-                  Chroma
-                </button>
                 <button className={styles.btnSecondary} onClick={applyChromaGroups} disabled={!image}>
                   Analyze
                 </button>
