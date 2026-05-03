@@ -977,6 +977,55 @@ export default function Home() {
 
   const paletteGridCols = paletteCount <= 8 ? 'repeat(4, 1fr)' : paletteCount <= 12 ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)'
 
+  // Extract info bar bottom row to avoid SWC nested-flex parsing issue
+  const colorPaletteRow = (
+    <div className={styles.infoBarRowBottom}>
+      <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 260, borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className={styles.infoLabel}>Color Palette</div>
+        <div style={{ display: 'grid', gridTemplateColumns: paletteGridCols, gap: 3, flex: 1 }}>
+          {(paletteClusters.length > 0
+            ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
+            : Array.from({ length: paletteCount }, () => null)
+          ).map((c, i) => {
+            const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
+            return (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <div style={{
+                  width: '100%', height: paletteCount <= 8 ? 28 : paletteCount <= 12 ? 24 : 20,
+                  borderRadius: 3,
+                  background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  cursor: c ? 'pointer' : 'default',
+                }}
+                  onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
+                />
+                {paletteCount <= 12 && (
+                  <span style={{ fontSize: 8, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
+                    {m ? `${m.hue}` : '—'}
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 200 }}>
+        <div className={styles.infoLabel}>Palette</div>
+        <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+          <Palette
+            palette={palette}
+            selected={selectedSwatch}
+            onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+            onRemove={removeFromPalette}
+            onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+            onAddToPalette={hasColor ? addToPalette : null}
+            hasColor={hasColor}
+          />
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div className={styles.layout}>
       <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
@@ -2009,54 +2058,7 @@ export default function Home() {
           </div>
 
           {/* Bottom row: Color Palette + Palette */}
-          <div className={styles.infoBarRowBottom}>
-            {/* Color Palette (dominant image colors) */}
-            <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 260, borderRight: '1px solid rgba(255,255,255,0.08)' }}>
-              <div className={styles.infoLabel}>Color Palette</div>
-              <div style={{ display: 'grid', gridTemplateColumns: paletteGridCols, gap: 3, flex: 1 }}>
-                {(paletteClusters.length > 0
-                  ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
-                  : Array.from({ length: paletteCount }, () => null)
-                ).map((c, i) => {
-                  const m = c ? rgbToMunsellExact(c.r, c.g, c.b) : null
-                  return (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <div style={{
-                        width: '100%', height: paletteCount <= 8 ? 28 : paletteCount <= 12 ? 24 : 20,
-                        borderRadius: 3,
-                        background: c ? `rgb(${c.r},${c.g},${c.b})` : '#2a2a2a',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        cursor: c ? 'pointer' : 'default',
-                      }}
-                        onClick={() => { if (!c) return; setColor({ r: c.r, g: c.g, b: c.b, ...rgbToMunsellExact(c.r, c.g, c.b) }); setColorOverlayView('rgb'); setShowColorOverlay(true); }}
-                      />
-                      {paletteCount <= 12 && (
-                        <span style={{ fontSize: 8, color: '#555250', fontFamily: 'monospace', textAlign: 'center', lineHeight: 1.2 }}>
-                          {m ? `${m.hue}` : '—'}
-                        </span>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Panel 6: Palette */}
-            <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 200 }}>
-              <div className={styles.infoLabel}>Palette</div>
-              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-                <Palette
-                  palette={palette}
-                  selected={selectedSwatch}
-                  onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                  onRemove={removeFromPalette}
-                  onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-                  onAddToPalette={hasColor ? addToPalette : null}
-                  hasColor={hasColor}
-                />
-              </div>
-            </div>
-          </div>
+          {colorPaletteRow}
 
         </div>
         )}
