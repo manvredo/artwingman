@@ -1530,7 +1530,6 @@ export default function Home() {
                       }} />
                     )}
                   </div>
-                  {staticLoupe}
                 )
               })()}
               <StaticLoupe loupeCanvasRef={loupeCanvasRef} hoverMunsell={hoverMunsell} loupeData={loupeData} />
