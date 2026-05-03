@@ -1537,7 +1537,7 @@ export default function Home() {
                   return (
                     <div style={{
                       position: 'fixed',
-                      left: clickPos.x > window.innerWidth / 2 ? clickPos.x - 160 : clickPos.x + 20,
+                      left: clickPos.x - 160,
                       top: clickPos.y - 32,
                       transition: 'left 0.05s ease-out, top 0.05s ease-out',
                       padding: '3px 8px',
@@ -1971,23 +1971,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Panel 5: Palette */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
-            <div className={styles.infoLabel}>Palette</div>
-            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-              <Palette
-                palette={palette}
-                selected={selectedSwatch}
-                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
-                onRemove={removeFromPalette}
-                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
-                onAddToPalette={hasColor ? addToPalette : null}
-                hasColor={hasColor}
-              />
-            </div>
-          </div>
-
-          {/* Panel 6: Munsell Chart */}
+          {/* Panel 5: Munsell Chart */}
           <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
             <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
             <MunsellChart
@@ -2004,6 +1988,22 @@ export default function Home() {
                 setShowColorOverlay(true)
               }}
             />
+          </div>
+
+          {/* Panel 6: Palette */}
+          <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`}>
+            <div className={styles.infoLabel}>Palette</div>
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              <Palette
+                palette={palette}
+                selected={selectedSwatch}
+                onSelect={(i) => setSelectedSwatch(prev => prev === i ? null : i)}
+                onRemove={removeFromPalette}
+                onClear={() => { setPalette([]); setSelectedSwatch(null) }}
+                onAddToPalette={hasColor ? addToPalette : null}
+                hasColor={hasColor}
+              />
+            </div>
           </div>
 
         </div>
