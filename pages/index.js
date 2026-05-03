@@ -512,7 +512,7 @@ export default function Home() {
     const ctx = mc.getContext('2d')
     ctx.clearRect(0, 0, mc.width, mc.height)
     ctx.drawImage(c, 0, 0, mc.width, mc.height)
-  }, [image, colorActive, showGray, chromaMode])
+  }, [image, colorActive, showGray, chromaMode, valueSteps, valueSoften])
 
   // Sync LUT to GL state whenever it changes
   useEffect(() => {
