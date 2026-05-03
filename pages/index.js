@@ -1466,7 +1466,7 @@ export default function Home() {
                     )}
                   </div>
                   {/* Static Loupe below Minimap */}
-                  {loupeMode && (
+                  {loupeMode ? (
                     <div style={{
                       position: 'absolute',
                       top: 166, left: 10,
@@ -1484,7 +1484,7 @@ export default function Home() {
                         <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
                         <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
                       </div>
-                      {hoverMunsell && (
+                      {hoverMunsell ? (
                         <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                           <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
                             <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
@@ -1494,9 +1494,9 @@ export default function Home() {
                             {hoverMunsell.munsellStr}
                           </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
-                  )}
+                  ) : null}
                 )
               })()}
               <div
