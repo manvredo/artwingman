@@ -25,7 +25,7 @@ function devTicks(min, max) {
       left: `${(v - min) / (max - min) * 100}%`,
       top: 0, width: 1,
       height: v === mid ? 5 : 3,
-      background: v === mid ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
+      background: v === mid ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)',
       transform: 'translateX(-50%)',
     }} />
   ))
