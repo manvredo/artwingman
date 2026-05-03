@@ -1133,6 +1133,11 @@ export default function Home() {
                   setChromaSteps(12)
                   setChromaSoften(0)
                   chromaTouchedRef.current = false
+                  const canvas = canvasRef.current
+                  if (canvas && originalImageDataRef.current) {
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+                    ctx.putImageData(originalImageDataRef.current, 0, 0)
+                  }
                 }} disabled={!image}>
                   Reset
                 </button>
