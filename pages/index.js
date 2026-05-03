@@ -937,17 +937,23 @@ export default function Home() {
           <AccordionDrawer title="Value Groups" isOpen={openDrawer.includes('value')} onToggle={() => toggleDrawer('value')}>
             <div className={styles.drawerControls}>
               <div className={styles.sectionLabel}>Number of steps</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="2" max="10" step="1" value={valueSteps}
-                  onChange={e => setValueSteps(Number(e.target.value))}
-                  className={styles.slider} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(2, 10)}
+                  <input type="range" min="2" max="10" step="1" value={valueSteps}
+                    onChange={e => setValueSteps(Number(e.target.value))}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
                 <span className={styles.sliderVal}>{valueSteps}</span>
               </div>
               <div className={styles.sectionLabel}>Soften</div>
-              <div className={styles.sliderRow}>
-                <input type="range" min="0" max="20" step="1" value={valueSoften}
-                  onChange={e => setValueSoften(Number(e.target.value))}
-                  className={styles.slider} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative', height: 8 }}>
+                  {devTicks(0, 20)}
+                  <input type="range" min="0" max="20" step="1" value={valueSoften}
+                    onChange={e => setValueSoften(Number(e.target.value))}
+                    className={styles.slider} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }} />
+                </div>
                 <span className={styles.sliderVal}>{valueSoften === 0 ? 'off' : valueSoften}</span>
               </div>
               <div className={styles.btnRow}>
