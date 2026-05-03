@@ -975,6 +975,8 @@ export default function Home() {
     { label: 'PM', title: 'Paint Match', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13 L10 6 L12 8 L5 15 Z" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinejoin="round"/><path d="M10 6 L12 4 Q14 2 13 4 L12 8" stroke="currentColor" strokeWidth="1.2" fill="none"/></svg> },
   ]
 
+  const paletteGridCols = paletteCount <= 8 ? 'repeat(4, 1fr)' : paletteCount <= 12 ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)'
+
   return (
     <div className={styles.layout}>
       <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
@@ -2011,7 +2013,7 @@ export default function Home() {
             {/* Color Palette (dominant image colors) */}
             <div className={`${styles.infoPanel} ${styles.infoPanelPalette}`} style={{ width: 260, borderRight: '1px solid rgba(255,255,255,0.08)' }}>
               <div className={styles.infoLabel}>Color Palette</div>
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${paletteCount <= 8 ? 4 : paletteCount <= 12 ? 4 : 6}, 1fr)`, gap: 3, flex: 1 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: paletteGridCols, gap: 3, flex: 1 }}>
                 {(paletteClusters.length > 0
                   ? [...paletteClusters].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, paletteCount)
                   : Array.from({ length: paletteCount }, () => null)
