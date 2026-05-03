@@ -71,6 +71,10 @@ export default function MunsellChart({ hueAngle, hueName, hue, value, chroma, co
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
+    // Set initial size from clientWidth/clientHeight to ensure first render
+    const w = Math.max(1, Math.floor(el.clientWidth))
+    const h = Math.max(1, Math.floor(el.clientHeight))
+    if (w > 1 || h > 1) setSz({ w, h })
     const ro = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect
       setSz({ w: Math.max(1, Math.floor(width)), h: Math.max(1, Math.floor(height)) })
