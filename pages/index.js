@@ -509,9 +509,14 @@ export default function Home() {
     const mc = minimapCanvasRef.current
     const c = canvasRef.current
     if (!mc || !c) return
-    const ctx = mc.getContext('2d')
-    ctx.clearRect(0, 0, mc.width, mc.height)
-    ctx.drawImage(c, 0, 0, mc.width, mc.height)
+    const draw = () => {
+      try {
+        const ctx = mc.getContext('2d')
+        ctx.clearRect(0, 0, mc.width, mc.height)
+        ctx.drawImage(c, 0, 0, mc.width, mc.height)
+      } catch (e) { /* canvas not ready */ }
+    }
+    requestAnimationFrame(draw)
   }, [image, colorActive, showGray, chromaMode, valueSteps, valueSoften])
 
   // Sync LUT to GL state whenever it changes
