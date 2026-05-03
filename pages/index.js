@@ -142,7 +142,7 @@ export default function Home() {
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false })
   const [sampleRadius, setSampleRadius] = useState(3)
   const [dragging, setDragging] = useState(false)
-  const [openDrawer, setOpenDrawer] = useState(['color', 'value'])
+  const [openDrawer, setOpenDrawer] = useState([])
   const [valueSteps, setValueSteps] = useState(10)
   const [showGray, setShowGray] = useState(false)
   const [chromaMode, setChromaMode] = useState(false)
