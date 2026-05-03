@@ -164,6 +164,7 @@ export default function Home() {
   const [loupeMode, setLoupeMode] = useState(true)
   const [showMunsellValues, setShowMunsellValues] = useState(true)
   const [showMinimap, setShowMinimap] = useState(true)
+  const chartPanelRef = useRef(null)
   const [matchColor, setMatchColor] = useState(null)
   const [matchPixels, setMatchPixels] = useState([])
   const [matchMode, setMatchMode] = useState(false)
@@ -1531,14 +1532,15 @@ export default function Home() {
                     </>
                   )
                 })()}
-                {!loupeMode && showMunsellValues && hoverMunsell && image && clickPos && (() => {
+                {!loupeMode && showMunsellValues && hoverMunsell && image && hoverPos && (() => {
                   const lum = (0.299 * hoverMunsell.r + 0.587 * hoverMunsell.g + 0.114 * hoverMunsell.b) / 255
                   const isLight = lum > 0.5
+                  const chartRight = chartPanelRef.current ? chartPanelRef.current.getBoundingClientRect().right : hoverPos.x
                   return (
                     <div style={{
                       position: 'fixed',
-                      left: clickPos.x - 80,
-                      top: clickPos.y - 32,
+                      left: Math.min(hoverPos.x + 20, chartRight + 8),
+                      top: hoverPos.y - 32,
                       transition: 'left 0.05s ease-out, top 0.05s ease-out',
                       padding: '3px 8px',
                       borderRadius: 4,
@@ -1972,7 +1974,7 @@ export default function Home() {
           </div>
 
           {/* Panel 5: Munsell Chart */}
-          <div className={`${styles.infoPanel} ${styles.infoPanelChart}`}>
+          <div className={`${styles.infoPanel} ${styles.infoPanelChart}`} ref={chartPanelRef}>
             <div className={styles.infoLabel}>Munsell Chart — {color.hueName !== '—' ? color.hueName : 'pick a color'}</div>
             <MunsellChart
               compact
