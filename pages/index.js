@@ -100,7 +100,7 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData, loupePos, onLoup
       style={{
         position: 'absolute',
         top: loupePos.y, left: loupePos.x,
-        width: 150, height: 225,
+        width: 200, height: 275,
         background: 'rgba(14,14,14,0.9)',
         borderRadius: 8,
         border: '1px solid rgba(255,255,255,0.2)',
@@ -110,7 +110,7 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData, loupePos, onLoup
         cursor: 'move',
       }}
     >
-      <canvas ref={loupeCanvasRef} width={150} height={225} style={{ display: 'block', width: 150, height: 225 }} />
+      <canvas ref={loupeCanvasRef} width={200} height={275} style={{ display: 'block', width: 200, height: 275 }} />
     </div>
   )
 }
@@ -202,7 +202,7 @@ export default function Home() {
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [colorOverlayView, setColorOverlayView] = useState('munsell') // 'munsell' | 'rgb'
   const [compGray, setCompGray] = useState(3)
-  const [loupePos, setLoupePos] = useState({ x: 10, y: 166 })
+  const [loupePos, setLoupePos] = useState({ x: 170, y: 166 })
   const [valueSoften, setValueSoften] = useState(0)
   const valueTouchedRef = useRef(false)
   const [colorSteps, setColorSteps] = useState(30)
@@ -539,9 +539,9 @@ export default function Home() {
         const scaleY = (imgDims.h || 1) / rect.height
         const px = (e.clientX - rect.left) * scaleX
         const py = (e.clientY - rect.top) * scaleY
-        loupeCtx.clearRect(0, 0, 150, 225)
+        loupeCtx.clearRect(0, 0, 200, 275)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, Math.floor(px - 30), Math.floor(py - 30), 60, 90, 0, 0, 150, 225)
+        loupeCtx.drawImage(canvas, Math.floor(px - 40), Math.floor(py - 55), 80, 110, 0, 0, 200, 275)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
@@ -1508,7 +1508,7 @@ export default function Home() {
               className={styles.canvasWrap}
               style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.fillStyle = '#555'; lc.fillRect(0, 0, 150, 225) } }}
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.fillStyle = '#555'; lc.fillRect(0, 0, 200, 275) } }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
               onTouchStart={handleTouchStart}
