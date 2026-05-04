@@ -521,12 +521,12 @@ export default function Home() {
       setHoverMunsell({ munsellStr, r, g, b })
       setHoverPos({ x: visualX, y: visualY })
 
-      // Loupe: 20x20px crop in image space → 100x100 canvas on screen
+      // Loupe: 20x20px crop in image space → 150x150 canvas on screen
       const loupeCtx = loupeCanvasRef.current?.getContext('2d')
       if (loupeCtx && canvas) {
-        loupeCtx.clearRect(0, 0, 100, 100)
+        loupeCtx.clearRect(0, 0, 150, 150)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, imgX - 20, imgY - 20, 40, 40, 0, 0, 100, 100)
+        loupeCtx.drawImage(canvas, imgX - 20, imgY - 20, 40, 40, 0, 0, 150, 150)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
@@ -1493,7 +1493,7 @@ export default function Home() {
               className={styles.canvasWrap}
               style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.clearRect(0, 0, 100, 100) } }}
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.clearRect(0, 0, 150, 150) } }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
               onTouchStart={handleTouchStart}
