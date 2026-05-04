@@ -1045,7 +1045,7 @@ export default function Home() {
     <div style={{
       position: 'absolute',
       top: 166, left: 10,
-      width: 100,
+      width: 150,
       background: 'rgba(14,14,14,0.9)',
       borderRadius: 8,
       border: '1px solid rgba(255,255,255,0.2)',
@@ -1054,7 +1054,7 @@ export default function Home() {
       pointerEvents: 'none',
       zIndex: 10,
     }}>
-      <canvas ref={loupeCanvasRef} width={100} height={100} style={{ display: 'block', width: 100, height: 100 }} />
+      <canvas ref={loupeCanvasRef} width={150} height={150} style={{ display: 'block', width: 150, height: 150 }} />
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
         <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
         <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
