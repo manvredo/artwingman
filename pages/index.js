@@ -1601,19 +1601,21 @@ export default function Home() {
                 {showCrosshair && image && (() => {
                   return (
                     <>
-                      {/* Horizontal ruler bar - top edge */}
+                      {/* Horizontal ruler bar - top edge, spans full canvasWrap width */}
                       <div
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 16, background: 'rgba(0,0,0,0.4)', zIndex: 20, cursor: 'ew-resize' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 20, background: '#222', borderBottom: '1px solid rgba(255,255,255,0.3)', zIndex: 20, cursor: 'ew-resize' }}
                         onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true }}
                       >
-                        <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.5)', transform: 'translateY(-50%)' }} />
+                        {/* Indicator dot showing vertical line position */}
+                        <div style={{ position: 'absolute', top: '50%', left: `${crosshairH * 100}%`, transform: 'translate(-50%, -50%)', width: 8, height: 8, borderRadius: '50%', background: '#fff', pointerEvents: 'none' }} />
                       </div>
-                      {/* Vertical ruler bar - left edge */}
+                      {/* Vertical ruler bar - left edge, spans full canvasWrap height */}
                       <div
-                        style={{ position: 'absolute', top: 0, left: 0, width: 16, height: '100%', background: 'rgba(0,0,0,0.4)', zIndex: 20, cursor: 'ns-resize' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: 20, height: '100%', background: '#222', borderRight: '1px solid rgba(255,255,255,0.3)', zIndex: 20, cursor: 'ns-resize' }}
                         onMouseDown={(e) => { e.stopPropagation(); crosshairDragV.current = true }}
                       >
-                        <div style={{ position: 'absolute', top: 0, left: '50%', width: 1, height: '100%', background: 'rgba(255,255,255,0.5)', transform: 'translateX(-50%)' }} />
+                        {/* Indicator dot showing horizontal line position */}
+                        <div style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: '50%', transform: 'translate(-50%, -50%)', width: 8, height: 8, borderRadius: '50%', background: '#fff', pointerEvents: 'none' }} />
                       </div>
                       {/* Vertical crosshair line - draggable anywhere on line */}
                       <div
