@@ -1534,7 +1534,7 @@ export default function Home() {
                   </div>
                 )
               })()}
-              <StaticLoupe loupeCanvasRef={loupeCanvasRef} hoverMunsell={hoverMunsell} loupeData={loupeData} />
+              {loupeMode && <StaticLoupe loupeCanvasRef={loupeCanvasRef} hoverMunsell={hoverMunsell} loupeData={loupeData} />}
               <div
                 className={styles.canvasInner}
                 style={{
