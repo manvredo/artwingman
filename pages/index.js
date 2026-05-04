@@ -1804,7 +1804,7 @@ export default function Home() {
             </svg>
           </button>
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-          <button className={styles.viewBtn} onClick={() => setShowMinimap(m => !m)} title="Minimap an/aus" disabled={!image} style={{ color: showMinimap && image ? '#8a8680' : '#555250' }}>
+          <button className={styles.viewBtn} onClick={() => { setShowMinimap(m => !m); if (showMinimap) setMinimapTrigger(t => t + 1) }} title="Minimap an/aus" disabled={!image} style={{ color: showMinimap && image ? '#8a8680' : '#555250' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
               <rect x="5" y="5" width="6" height="6" rx="0.5" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1"/>
