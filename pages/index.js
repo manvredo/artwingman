@@ -518,14 +518,17 @@ export default function Home() {
       setHoverPos({ x: visualX, y: visualY })
 
       // Loupe: 20x20px crop in image space → 150x150 canvas on screen
-      // Use exact floating-point imgX/imgY so loupe centers on cursor crosshair
+      // Use rect-based coords like sampleColor for crosshair alignment
       const loupeCtx = loupeCanvasRef.current?.getContext('2d')
       if (loupeCtx && canvas) {
-        const exactImgX = (innerX - viewport.panX) / viewport.zoom
-        const exactImgY = (innerY - viewport.panY) / viewport.zoom
+        const rect = canvasRef.current.getBoundingClientRect()
+        const scaleX = (imgDims.w || 1) / rect.width
+        const scaleY = (imgDims.h || 1) / rect.height
+        const px = (e.clientX - rect.left) * scaleX
+        const py = (e.clientY - rect.top) * scaleY
         loupeCtx.clearRect(0, 0, 150, 150)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, Math.floor(exactImgX - 20), Math.floor(exactImgY - 20), 40, 40, 0, 0, 150, 150)
+        loupeCtx.drawImage(canvas, Math.floor(px - 20), Math.floor(py - 20), 40, 40, 0, 0, 150, 150)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
