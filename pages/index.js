@@ -99,7 +99,7 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
     <div style={{
       position: 'absolute',
       top: 166, left: 10,
-      width: 150,
+      width: 150, height: 225,
       background: 'rgba(14,14,14,0.9)',
       borderRadius: 8,
       border: '1px solid rgba(255,255,255,0.2)',
@@ -108,7 +108,7 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
       pointerEvents: 'none',
       zIndex: 10,
     }}>
-      <canvas ref={loupeCanvasRef} width={150} height={150} style={{ display: 'block', width: 150, height: 150 }} />
+      <canvas ref={loupeCanvasRef} width={150} height={225} style={{ display: 'block', width: 150, height: 225 }} />
       <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
           <div style={{ flex: 1, height: 10, background: isActive ? `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})` : '#555', borderRadius: 2 }} />
@@ -526,9 +526,9 @@ export default function Home() {
         const scaleY = (imgDims.h || 1) / rect.height
         const px = (e.clientX - rect.left) * scaleX
         const py = (e.clientY - rect.top) * scaleY
-        loupeCtx.clearRect(0, 0, 150, 150)
+        loupeCtx.clearRect(0, 0, 150, 225)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, Math.floor(px - 30), Math.floor(py - 30), 60, 60, 0, 0, 150, 150)
+        loupeCtx.drawImage(canvas, Math.floor(px - 30), Math.floor(py - 30), 60, 90, 0, 0, 150, 225)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
@@ -1047,7 +1047,7 @@ export default function Home() {
     <div style={{
       position: 'absolute',
       top: 166, left: 10,
-      width: 150,
+      width: 150, height: 225,
       background: 'rgba(14,14,14,0.9)',
       borderRadius: 8,
       border: '1px solid rgba(255,255,255,0.2)',
@@ -1056,7 +1056,7 @@ export default function Home() {
       pointerEvents: 'none',
       zIndex: 10,
     }}>
-      <canvas ref={loupeCanvasRef} width={150} height={150} style={{ display: 'block', width: 150, height: 150 }} />
+      <canvas ref={loupeCanvasRef} width={150} height={225} style={{ display: 'block', width: 150, height: 225 }} />
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
         <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
         <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
@@ -1495,7 +1495,7 @@ export default function Home() {
               className={styles.canvasWrap}
               style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.fillStyle = '#555'; lc.fillRect(0, 0, 150, 150) } }}
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.fillStyle = '#555'; lc.fillRect(0, 0, 150, 225) } }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
               onTouchStart={handleTouchStart}
