@@ -219,6 +219,10 @@ export default function Home() {
   const [loupeMode, setLoupeMode] = useState(true)
   const [showMunsellValues, setShowMunsellValues] = useState(true)
   const [showMinimap, setShowMinimap] = useState(true)
+  const [showCrosshair, setShowCrosshair] = useState(false)
+  const [crosshairPos, setCrosshairPos] = useState({ x: 0, y: 0 })
+  const [crosshairH, setCrosshairH] = useState(0.5) // 0-1 horizontal position
+  const [crosshairV, setCrosshairV] = useState(0.5) // 0-1 vertical position
   const chartPanelRef = useRef(null)
   const [matchColor, setMatchColor] = useState(null)
   const [matchPixels, setMatchPixels] = useState([])
@@ -450,6 +454,31 @@ export default function Home() {
       setLoupePos({ x: loupeDragRef.current.startLoupeX + dx, y: loupeDragRef.current.startLoupeY + dy })
     }
     const onMouseUp = () => { loupeDragRef.current = null }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp) }
+  }, [])
+
+  const crosshairDragH = useRef(null)
+  const crosshairDragV = useRef(null)
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (crosshairDragH.current) {
+        const wrap = canvasWrapRef.current
+        if (wrap) {
+          const rect = wrap.getBoundingClientRect()
+          setCrosshairH(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)))
+        }
+      }
+      if (crosshairDragV.current) {
+        const wrap = canvasWrapRef.current
+        if (wrap) {
+          const rect = wrap.getBoundingClientRect()
+          setCrosshairV(Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)))
+        }
+      }
+    }
+    const onMouseUp = () => { crosshairDragH.current = null; crosshairDragV.current = null }
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
     return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp) }
@@ -1560,6 +1589,21 @@ export default function Home() {
               >
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
+                {showCrosshair && image && (() => {
+                  const wrapW = canvasWrapRef.current?.offsetWidth || 1
+                  const wrapH = canvasWrapRef.current?.offsetHeight || 1
+                  return (
+                    <>
+                      <div
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}
+                        onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true; crosshairDragV.current = true }}
+                      >
+                        <div style={{ position: 'absolute', top: 0, left: `${crosshairH * 100}%`, width: 1, height: '100%', background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                        <div style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                      </div>
+                    </>
+                  )
+                })()}
                 {clickPos && (() => {
                   const displayW = canvasRef.current?.offsetWidth || 1
                   const scale = displayW / (imgDims.w || 1)
@@ -1808,6 +1852,12 @@ export default function Home() {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
               <rect x="5" y="5" width="6" height="6" rx="0.5" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1"/>
+            </svg>
+          </button>
+          <button className={styles.viewBtn} onClick={() => setShowCrosshair(s => !s)} title="Fadenkreuz an/aus" disabled={!image} style={{ color: showCrosshair && image ? '#8a8680' : '#555250' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </button>
           <button className={styles.viewBtn} onClick={() => { if (matchMode) { setMatchMode(false) } else { setMatchMode(true); setLoupeMode(false); setShowMunsellValues(false); triggerPixelMatch() } }} title="Gleiche Munsell-Farbe anzeigen" disabled={!image} style={{ color: matchMode && image ? '#c84e4e' : '#555250' }}>
