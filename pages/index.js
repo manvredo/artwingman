@@ -1598,8 +1598,18 @@ export default function Home() {
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}
                         onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true; crosshairDragV.current = true }}
                       >
-                        <div style={{ position: 'absolute', top: 0, left: `${crosshairH * 100}%`, width: 1, height: '100%', background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
-                        <div style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                        <div
+                          style={{ position: 'absolute', top: 0, left: `${crosshairH * 100}%`, width: 6, height: '100%', cursor: 'ew-resize', transform: 'translateX(-50%)', pointerEvents: 'auto', zIndex: 6 }}
+                          onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true }}
+                        >
+                          <div style={{ position: 'absolute', top: 0, left: '50%', width: 1, height: '100%', background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                        </div>
+                        <div
+                          style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 0, width: '100%', height: 6, cursor: 'ns-resize', transform: 'translateY(-50%)', pointerEvents: 'auto', zIndex: 6 }}
+                          onMouseDown={(e) => { e.stopPropagation(); crosshairDragV.current = true }}
+                        >
+                          <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                        </div>
                       </div>
                     </>
                   )
