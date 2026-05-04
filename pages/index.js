@@ -528,7 +528,7 @@ export default function Home() {
         const py = (e.clientY - rect.top) * scaleY
         loupeCtx.clearRect(0, 0, 150, 150)
         loupeCtx.imageSmoothingEnabled = false
-        loupeCtx.drawImage(canvas, Math.floor(px - 20), Math.floor(py - 20), 40, 40, 0, 0, 150, 150)
+        loupeCtx.drawImage(canvas, Math.floor(px - 30), Math.floor(py - 30), 60, 60, 0, 0, 150, 150)
       }
 
       mouseRef.current = { x: e.clientX, y: e.clientY }
