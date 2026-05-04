@@ -109,15 +109,6 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
       zIndex: 10,
     }}>
       <canvas ref={loupeCanvasRef} width={150} height={225} style={{ display: 'block', width: 150, height: 225 }} />
-      <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-          <div style={{ flex: 1, height: 10, background: isActive ? `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})` : '#555', borderRadius: 2 }} />
-          <div style={{ flex: 1, height: 10, background: isActive && loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
-        </div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: isActive ? '#c8a96e' : '#666' }}>
-          {isActive ? hoverMunsell.munsellStr : '—'}
-        </div>
-      </div>
     </div>
   )
 }
