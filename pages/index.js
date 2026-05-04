@@ -1599,28 +1599,35 @@ export default function Home() {
                 <canvas ref={canvasRef} className={styles.canvas} />
                 <GridOverlay gridMode={gridMode} squareGridSize={squareGridSize} showDiagonals={showDiagonals} gridColor={gridColor} gridOpacity={gridOpacity / 100} />
                 {showCrosshair && image && (() => {
-                  const wrapW = canvasWrapRef.current?.offsetWidth || 1
-                  const wrapH = canvasWrapRef.current?.offsetHeight || 1
                   return (
                     <>
-                      {/* Vertical ruler on left edge */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, width: 20, height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 5, pointerEvents: 'none' }}>
-                        <div style={{ position: 'absolute', left: 14, top: `${crosshairV * 100}%`, transform: 'translateY(-50%)', width: 1, height: '100%', background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
-                        <div style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 4, transform: 'translateY(-50%)', width: 10, height: 6, background: 'rgba(255,255,255,0.8)', borderRadius: 1, pointerEvents: 'auto', cursor: 'ns-resize', zIndex: 6 }}
-                          onMouseDown={(e) => { e.stopPropagation(); crosshairDragV.current = true }}
-                        />
+                      {/* Horizontal ruler bar - top edge */}
+                      <div
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 16, background: 'rgba(0,0,0,0.4)', zIndex: 20, cursor: 'ew-resize' }}
+                        onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true }}
+                      >
+                        <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.5)', transform: 'translateY(-50%)' }} />
                       </div>
-                      {/* Horizontal ruler on top edge */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 20, background: 'rgba(0,0,0,0.5)', zIndex: 5, pointerEvents: 'none' }}>
-                        <div style={{ position: 'absolute', top: 14, left: `${crosshairH * 100}%`, transform: 'translateX(-50%)', width: '100%', height: 1, background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
-                        <div style={{ position: 'absolute', top: 4, left: `${crosshairH * 100}%`, transform: 'translateX(-50%)', width: 6, height: 10, background: 'rgba(255,255,255,0.8)', borderRadius: 1, pointerEvents: 'auto', cursor: 'ew-resize', zIndex: 6 }}
-                          onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true }}
-                        />
+                      {/* Vertical ruler bar - left edge */}
+                      <div
+                        style={{ position: 'absolute', top: 0, left: 0, width: 16, height: '100%', background: 'rgba(0,0,0,0.4)', zIndex: 20, cursor: 'ns-resize' }}
+                        onMouseDown={(e) => { e.stopPropagation(); crosshairDragV.current = true }}
+                      >
+                        <div style={{ position: 'absolute', top: 0, left: '50%', width: 1, height: '100%', background: 'rgba(255,255,255,0.5)', transform: 'translateX(-50%)' }} />
                       </div>
-                      {/* Crosshair lines */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
-                        <div style={{ position: 'absolute', top: 0, left: `${crosshairH * 100}%`, width: 1, height: '100%', background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
-                        <div style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.7)', pointerEvents: 'none' }} />
+                      {/* Vertical crosshair line - draggable anywhere on line */}
+                      <div
+                        style={{ position: 'absolute', top: 0, left: `${crosshairH * 100}%`, width: 12, height: '100%', cursor: 'ew-resize', transform: 'translateX(-50%)', zIndex: 15 }}
+                        onMouseDown={(e) => { e.stopPropagation(); crosshairDragH.current = true }}
+                      >
+                        <div style={{ position: 'absolute', top: 0, left: '50%', width: 1, height: '100%', background: 'rgba(255,255,255,0.8)', pointerEvents: 'none' }} />
+                      </div>
+                      {/* Horizontal crosshair line - draggable anywhere on line */}
+                      <div
+                        style={{ position: 'absolute', top: `${crosshairV * 100}%`, left: 0, width: '100%', height: 12, cursor: 'ns-resize', transform: 'translateY(-50%)', zIndex: 15 }}
+                        onMouseDown={(e) => { e.stopPropagation(); crosshairDragV.current = true }}
+                      >
+                        <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: 1, background: 'rgba(255,255,255,0.8)', pointerEvents: 'none' }} />
                       </div>
                     </>
                   )
