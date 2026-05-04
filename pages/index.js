@@ -94,7 +94,7 @@ function parseMunsell(str) {
 }
 
 function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
-  if (!hoverMunsell) return null
+  const isActive = !!hoverMunsell
   return (
     <div style={{
       position: 'absolute',
@@ -109,17 +109,13 @@ function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
       zIndex: 10,
     }}>
       <canvas ref={loupeCanvasRef} width={150} height={150} style={{ display: 'block', width: 150, height: 150 }} />
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: -0.5, left: -7, width: 14, height: 1, background: 'rgba(255,255,255,0.8)' }} />
-        <div style={{ position: 'absolute', left: -0.5, top: -7, width: 1, height: 14, background: 'rgba(255,255,255,0.8)' }} />
-      </div>
       <div style={{ padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-          <div style={{ flex: 1, height: 10, background: `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})`, borderRadius: 2 }} />
-          <div style={{ flex: 1, height: 10, background: loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
+          <div style={{ flex: 1, height: 10, background: isActive ? `rgb(${hoverMunsell.r},${hoverMunsell.g},${hoverMunsell.b})` : '#555', borderRadius: 2 }} />
+          <div style={{ flex: 1, height: 10, background: isActive && loupeData?.munsellChip ? `rgb(${loupeData.munsellChip.r},${loupeData.munsellChip.g},${loupeData.munsellChip.b})` : '#2a2a2a', borderRadius: 2 }} />
         </div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#c8a96e' }}>
-          {hoverMunsell.munsellStr}
+        <div style={{ fontFamily: 'monospace', fontSize: 11, color: isActive ? '#c8a96e' : '#666' }}>
+          {isActive ? hoverMunsell.munsellStr : '—'}
         </div>
       </div>
     </div>
@@ -1493,7 +1489,7 @@ export default function Home() {
               className={styles.canvasWrap}
               style={{ background: canvasBg }}
               onMouseMove={handleMouseMove}
-              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.clearRect(0, 0, 150, 150) } }}
+              onMouseLeave={() => { setCursor(c => ({ ...c, visible: false })); setHoverMunsell(null); dragRef.current = null; if (loupeCanvasRef.current) { const lc = loupeCanvasRef.current.getContext('2d'); lc.fillStyle = '#555'; lc.fillRect(0, 0, 150, 150) } }}
               onMouseDown={handleCanvasMouseDown}
               onMouseUp={handleCanvasMouseUp}
               onTouchStart={handleTouchStart}
