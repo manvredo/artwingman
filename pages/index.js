@@ -93,21 +93,23 @@ function parseMunsell(str) {
   }
 }
 
-function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData }) {
-  const isActive = !!hoverMunsell
+function StaticLoupe({ loupeCanvasRef, hoverMunsell, loupeData, loupePos, onLoupeMouseDown }) {
   return (
-    <div style={{
-      position: 'absolute',
-      top: 166, left: 10,
-      width: 150, height: 225,
-      background: 'rgba(14,14,14,0.9)',
-      borderRadius: 8,
-      border: '1px solid rgba(255,255,255,0.2)',
-      boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-      overflow: 'hidden',
-      pointerEvents: 'none',
-      zIndex: 10,
-    }}>
+    <div
+      onMouseDown={onLoupeMouseDown}
+      style={{
+        position: 'absolute',
+        top: loupePos.y, left: loupePos.x,
+        width: 150, height: 225,
+        background: 'rgba(14,14,14,0.9)',
+        borderRadius: 8,
+        border: '1px solid rgba(255,255,255,0.2)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+        overflow: 'hidden',
+        zIndex: 10,
+        cursor: 'move',
+      }}
+    >
       <canvas ref={loupeCanvasRef} width={150} height={225} style={{ display: 'block', width: 150, height: 225 }} />
     </div>
   )
@@ -200,6 +202,7 @@ export default function Home() {
   const [showColorOverlay, setShowColorOverlay] = useState(false)
   const [colorOverlayView, setColorOverlayView] = useState('munsell') // 'munsell' | 'rgb'
   const [compGray, setCompGray] = useState(3)
+  const [loupePos, setLoupePos] = useState({ x: 10, y: 166 })
   const [valueSoften, setValueSoften] = useState(0)
   const valueTouchedRef = useRef(false)
   const [colorSteps, setColorSteps] = useState(30)
@@ -432,6 +435,25 @@ export default function Home() {
       moved: false,
     }
   }, [viewport.panX, viewport.panY])
+
+  const loupeDragRef = useRef(null)
+  const handleLoupeMouseDown = useCallback((e) => {
+    e.stopPropagation()
+    loupeDragRef.current = { startX: e.clientX, startY: e.clientY, startLoupeX: loupePos.x, startLoupeY: loupePos.y }
+  }, [loupePos.x, loupePos.y])
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!loupeDragRef.current) return
+      const dx = e.clientX - loupeDragRef.current.startX
+      const dy = e.clientY - loupeDragRef.current.startY
+      setLoupePos({ x: loupeDragRef.current.startLoupeX + dx, y: loupeDragRef.current.startLoupeY + dy })
+    }
+    const onMouseUp = () => { loupeDragRef.current = null }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp) }
+  }, [])
 
   const handleCanvasMouseUp = useCallback((e) => {
     const drag = dragRef.current
@@ -1525,7 +1547,7 @@ export default function Home() {
                   </div>
                 )
               })()}
-              {loupeMode && <StaticLoupe loupeCanvasRef={loupeCanvasRef} hoverMunsell={hoverMunsell} loupeData={loupeData} />}
+              {loupeMode && <StaticLoupe loupeCanvasRef={loupeCanvasRef} hoverMunsell={hoverMunsell} loupeData={loupeData} loupePos={loupePos} onLoupeMouseDown={handleLoupeMouseDown} />}
               <div
                 className={styles.canvasInner}
                 style={{
