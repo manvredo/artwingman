@@ -988,12 +988,11 @@ export default function Home() {
 
   const handleCurvesChange = useCallback((newCurves) => {
     setChannelCurves(newCurves)
-    if (!activeFilter || activeFilter !== 'curves') return
     clearTimeout(filterDebounceRef.current)
     filterDebounceRef.current = setTimeout(() => {
       applyFilter('curves', 0, newCurves)
     }, 100)
-  }, [activeFilter, applyFilter])
+  }, [applyFilter])
 
   const addToPalette = useCallback(() => {
     if (!color || color.r === null) return
