@@ -104,19 +104,19 @@ export function DuotonePicker({ color, onChange, label }) {
       <canvas
         ref={canvasRef}
         width={180}
-        height={130}
+        height={180}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp}
-        style={{ borderRadius: 8, cursor: 'crosshair', display: 'block', width: 180, height: 130, margin: '0 auto' }}
+        style={{ borderRadius: 12, cursor: 'crosshair', display: 'block', width: 180, height: 180, margin: '0 auto' }}
       />
       <div style={{ position: 'relative', height: 16, width: 180 }}>
         <div
           style={{
             position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            borderRadius: 8,
+            borderRadius: 12,
             background: 'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)',
             height: 16,
           }}
