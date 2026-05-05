@@ -1365,10 +1365,6 @@ export default function Home() {
                         disabled={['texture','clarity','dehaze','vibrance','saturation'].every(k => develop[k] === 0)}>Reset</button>
                     </div>
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 4 }}>
-                      <div style={{ fontSize: 10, color: '#8a8680', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tone Curve</div>
-                      <CurvesEditor curves={channelCurves} onChange={handleCurvesChange} />
-                    </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 4 }}>
                       <div style={{ fontSize: 10, color: '#8a8680', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Load .cube LUT</div>
                       <input ref={lutFileRef} type="file" accept=".cube" style={{ display: 'none' }}
                         onChange={e => {
@@ -1402,6 +1398,12 @@ export default function Home() {
                     </div>
                   </div>
                 </AccordionDrawer>
+
+          <AccordionDrawer title="Tone Curve" isOpen={openDrawer.includes('tonecurve')} onToggle={() => toggleDrawer('tonecurve')}>
+            <div className={styles.drawerControls}>
+              <CurvesEditor curves={channelCurves} onChange={handleCurvesChange} />
+            </div>
+          </AccordionDrawer>
 
           <AccordionDrawer title="Filter" isOpen={openDrawer.includes('filter')} onToggle={() => toggleDrawer('filter')}>
             <div className={styles.drawerControls}>
